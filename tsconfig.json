@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "umd",
+    "module": "amd",
     "target": "es5",
     "noImplicitAny": false,
     "sourceMap": true,

@@ -1,11 +1,11 @@
 {
-  "name": "ts-template",
+  "name": "ts-boilerplate",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "repository": "git@github.com:xegax/tsTemplate.git",
+  "repository": "git@github.com:xegax/ts-boilerplate.git",
   "scripts": {
-    "dist": "node_modules/.bin/webpack",
+    "dist": "node_modules/.bin/webpack --optimize-minimize",
     "dev": "npm run make-examples && npm run tsc && npm run sass",
     "make-examples": "node make-examples-list",
     "tsc": "tsc",
@@ -41,8 +41,10 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "requirejs": "^2.3.5",
+    "ts-loader": "^4.2.0",
     "typescript": "^2.4.1",
-    "webpack": "^2.7.0"
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.14"
   },
   "dependencies": {
     "tslint": "^3.15.1"

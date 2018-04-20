@@ -1,9 +1,9 @@
-export function testFunc(v: string) {
-  return v;
+export class TestClass {
+  test(a: string) {
+    return a;
+  }
 }
 
-export class TestClass {
-  test(v: string) {
-    return v;
-  }
+export function testFunc(a: string) {
+  return a;
 }
