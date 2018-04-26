@@ -2,6 +2,7 @@
 {
 	"editor.tabSize": 2,
 	"files.exclude": {
+		"build": true,
 		"**/.git": true,
 		"**/.DS_Store": true,
 		"**/.tscache": true,

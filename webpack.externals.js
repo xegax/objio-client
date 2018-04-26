@@ -1,12 +1,25 @@
 const path = require('path');
 const webpack = require('webpack');
 
+var externals = {
+  'react': [
+    './node_modules/react/umd/react.development.js'
+  ],
+  'reactdom': [
+    './node_modules/react-dom/umd/react-dom.development.js'
+  ],
+  'blueprintjs': [
+    './node_modules/normalize.css/normalize.css',
+    './node_modules/@blueprintjs/core/lib/css/blueprint.css',
+    './node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css',
+    './node_modules/@blueprintjs/core/dist/core.bundle.js'
+  ]
+};
+
 module.exports = [
   {
     mode: 'development',
-    entry: {
-      'entry': ['./src/entry/entry.tsx']
-    },
+    entry: externals,
     output: {
       path: path.resolve('./build'),
       filename: '[name].js',
@@ -18,11 +31,6 @@ module.exports = [
         path.resolve('./src'),
         'node_modules'
       ]
-    },
-    externals: {
-      'react': 'react',
-      'react-dom': 'reactdom',
-      '@blueprintjs/core': 'blueprintjs'
     },
     module: {
       rules: [

@@ -1,4 +1,4 @@
-import {TestClass, testFunc} from 'common/test';
+import {TestClass, testFunc} from '../common/test';
 
 describe('TestClass, testFunc', () => {
   it('testFunc', () => {
