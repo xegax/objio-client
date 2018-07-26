@@ -1,4 +1,11 @@
+@import "../node_modules/font-awesome/scss/font-awesome";
 @import "variables";
 @import "common";
 @import "mixins";
 @import "examples";
+@import "doc-cont-view";
+@import "sprite-sheet-view";
+
+body * {
+  font-family: 'FontAwesome';
+}

@@ -13,7 +13,7 @@ module.exports = [
       library: '[name]'
     },
     resolve: {
-      extensions: [".ts", ".tsx", ".js"],
+      extensions: [".ts", ".tsx", ".js", ".sass"],
       modules: [
         path.resolve('./src'),
         'node_modules'
@@ -30,8 +30,8 @@ module.exports = [
           test: /\.tsx?$/,
           loader: 'ts-loader'
         }, {
-          test: /\.css$/,
-          use: [ 'style-loader', 'css-loader' ]
+          test: /\.scss$/,
+          use: [ 'style-loader', 'css-loader', 'sass-loader' ]
         }, {
           test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
           loader: 'url-loader',

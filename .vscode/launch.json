@@ -27,6 +27,13 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "doc server",
+      "program": "${workspaceRoot}/src/server/doc-server.js",
+      "cwd": "${workspaceRoot}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "test-node-entry",
       "program": "${workspaceRoot}/src/entry/test-node-entry.js",
       "outFiles": [],
