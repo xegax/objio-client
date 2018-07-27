@@ -3,11 +3,10 @@ import { Table } from 'objio-sqlite-table';
 import { TableHolder } from 'objio-object/server/table-holder';
 import { FileObject } from 'objio-object/server/file-object';
 import { DocProcess } from '../doc-process';
-import { Animation } from '../doc-sprite-sheet';
 import { DocContainer } from '../doc-container';
 import { DocDummy } from '../doc-dummy';
 import { DocTable } from './doc-table';
-import { DocSpriteSheet } from '../doc-sprite-sheet';
+import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
 import { StateObject } from 'objio-object/state-object';
 import { DocHolder } from '../doc-holder';
 

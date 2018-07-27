@@ -13,8 +13,9 @@ module.exports = [
       library: '[name]'
     },
     resolve: {
-      extensions: [".ts", ".tsx", ".js", ".sass"],
+      extensions: [".ts", ".tsx", ".js", ".scss"],
       modules: [
+        'styles',
         path.resolve('./src'),
         'node_modules'
       ]

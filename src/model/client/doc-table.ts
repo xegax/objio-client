@@ -1,6 +1,6 @@
 import { TableHolder } from 'objio-object/table-holder';
 import { SERIALIZER } from 'objio';
-import { RenderListModel } from 'ts-react-ui';
+import { RenderListModel } from 'ts-react-ui/list';
 
 export class DocTable extends TableHolder {
   private render = new RenderListModel(0, 20);

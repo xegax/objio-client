@@ -26,6 +26,7 @@ import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
 
 import { DocTableView, DocTableWizard } from '../view/doc-table-view';
 import { FileObject } from 'objio-object/file-object';
+import '../../styles/styles.scss';
 
 let objio: OBJIO;
 

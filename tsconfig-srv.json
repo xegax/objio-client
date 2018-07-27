@@ -2,8 +2,10 @@
   "compilerOptions": {
     "module": "umd",
     "target": "es5",
+    "lib": ["es6", "dom"],
     "sourceMap": true,
     "jsx": "react",
     "moduleResolution": "node"
-  }
+  },
+  "files": ["src/server/doc-server"]
 }

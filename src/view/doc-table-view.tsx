@@ -4,7 +4,8 @@ import { WizardContent } from './wizard';
 import { PushRowArgs } from 'objio-object/table';
 import { DocContainer } from '../model/doc-container';
 import { FileObject } from 'objio-object/file-object';
-import { FitToParent, List, RenderListModel, RenderArgs } from 'ts-react-ui';
+import { FitToParent } from 'ts-react-ui/fittoparent';
+import { List, RenderListModel, RenderArgs } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 
 interface Props {
@@ -45,6 +46,12 @@ export class DocTableView extends React.Component<Props, State> {
 
   updateModel() {
     const model = this.getRender();
+    const update = () => {
+      this.updateModel();
+      model.reload();
+      model.notify();
+    };
+
     model.setItemsCount(this.props.model.getTotalRowsNum());
     model.setColumns(this.props.model.getColumns().map((col, c) => {
       return {
@@ -61,10 +68,7 @@ export class DocTableView extends React.Component<Props, State> {
                     this.props.model.updateSubtable({
                       cols,
                       sort: null
-                    }).then(() => {
-                      this.updateModel();
-                      model.reload();
-                    });
+                    }).then(update);
                   }}
                 />,
                 <MenuItem
@@ -75,10 +79,27 @@ export class DocTableView extends React.Component<Props, State> {
                     this.props.model.updateSubtable({
                       cols,
                       sort: null
-                    }).then(() => {
-                      this.updateModel();
-                      model.reload();
-                    });
+                    }).then(update);
+                  }}
+                />,
+                <MenuItem
+                  key='sort-asc'
+                  text='Sort asc'
+                  onClick={() => {
+                    this.props.model.updateSubtable({
+                      cols: null,
+                      sort: [{ column: col.name, dir: 'asc'} ]
+                    }).then(update);
+                  }}
+                />,
+                <MenuItem
+                  key='sort-desc'
+                  text='Sort desc'
+                  onClick={() => {
+                    this.props.model.updateSubtable({
+                      cols: null,
+                      sort: [{ column: col.name, dir: 'desc'} ]
+                    }).then(update);
                   }}
                 />
               ];
@@ -140,7 +161,7 @@ export class DocTableView extends React.Component<Props, State> {
   renderInvalid(): JSX.Element {
     const state = this.props.model.getState();
     const stateType = state.getType();
-    if (stateType == 'inProgress')
+    if (stateType == 'in progress')
       return (
         <div>in progress, {state.getProgress()}</div>
       );
@@ -149,7 +170,6 @@ export class DocTableView extends React.Component<Props, State> {
       <div>not confgured</div>
     );
   }
-  
 
   renderValid() {
     const model = this.props.model;
@@ -157,6 +177,10 @@ export class DocTableView extends React.Component<Props, State> {
       <React.Fragment>
         <div>table: {model.getTable()}</div>
         <div>rows: {model.getTotalRowsNum()}</div>
+        <div>last execute time: {model.getLastExecuteTime()}</div>
+        <button onClick={() => {
+          model.execute({table: model.getTable(), fileObjId: model.getFileObjId()});
+        }}>execute</button>
         {this.renderTable()}
       </React.Fragment>
     );
@@ -203,7 +227,7 @@ export class DocTableWizard extends WizardContent<{model: DocContainer}> {
     } else {
       return {
         table: this.name.current.value,
-        srcId: srcObj.holder.getID()
+        fileObjId: srcObj.holder.getID()
       };
     }
   }
