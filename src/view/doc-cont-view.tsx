@@ -218,7 +218,7 @@ export class DocContView extends React.Component<Props, State> {
     const fileObj = new FileObject({
       originName: file.name,
       originSize: file.size,
-      type: file.type
+      mime: file.type
     });
     const doc = new DocHolder({ doc: fileObj });
 

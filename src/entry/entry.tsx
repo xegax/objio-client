@@ -26,6 +26,7 @@ import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
 
 import { DocTableView, DocTableWizard } from '../view/doc-table-view';
 import { FileObject } from 'objio-object/file-object';
+import { FileObjectView } from '../view/file-object-view'; 
 import '../../styles/styles.scss';
 
 let objio: OBJIO;
@@ -93,13 +94,7 @@ async function loadAndRender() {
   mvf.register(
     FileObject,
     (props: {model: FileObject}) => (
-      <div>
-        <div>name: {props.model.getName()}</div>
-        <div>size: {props.model.getSize()}</div>
-        <div>type: {props.model.getType()}</div>
-        <div>loaded: {props.model.getLoadSize()}</div>
-        <div>progress: {props.model.getProgress()}</div>
-      </div>
+      <FileObjectView prj={args.prj} {...props}/>
     ),
     null
   );
