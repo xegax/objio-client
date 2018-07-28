@@ -98,6 +98,7 @@ async function loadAndRender() {
         <div>size: {props.model.getSize()}</div>
         <div>type: {props.model.getType()}</div>
         <div>loaded: {props.model.getLoadSize()}</div>
+        <div>progress: {props.model.getProgress()}</div>
       </div>
     ),
     null
