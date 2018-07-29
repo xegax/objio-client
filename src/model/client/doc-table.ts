@@ -2,6 +2,7 @@ import { TableHolder } from 'objio-object/table-holder';
 import { SERIALIZER } from 'objio';
 import { RenderListModel } from 'ts-react-ui/list';
 import { timer, cancelable, Cancelable } from 'objio/common/promise';
+import { ExecuteArgs } from 'objio-object/table';
 
 export class DocTable extends TableHolder {
   private render = new RenderListModel(0, 20);
@@ -25,6 +26,11 @@ export class DocTable extends TableHolder {
         });
       }}
     );
+  }
+
+  execute(args: ExecuteArgs): Promise<any> {
+    this.render.clearCache(false);
+    return super.execute(args);
   }
 
   getRender(): RenderListModel {
