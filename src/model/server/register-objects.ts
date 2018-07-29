@@ -9,6 +9,8 @@ import { DocTable } from './doc-table';
 import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
 import { StateObject } from 'objio-object/state-object';
 import { DocHolder } from '../doc-holder';
+import { CSVFileObject } from 'objio-object/server/csv-file-object';
+import { FileObjImpl } from 'objio-object/file-obj-impl';
 
 class SrvDocProcess extends DocProcess {
   private timer: any;
@@ -67,4 +69,6 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(SrvAnimation);
   fact.registerItem(SrvDocProcess);
   fact.registerItem(DocTable);
+  fact.registerItem(CSVFileObject);
+  fact.registerItem(FileObjImpl);
 }

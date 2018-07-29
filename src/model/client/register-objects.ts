@@ -11,6 +11,7 @@ import { TableHolder } from 'objio-object/table-holder';
 import { FileObject } from 'objio-object/file-object';
 import { StateObject } from 'objio-object/state-object';
 import { DocTable } from './doc-table';
+import { CSVFileObject } from 'objio-object/csv-file-object';
 
 export {
   DocContainer,
@@ -34,4 +35,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(FileObject);
   fact.registerItem(StateObject);
   fact.registerItem(DocTable);
+  fact.registerItem(CSVFileObject);
 }

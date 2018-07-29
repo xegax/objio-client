@@ -10,7 +10,8 @@ import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 import { DocProcess } from '../model/doc-process';
 import { DocTable } from '../model/client/doc-table';
 import { OBJIOItemClass, OBJIOItem } from 'objio';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject, FileArgs } from 'objio-object/file-object';
+import { CSVFileObject } from 'objio-object/csv-file-object';
 import { showWizard } from '../view/wizard';
 
 const classes = {
@@ -215,11 +216,12 @@ export class DocContView extends React.Component<Props, State> {
       return;
 
     const file = event.dataTransfer.items[0].getAsFile();
-    const fileObj = new FileObject({
+    const fileArgs: FileArgs = {
       originName: file.name,
       originSize: file.size,
       mime: file.type
-    });
+    };
+    const fileObj = new FileObject(fileArgs);
     const doc = new DocHolder({ doc: fileObj });
 
     this.props.model.append(doc).then(() => {
