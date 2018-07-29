@@ -9,6 +9,7 @@ import { DocProcess } from '../doc-process';
 import { Table } from 'objio-object/table';
 import { TableHolder } from 'objio-object/table-holder';
 import { FileObject } from 'objio-object/file-object';
+import { FileObjImpl } from 'objio-object/file-obj-impl';
 import { StateObject } from 'objio-object/state-object';
 import { DocTable } from './doc-table';
 import { CSVFileObject } from 'objio-object/csv-file-object';
@@ -36,4 +37,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(StateObject);
   fact.registerItem(DocTable);
   fact.registerItem(CSVFileObject);
+  fact.registerItem(FileObjImpl);
 }

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { DocTable } from '../model/client/doc-table';
 import { WizardContent } from './wizard';
-import { PushRowArgs } from 'objio-object/table';
+import { PushRowArgs, ColumnAttr, ExecuteArgs } from 'objio-object/table';
 import { DocContainer } from '../model/doc-container';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { List, RenderListModel, RenderArgs } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
+import { CSVFileObject } from 'objio-object/csv-file-object';
 
 interface Props {
   model: DocTable;
@@ -178,9 +179,25 @@ export class DocTableView extends React.Component<Props, State> {
         <div>table: {model.getTable()}</div>
         <div>rows: {model.getTotalRowsNum()}</div>
         <div>last execute time: {model.getLastExecuteTime()}</div>
-        <button onClick={() => {
-          model.execute({table: model.getTable(), fileObjId: model.getFileObjId()});
-        }}>execute</button>
+        <div>
+          <button
+            onClick={() => {
+              const args: ExecuteArgs = {
+                table: model.getTable(),
+                fileObjId: model.getFileObjId()
+              };
+
+              model.holder.getObject<FileObject>(model.getFileObjId())
+              .then(file => {
+                const csv = file.getImpl<CSVFileObject>();
+                args.columns = csv.getColumns();
+                model.execute(args);
+              });
+            }}
+          >
+            execute
+          </button>
+        </div>
         {this.renderTable()}
       </React.Fragment>
     );

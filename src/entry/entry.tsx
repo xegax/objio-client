@@ -95,7 +95,13 @@ async function loadAndRender() {
   mvf.register(
     FileObject,
     (props: {model: FileObject}) => (
-      <FileObjectView prj={args.prj} {...props}/>
+      <FileObjectView
+        createDoc={newObj => {
+          return model.append(new DocHolder({doc: newObj})).then(() => newObj);
+        }}
+        prj={args.prj}
+        {...props}
+      />
     ),
     null
   );
