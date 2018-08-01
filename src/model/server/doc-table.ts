@@ -1,9 +1,11 @@
-import { TableHolder } from 'objio-object/server/table-holder';
-import { SERIALIZER } from 'objio';
+import { OBJIOItem, SERIALIZER } from 'objio';
+import { Table } from 'objio-object/table';
 
-export class DocTable extends TableHolder {
+export class DocTable extends OBJIOItem {
+  protected table = new Table();
+
   static TYPE_ID = 'DocTable';
   static SERIALIZE: SERIALIZER = () => ({
-    ...TableHolder.SERIALIZE()
+    table: { type: 'object' }
   });
 }

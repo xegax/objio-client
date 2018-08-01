@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DocTable } from '../model/client/doc-table';
 import { WizardContent } from './wizard';
-import { PushRowArgs, ColumnAttr, ExecuteArgs } from 'objio-object/table';
+import { PushRowArgs, ColumnAttr, ExecuteArgs, Condition, CompoundCond, ValueCond } from 'objio-object/table';
 import { DocContainer } from '../model/doc-container';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
@@ -78,8 +78,7 @@ export class DocTableView extends React.Component<Props, State> {
                   onClick={() => {
                     const cols = this.props.model.getAllColumns().map(col => col.name);
                     this.props.model.updateSubtable({
-                      cols,
-                      sort: null
+                      cols
                     }).then(update);
                   }}
                 />,
@@ -88,7 +87,6 @@ export class DocTableView extends React.Component<Props, State> {
                   text='Sort asc'
                   onClick={() => {
                     this.props.model.updateSubtable({
-                      cols: null,
                       sort: [{ column: col.name, dir: 'asc'} ]
                     }).then(update);
                   }}
@@ -98,12 +96,45 @@ export class DocTableView extends React.Component<Props, State> {
                   text='Sort desc'
                   onClick={() => {
                     this.props.model.updateSubtable({
-                      cols: null,
                       sort: [{ column: col.name, dir: 'desc'} ]
                     }).then(update);
                   }}
+                />,
+                /*<MenuItem
+                  key='filter'
+                  text='Hide empty'
+                  onClick={() => {
+                    let filter: CompoundCond = this.props.model.getFilter() as CompoundCond || { op: 'or', values: [] };
+                    filter.values = filter.values.filter((val: ValueCond) => val.column != col.name);
+                    filter.values.push({ column: col.name, inverse: true, value: '' });
+
+                    this.props.model.updateSubtable({ filter }).then(update);
+                  }}
+                />,*/
+                <MenuItem
+                  key='distinct'
+                  text='Distinct'
+                  onClick={() => {
+                    this.props.model.updateSubtable({ distinct: { column: col.name } }).then(update);
+                  }}
                 />
               ];
+              /*let filter = this.props.model.getFilter() as CompoundCond;
+              let idx;
+              if (filter && (idx = filter.values.findIndex((val: ValueCond) => val.column == col.name)) != -1) {
+                items.push(
+                  <MenuItem
+                    key='unfilter'
+                    text='Show all values'
+                    onClick={() => {
+                      filter = this.props.model.getFilter() as CompoundCond;
+                      filter.values.splice(idx, 1);
+                      this.props.model.updateSubtable({ filter }).then(update);
+                    }}
+                  />
+                );
+              }*/
+
               evt.preventDefault();
               evt.stopPropagation();
               ContextMenu.show(<Menu>{items}</Menu>, {left: evt.clientX, top: evt.clientY});
@@ -141,7 +172,7 @@ export class DocTableView extends React.Component<Props, State> {
     this.setState({});
   };
 
-  append() {
+  /*append() {
     const table = this.props.model;
 
     const args: PushRowArgs = {values: {}};
@@ -149,7 +180,7 @@ export class DocTableView extends React.Component<Props, State> {
       args.values[col.name] = [this.input[col.name].current.value];
     });
     table.pushCells(args);
-  }
+  }*/
 
   renderTable(): JSX.Element {
     return (

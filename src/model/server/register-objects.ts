@@ -1,6 +1,5 @@
 import { OBJIOFactory, SERIALIZER } from 'objio';
 import { Table } from 'objio-sqlite-table';
-import { TableHolder } from 'objio-object/server/table-holder';
 import { FileObject } from 'objio-object/server/file-object';
 import { DocProcess } from '../doc-process';
 import { DocContainer } from '../doc-container';
@@ -63,7 +62,6 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Table);
-  fact.registerItem(TableHolder);
   fact.registerItem(FileObject);
   fact.registerItem(StateObject);
   fact.registerItem(SrvAnimation);

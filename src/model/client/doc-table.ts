@@ -1,13 +1,20 @@
-import { TableHolder } from 'objio-object/table-holder';
 import { SERIALIZER } from 'objio';
 import { RenderListModel } from 'ts-react-ui/list';
 import { timer, cancelable, Cancelable } from 'objio/common/promise';
-import { ExecuteArgs } from 'objio-object/table';
+import {
+  CreateSubtableResult,
+  ExecuteArgs,
+  SubtableAttrs,
+  ColumnAttr
+} from 'objio-object/table';
+import { DocTable as DocTableBase } from '../server/doc-table';
 
-export class DocTable extends TableHolder {
+export class DocTable extends DocTableBase {
   private render = new RenderListModel(0, 20);
   private lastLoadTimer: Cancelable;
   private maxTimeBetweenRequests: number = 300;
+  private totalRows: number = 0;
+  private cols = Array<ColumnAttr>();
 
   constructor() {
     super();
@@ -22,15 +29,64 @@ export class DocTable extends TableHolder {
         this.lastLoadTimer = cancelable(timer(this.maxTimeBetweenRequests));
         return this.lastLoadTimer.then(() => {
           this.lastLoadTimer = null;
-          return this.loadCells({ first: from, count });
+          return this.table.loadCells({ first: from, count });
         });
-      }}
-    );
+      }
+    });
+
+    this.holder.addEventHandler({
+      onLoad: () => {
+        this.totalRows = this.table.getTotalRowsNum();
+        this.cols = this.table.getColumns();
+        this.holder.notify();
+        return Promise.resolve();
+      },
+      onObjChange: () => {
+        if (this.totalRows == this.table.getTotalRowsNum())
+          return;
+
+        this.totalRows = this.table.getTotalRowsNum();
+        this.cols = this.table.getColumns();
+        this.holder.notify();
+      }
+    });
+  }
+
+  getState() {
+    return this.table.getState();
+  }
+
+  getTable(): string {
+    return this.table.getTable();
+  }
+
+  getFileObjId(): string {
+    return this.table.getFileObjId();
+  }
+
+  getLastExecuteTime(): number {
+    return this.table.getLastExecuteTime();
+  }
+
+  updateSubtable(args: Partial<SubtableAttrs>): Promise<CreateSubtableResult> {
+    return this.table.createSubtable(args);
+  }
+
+  getTotalRowsNum(): number {
+    return this.totalRows;
+  }
+
+  getColumns(): Array<ColumnAttr> {
+    return this.cols;
+  }
+
+  getAllColumns(): Array<ColumnAttr> {
+    return this.table.getColumns();
   }
 
   execute(args: ExecuteArgs): Promise<any> {
     this.render.clearCache(false);
-    return super.execute(args);
+    return this.table.execute(args);
   }
 
   getRender(): RenderListModel {
@@ -39,6 +95,6 @@ export class DocTable extends TableHolder {
 
   static TYPE_ID = 'DocTable';
   static SERIALIZE: SERIALIZER = () => ({
-    ...TableHolder.SERIALIZE()
+    table: { type: 'object' }
   });
 }

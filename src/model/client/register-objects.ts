@@ -7,7 +7,6 @@ import {
 import { DocSpriteSheet, Animation } from '../doc-sprite-sheet';
 import { DocProcess } from '../doc-process';
 import { Table } from 'objio-object/table';
-import { TableHolder } from 'objio-object/table-holder';
 import { FileObject } from 'objio-object/file-object';
 import { FileObjImpl } from 'objio-object/file-obj-impl';
 import { StateObject } from 'objio-object/state-object';
@@ -32,7 +31,6 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(Animation);
   fact.registerItem(DocProcess);
   fact.registerItem(Table);
-  fact.registerItem(TableHolder);
   fact.registerItem(FileObject);
   fact.registerItem(StateObject);
   fact.registerItem(DocTable);
