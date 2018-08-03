@@ -5,7 +5,8 @@ import { PushRowArgs, ColumnAttr, ExecuteArgs, Condition, CompoundCond, ValueCon
 import { DocContainer } from '../model/doc-container';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
-import { List, RenderListModel, RenderArgs } from 'ts-react-ui/list';
+import { RenderListModel, RenderArgs } from 'ts-react-ui/model/list';
+import { List } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 

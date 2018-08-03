@@ -11,8 +11,9 @@ import { DocProcess } from '../model/doc-process';
 import { DocTable } from '../model/client/doc-table';
 import { OBJIOItemClass, OBJIOItem } from 'objio';
 import { FileObject, FileArgs } from 'objio-object/file-object';
-import { CSVFileObject } from 'objio-object/csv-file-object';
+import { Tree } from 'ts-react-ui/tree';
 import { showWizard } from '../view/wizard';
+import { FitToParent } from 'ts-react-ui/fittoparent';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -30,8 +31,7 @@ interface Props {
 }
 
 interface State {
-  edit?: boolean;
-  select?: number;
+  select?: DocHolder;
   fileDrop?: boolean;
 }
 
@@ -42,12 +42,6 @@ export class DocContView extends React.Component<Props, State> {
 
   private dropTgt: React.Ref<HTMLDivElement> = React.createRef<HTMLDivElement>();
 
-  private input: HTMLInputElement;
-  private onInputRef = e => {
-    this.input = e;
-    this.input && this.input.focus();
-  };
-
   constructor(props: Props) {
     super(props);
 
@@ -55,42 +49,15 @@ export class DocContView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.model.getPublisher().subscribe(this.subscriber);
+    const tree = this.props.model.getTree();
+    this.props.model.holder.subscribe(this.subscriber);
+    tree.subscribe(() => {
+      this.setState({select: tree.getSelect().doc})
+    }, 'select');
   }
 
   componentWillUnmount() {
-    this.props.model.getPublisher().unsubscribe(this.subscriber);
-  }
-
-  renderItemName(doc: DocHolder, idx: number) {
-    if (!this.state.edit || this.state.select != idx)
-      return doc.getName();
-
-    return (
-      <input
-        defaultValue={doc.getName()}
-        ref={this.onInputRef}
-        onBlur={this.finishEdit}
-        onKeyDown={e => {
-          if (e.keyCode == 13)
-            this.finishEdit();
-        }}
-      />
-    );
-  }
-
-  startEdit = (select: number) => {
-    this.setState({ select, edit: true });
-  }
-
-  finishEdit = () => {
-    if (!this.state.edit)
-      return;
-
-    const doc = this.props.model.getDoc(this.state.select);
-    doc.setName(this.input.value).save();
-
-    this.setState({ edit: false });
+    this.props.model.holder.unsubscribe(this.subscriber);
   }
 
   createObject(objClass: OBJIOItemClass): Promise<OBJIOItem> {
@@ -124,69 +91,32 @@ export class DocContView extends React.Component<Props, State> {
       </MenuItem>
     ];
 
-    if (this.props.model.getDoc(idx)) {
-      items.push(
-        <MenuItem key='rename' text='rename' onClick={() => this.startEdit(idx)}/>,
-        <MenuItem key='remove' text='remove' onClick={() => this.remove(idx)}/>
-      );
-    }
-
     ContextMenu.show(<Menu>{items}</Menu>, {left: e.clientX, top: e.clientY});
-    this.setSelect(idx);
   }
 
-  setSelect(select: number) {
-    if (this.state.select == select)
-      return;
-
-    this.finishEdit();
-    this.setState({ select });
-  }
-
-  renderItem(doc: DocHolder, idx: number) {
-    const sel = idx == this.state.select;
-    return (
-      <div
-        className={cn(classes.listItem, sel && classes.listItemSelect)}
-        key={doc.getHolder().getID()}
-        onClick={() => this.setSelect(idx)}
-        onDoubleClick={() => this.startEdit(idx)}
-        onContextMenu={e => this.onContextMenu(e, idx)}
-      >
-        { this.renderItemName(doc, idx) }
-      </div>
-    );
-  }
-
-  append = async (doc: DocHolder) => {
-    await this.props.model.append(doc);
-    this.setState({edit: true, select: this.props.model.getChildren().getLength() - 1});
-  }
-
-  remove = (idx: number) => {
-    this.props.model.remove(idx);
+  append = (doc: DocHolder) => {
+    return this.props.model.append(doc)
+    .then(() => {
+      this.setState({select: doc});
+    });
   }
 
   renderItems() {
-    const items = this.props.model.getChildren();
-    const arr = [];
-    for (let n = 0; n < items.getLength(); n++) {
-      const doc = items.get(n);
-      arr.push(this.renderItem(doc, n));
-    }
-
     return (
       <div
         key='doc-list' className={classes.docList}
+        style={{display: 'flex'}}
         onContextMenu={e => this.onContextMenu(e, -1)}
       >
-        {arr}
+        <FitToParent wrapToFlex>
+          <Tree model={this.props.model.getTree()}/>
+        </FitToParent>
       </div>
     );
   }
 
   renderDoc() {
-    const doc = this.props.model.getDoc(this.state.select);
+    const doc = this.state.select;
     const view = doc ? this.props.getView(doc.getDoc()) : null;
     return (
       <div className={classes.docContent}>
@@ -225,7 +155,7 @@ export class DocContView extends React.Component<Props, State> {
     const doc = new DocHolder({ doc: fileObj });
 
     this.props.model.append(doc).then(() => {
-      this.setSelect(this.props.model.getChildren().getLength() - 1);
+      this.setState({ select: doc });
       fileObj.sendFile(file);
     });
 

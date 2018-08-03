@@ -69,7 +69,7 @@ async function loadAndRender() {
   }
 
   objio.startWatch({req, timeOut: 100}).subscribe(() => {
-    model.getPublisher().notify();
+    model.holder.notify();
   });
 
   let mvf = new ModelViewFactory<OBJIOItem>();

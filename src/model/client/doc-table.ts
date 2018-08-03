@@ -50,6 +50,16 @@ export class DocTable extends DocTableBase {
         this.holder.notify();
       }
     });
+
+    this.table.holder.addEventHandler({
+      onObjChange: () => {
+        if (!this.table.getState().isValid())
+          return;
+        this.totalRows = this.table.getTotalRowsNum();
+        this.cols = this.table.getColumns();
+        this.holder.notify();
+      }
+    });
   }
 
   getState() {
