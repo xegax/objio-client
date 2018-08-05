@@ -1,4 +1,7 @@
 import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
+import { FileObject } from 'objio-object/file-object';
+import { CSVFileObject } from 'objio-object/csv-file-object';
+import { DocTable } from './server/doc-table';
 
 export interface DocHolderClass extends OBJIOItemClass {
 }
@@ -23,6 +26,29 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
     this.name = args.name || this.name;
     this.path = (args.path || this.path).slice();
     this.doc = args.doc;
+  }
+
+  getTypePath(): Array<string> {
+    const path = [];
+    if (this.doc instanceof FileObject) {
+      path.push('files');
+
+      if (this.doc.getExt() == '.csv')
+        path.push('csv');
+
+      if (['.png', '.gif', '.jpg', '.jpeg'].indexOf(this.doc.getExt()) != -1)
+        path.push('images');
+
+      if (['.mp4', '.avi'].indexOf(this.doc.getExt()) != -1)
+        path.push('video');
+
+      if (['.mp3', '.ogg'].indexOf(this.doc.getExt()) != -1)
+        path.push('music');
+    } else if (this.doc instanceof DocTable) {
+      path.push('tables');
+    }
+
+    return path;
   }
 
   getPath(): Array<string> {

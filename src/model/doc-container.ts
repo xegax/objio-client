@@ -8,9 +8,6 @@ import { DocDummy } from './doc-dummy';
 import { DocHolder } from './doc-holder';
 import { DocSpriteSheet } from './doc-sprite-sheet';
 import { TreeModel, TreeItem } from 'ts-react-ui/model/tree';
-import { FileObject } from 'objio-object/file-object';
-import { CSVFileObject } from 'objio-object/csv-file-object';
-import { DocTable } from './server/doc-table';
 
 export {
   DocDummy,
@@ -19,7 +16,7 @@ export {
 };
 
 export interface DocTreeItem extends TreeItem {
-  doc: DocHolder;
+  doc?: DocHolder;
 }
 
 export class DocContainer extends OBJIOItem {
@@ -51,36 +48,47 @@ export class DocContainer extends OBJIOItem {
   updateTree(select?: DocHolder) {
     let selItem: DocTreeItem;
     const docs = this.children.getArray();
-    const makeItem = (doc: DocHolder): DocTreeItem => {
+    const makeItem = (doc: DocHolder): TreeItem => {
       const item = { doc, label: doc.getName() };
       if (select == doc)
         selItem = item;
       return item;
     };
 
-    this.tree.setItems([
-      {
-        open: true,
-        label: 'files',
-        children: [
-          {
+    let root = Array<DocTreeItem>();
+    const map: {[key: string]: DocTreeItem} = {};
+    docs.forEach(doc => {
+      let parent = map[doc.getTypePath().join('/')];
+      if (!parent) {
+        let path = '';
+        doc.getTypePath().forEach((type, i) => {
+          if (path)
+            path += '/';
+          path += type;
+
+          const prev = parent;
+          if (parent = map[path])
+            return;
+
+          const newFolder = {
+            label: type,
             open: true,
-            label: 'csv',
-            children: docs.filter(doc => {
-              const file = doc.getDoc() as FileObject;
-              return file instanceof FileObject && file.getImpl() instanceof CSVFileObject;
-            }).map(makeItem)
-          }
-        ]
-      }, {
-        open: true,
-        label: 'tables',
-        children: docs.filter(holder => {
-          const table = holder.getDoc() as DocTable;
-          return table instanceof DocTable;
-        }).map(makeItem)
+            children: []
+          };
+          if (i == 0)
+            root.push(newFolder);
+
+          if (prev)
+            prev.children.push(newFolder);
+
+          map[path] = newFolder;
+          parent = newFolder;
+        });
       }
-    ]);
+      parent.children.push(makeItem(doc));
+    });
+
+    this.tree.setItems(root);
 
     if (selItem)
       this.tree.setSelect(selItem);
@@ -99,9 +107,14 @@ export class DocContainer extends OBJIOItem {
     });
   }
 
-  remove(idx: number) {
+  remove(item: DocTreeItem) {
+    let idx = this.children.find(doc => doc == item.doc);
+    if (idx == -1)
+      return;
+
     this.children.remove(idx);
     this.children.getHolder().save();
+    this.updateTree();
     this.holder.notify();
   }
 

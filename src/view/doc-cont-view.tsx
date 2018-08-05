@@ -37,7 +37,8 @@ interface State {
 
 export class DocContView extends React.Component<Props, State> {
   private subscriber = () => {
-    this.setState({});
+    const tree = this.props.model.getTree();
+    this.setState({select: tree.getSelect().doc});
   };
 
   private dropTgt: React.Ref<HTMLDivElement> = React.createRef<HTMLDivElement>();
@@ -52,7 +53,7 @@ export class DocContView extends React.Component<Props, State> {
     const tree = this.props.model.getTree();
     this.props.model.holder.subscribe(this.subscriber);
     tree.subscribe(() => {
-      this.setState({select: tree.getSelect().doc})
+      this.setState({select: tree.getSelect().doc});
     }, 'select');
   }
 
@@ -88,7 +89,10 @@ export class DocContView extends React.Component<Props, State> {
         <MenuItem text='sprite' onClick={() => this.createObject(DocSpriteSheet)}/>
         <MenuItem text='process' onClick={() => this.createObject(DocProcess)}/>
         <MenuItem text='table' onClick={() => this.createObject(DocTable)}/>
-      </MenuItem>
+      </MenuItem>,
+      <MenuItem key='delete' text='delete' onClick={() => {
+        this.props.model.remove(this.props.model.getTree().getSelect());
+      }}/>
     ];
 
     ContextMenu.show(<Menu>{items}</Menu>, {left: e.clientX, top: e.clientY});
