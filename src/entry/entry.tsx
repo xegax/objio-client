@@ -27,7 +27,9 @@ import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
 import { DocTableView, DocTableWizard } from '../view/doc-table-view';
 import { FileObject } from 'objio-object/file-object';
 import { CSVFileObject } from 'objio-object/csv-file-object';
-import { FileObjectView } from '../view/file-object-view'; 
+import { FileObjectView } from '../view/file-object-view';
+import { DocLayoutView, DocLayout } from '../view/doc-layout';
+
 import '../../styles/styles.scss';
 
 let objio: OBJIO;
@@ -102,6 +104,13 @@ async function loadAndRender() {
         prj={args.prj}
         {...props}
       />
+    ),
+    null
+  );
+  mvf.register(
+    DocLayout,
+    (props: {model: DocLayout}) => (
+      <DocLayoutView {...props}/>
     ),
     null
   );

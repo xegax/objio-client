@@ -2,6 +2,7 @@ import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
 import { FileObject } from 'objio-object/file-object';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { DocTable } from './server/doc-table';
+import { DocLayout } from './client/doc-layout';
 
 export interface DocHolderClass extends OBJIOItemClass {
 }
@@ -46,6 +47,8 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
         path.push('music');
     } else if (this.doc instanceof DocTable) {
       path.push('tables');
+    } else if (this.doc instanceof DocLayout) {
+      path.push('layout');
     }
 
     return path;

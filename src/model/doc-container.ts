@@ -88,6 +88,17 @@ export class DocContainer extends OBJIOItem {
       parent.children.push(makeItem(doc));
     });
 
+    const sort = (root: Array<DocTreeItem>) => {
+      root.sort((a, b) => {
+        return (a.label as string).localeCompare(b.label as string);
+      });
+      root.forEach(item => {
+        if (!item.children)
+          return;
+        sort(item.children);
+      });
+    }
+    sort(root);
     this.tree.setItems(root);
 
     if (selItem)

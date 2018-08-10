@@ -7,6 +7,7 @@ import { prompt } from './prompt';
 import { DocTable } from '../model/client/doc-table';
 
 interface Props {
+  onlyContent?: boolean;
   model: FileObject;
   prj: string;
   createDoc<T extends OBJIOItem = OBJIOItem>(model?: T): Promise<T>;
@@ -144,13 +145,13 @@ export class FileObjectView extends React.Component<Props, {}> {
     const model = this.props.model;
     return (
       <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-        <div>
+        {this.props.onlyContent != true ? <div>
           <div>name: {model.getName()}</div>
           <div>size: {model.getSize()}</div>
           <div>mime: {model.getMIME()}</div>
           <div>loaded: {model.getLoadSize()}</div>
           <div>progress: {model.getProgress()}</div>
-        </div>
+        </div> : null}
         <div style={{flexGrow: 1, display: 'flex', position: 'relative'}}>
           {this.renderContent()}
         </div>

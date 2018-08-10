@@ -3,7 +3,8 @@ import {DocHolder} from '../model/doc-holder';
 import {
   DocContainer,
   DocDummy,
-  DocSpriteSheet
+  DocSpriteSheet,
+  DocTreeItem
 } from '../model/doc-container';
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
@@ -14,6 +15,8 @@ import { FileObject, FileArgs } from 'objio-object/file-object';
 import { Tree } from 'ts-react-ui/tree';
 import { showWizard } from '../view/wizard';
 import { FitToParent } from 'ts-react-ui/fittoparent';
+import { DocLayout } from '../model/client/doc-layout';
+import { Draggable } from 'ts-react-ui/drag-and-drop';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -38,7 +41,8 @@ interface State {
 export class DocContView extends React.Component<Props, State> {
   private subscriber = () => {
     const tree = this.props.model.getTree();
-    this.setState({select: tree.getSelect().doc});
+    const select = tree.getSelect();
+    this.setState( select ? {select: select.doc} : {});
   };
 
   private dropTgt: React.Ref<HTMLDivElement> = React.createRef<HTMLDivElement>();
@@ -53,7 +57,8 @@ export class DocContView extends React.Component<Props, State> {
     const tree = this.props.model.getTree();
     this.props.model.holder.subscribe(this.subscriber);
     tree.subscribe(() => {
-      this.setState({select: tree.getSelect().doc});
+      const select = tree.getSelect();
+      this.setState( select ? {select: select.doc} : {});
     }, 'select');
   }
 
@@ -89,6 +94,7 @@ export class DocContView extends React.Component<Props, State> {
         <MenuItem text='sprite' onClick={() => this.createObject(DocSpriteSheet)}/>
         <MenuItem text='process' onClick={() => this.createObject(DocProcess)}/>
         <MenuItem text='table' onClick={() => this.createObject(DocTable)}/>
+        <MenuItem text='layout' onClick={() => this.createObject(DocLayout)}/>
       </MenuItem>,
       <MenuItem key='delete' text='delete' onClick={() => {
         this.props.model.remove(this.props.model.getTree().getSelect());
@@ -105,6 +111,12 @@ export class DocContView extends React.Component<Props, State> {
     });
   }
 
+  renderTreeItem = (item: DocTreeItem, jsx: JSX.Element): JSX.Element => {
+    if (!item.doc)
+      return jsx;
+    return <Draggable data={{id: item.doc.holder.getID()}}>{jsx}</Draggable>;
+  }
+
   renderItems() {
     return (
       <div
@@ -113,7 +125,10 @@ export class DocContView extends React.Component<Props, State> {
         onContextMenu={e => this.onContextMenu(e, -1)}
       >
         <FitToParent wrapToFlex>
-          <Tree model={this.props.model.getTree()}/>
+          <Tree
+            model={this.props.model.getTree()}
+            renderItem={this.renderTreeItem}
+          />
         </FitToParent>
       </div>
     );
@@ -156,7 +171,7 @@ export class DocContView extends React.Component<Props, State> {
       mime: file.type
     };
     const fileObj = new FileObject(fileArgs);
-    const doc = new DocHolder({ doc: fileObj });
+    const doc = new DocHolder({ doc: fileObj, name: file.name });
 
     this.props.model.append(doc).then(() => {
       this.setState({ select: doc });
