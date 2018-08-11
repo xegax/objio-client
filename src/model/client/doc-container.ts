@@ -1,27 +1,17 @@
 import {
   OBJIOItem,
   SERIALIZER,
-  OBJIOArray,
-  Publisher
+  OBJIOArray
 } from 'objio';
-import { DocDummy } from './doc-dummy';
 import { DocHolder } from './doc-holder';
-import { DocSpriteSheet } from './doc-sprite-sheet';
 import { TreeModel, TreeItem } from 'ts-react-ui/model/tree';
-
-export {
-  DocDummy,
-  DocHolder,
-  DocSpriteSheet
-};
+import { DocContainer as Base } from '../server/doc-container';
 
 export interface DocTreeItem extends TreeItem {
   doc?: DocHolder;
 }
 
-export class DocContainer extends OBJIOItem {
-  private children = new OBJIOArray<DocHolder>();
-  protected modifyTime: number = 0;
+export class DocContainer extends Base {
   protected tree = new TreeModel<DocTreeItem>();
 
   constructor() {
@@ -45,7 +35,7 @@ export class DocContainer extends OBJIOItem {
     });
   }
 
-  updateTree(select?: DocHolder) {
+  private updateTree(select?: DocHolder) {
     let selItem: DocTreeItem;
     const docs = this.children.getArray();
     const makeItem = (doc: DocHolder): TreeItem => {
@@ -128,18 +118,4 @@ export class DocContainer extends OBJIOItem {
     this.updateTree();
     this.holder.notify();
   }
-
-  getDoc(idx: number): DocHolder {
-    return this.children.get(idx);
-  }
-
-  getChildren(): OBJIOArray<DocHolder> {
-    return this.children;
-  }
-
-  static TYPE_ID = 'DocContainer';
-  static SERIALIZE: SERIALIZER = () => ({
-    children: { type: 'object', classId: 'OBJIOArray' },
-    modifyTime: { type: 'number' }
-  });
 }

@@ -1,14 +1,11 @@
 import * as React from 'react';
-import {DocHolder} from '../model/doc-holder';
+import {DocHolder} from '../model/client/doc-holder';
 import {
   DocContainer,
-  DocDummy,
-  DocSpriteSheet,
   DocTreeItem
-} from '../model/doc-container';
-import { cn } from '../common/common';
+} from '../model/client/doc-container';
+import { DocSpriteSheet } from '../model/doc-sprite-sheet';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
-import { DocProcess } from '../model/doc-process';
 import { DocTable } from '../model/client/doc-table';
 import { OBJIOItemClass, OBJIOItem } from 'objio';
 import { FileObject, FileArgs } from 'objio-object/file-object';
@@ -90,9 +87,7 @@ export class DocContView extends React.Component<Props, State> {
 
     const items = [
       <MenuItem key='append' text='append'>
-        <MenuItem text='dummy' onClick={() => this.createObject(DocDummy)}/>
         <MenuItem text='sprite' onClick={() => this.createObject(DocSpriteSheet)}/>
-        <MenuItem text='process' onClick={() => this.createObject(DocProcess)}/>
         <MenuItem text='table' onClick={() => this.createObject(DocTable)}/>
         <MenuItem text='layout' onClick={() => this.createObject(DocLayout)}/>
       </MenuItem>,

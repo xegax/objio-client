@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { DocTable } from '../model/client/doc-table';
 import { WizardContent } from './wizard';
-import { PushRowArgs, ColumnAttr, ExecuteArgs, Condition, CompoundCond, ValueCond } from 'objio-object/table';
-import { DocContainer } from '../model/doc-container';
+import { ExecuteArgs } from 'objio-object/table';
+import { DocContainer } from '../model/client/doc-container';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { RenderListModel, RenderArgs } from 'ts-react-ui/model/list';

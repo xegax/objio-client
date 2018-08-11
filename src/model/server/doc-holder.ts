@@ -1,8 +1,7 @@
 import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
+import { DocTable } from './doc-table';
+import { DocLayout } from './doc-layout';
 import { FileObject } from 'objio-object/file-object';
-import { CSVFileObject } from 'objio-object/csv-file-object';
-import { DocTable } from './server/doc-table';
-import { DocLayout } from './client/doc-layout';
 
 export interface DocHolderClass extends OBJIOItemClass {
 }
@@ -14,9 +13,9 @@ export interface DocHolderArgs<T = OBJIOItem> {
 }
 
 export class DocHolder<T = OBJIOItem> extends OBJIOItem {
-  private path: Array<string> = [];
-  private name: string = 'unnamed';
-  private doc: T;
+  protected path: Array<string> = [];
+  protected name: string = 'unnamed';
+  protected doc: T;
 
   constructor(args?: DocHolderArgs<T>) {
     super();
@@ -27,6 +26,10 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
     this.name = args.name || this.name;
     this.path = (args.path || this.path).slice();
     this.doc = args.doc;
+  }
+
+  getPath(): Array<string> {
+    return this.path;
   }
 
   getTypePath(): Array<string> {
@@ -52,10 +55,6 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
     }
 
     return path;
-  }
-
-  getPath(): Array<string> {
-    return this.path;
   }
 
   getName(): string {

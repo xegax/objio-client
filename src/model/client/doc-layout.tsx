@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DocLayout as Base, OBJHolder } from '../server/doc-layout';
 import { LayoutModel, clone, LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem } from 'objio';
-import { DocHolder } from '../doc-container';
+import { DocHolder } from './doc-holder';
 import { FileObjectView } from '../../view/file-object-view';
 import { FileObject } from 'objio-object/file-object';
 

@@ -14,10 +14,8 @@ import {
 import {
   registerObjects,
   DocContainer,
-  DocDummy,
   DocHolder,
   DocSpriteSheet,
-  DocProcess,
   DocTable
 } from '../model/client/register-objects';
 import { DocContView } from '../view/doc-cont-view';
@@ -75,20 +73,11 @@ async function loadAndRender() {
   });
 
   let mvf = new ModelViewFactory<OBJIOItem>();
-  mvf.register(DocDummy, () => <div>DocDummy view</div>, null);
   mvf.register(
     DocSpriteSheet,
     (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     () => <SpriteWizard list={['default.png', 'prehistoric.png', 'SNES_MK1_reptile.png']}/>
   );
-  mvf.register(DocProcess, (props: {model: DocProcess}) => {
-    return (
-      <div key={props.model.holder.getID()} >
-        <div>progress: {props.model.getProgress()}</div>
-        <button onClick={e => props.model.run()}>start</button>
-      </div>
-    );
-  }, null);
   mvf.register(
     DocTable,
     (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,

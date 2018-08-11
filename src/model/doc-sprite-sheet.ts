@@ -1,5 +1,5 @@
 import { SERIALIZER, OBJIOItem, OBJIOArray } from 'objio';
-import { DocHolderArgs } from './doc-holder';
+import { DocHolderArgs } from './server/doc-holder';
 import { Point, Size, Rect, inRect } from '../common/point';
 
 export interface DocSpriteSheetArgs extends DocHolderArgs {
