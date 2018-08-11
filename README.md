@@ -1,2 +1,2 @@
-# ts-boilerplate
+# test objio client and server application
 
