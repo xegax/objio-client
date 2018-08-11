@@ -12,6 +12,12 @@ interface Props {
 
 export class DocLayoutView extends React.Component<Props, {}> {
   render() {
-    return <Layout model={this.props.model.getLayout()}/>;
+    const model = this.props.model;
+    return (
+      <Layout
+        key={model.holder.getID()}
+        model={model.getLayout()}
+      />
+    );
   }
 }
