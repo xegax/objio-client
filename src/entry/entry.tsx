@@ -24,13 +24,58 @@ import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
 
 import { DocTableView, DocTableWizard } from '../view/doc-table-view';
 import { FileObject } from 'objio-object/file-object';
-import { CSVFileObject } from 'objio-object/csv-file-object';
 import { FileObjectView } from '../view/file-object-view';
-import { DocLayoutView, DocLayout } from '../view/doc-layout';
+import {
+  DocLayoutView,
+  DocLayout,
+  DataSourceHolder,
+  ViewFactory,
+  LayoutItemViewProps
+} from '../view/doc-layout';
+import {
+  LayoutDataList
+} from '../model/client/layout-datalist';
+import { LayoutDataListView } from '../view/layout-datalist';
 
 import '../../styles/styles.scss';
 
 let objio: OBJIO;
+
+function initDocLayout(prj: string) {
+  const vf = new ViewFactory();
+  vf.register({
+    classObj: FileObject,
+    view: (props: LayoutItemViewProps<FileObject>) => (
+      <FileObjectView
+        model={props.dataSource}
+        prj={prj}
+        createDoc={null}
+        onlyContent
+      />
+    ),
+    viewType: 'content'
+  });
+  vf.register({
+    classObj: FileObject,
+    view: (props: LayoutItemViewProps<FileObject>) => (
+      <div>
+        <div>extention: {props.dataSource.getExt()}</div>
+        <div>size: {props.dataSource.getSize()}</div>
+        <div>name: {props.dataSource.getName()}</div>
+      </div>
+    ),
+    viewType: 'objInfo'
+  });
+  vf.register({
+    classObj: DocTable,
+    view: (props: LayoutItemViewProps<DocTable, LayoutDataList>) => (
+      <LayoutDataListView {...props}/>
+    ),
+    object: (source: DocTable) => new LayoutDataList({source, viewType: 'datalist'}),
+    viewType: 'datalist'
+  });
+  DataSourceHolder.setFactory(vf);
+}
 
 async function loadAndRender() {
   const p = window.location.search.split('?')[1] || '';
@@ -60,9 +105,11 @@ async function loadAndRender() {
     }
   });*/
 
+  initDocLayout(args.prj);
+  
   let model: DocContainer;
   try {
-    model = await objio.loadObject<DocContainer>('0');
+    model = await objio.loadObject<DocContainer>();
   } catch (e) {
     model = await objio.createObject<DocContainer>(new DocContainer());
     model.getHolder().save();
@@ -71,7 +118,7 @@ async function loadAndRender() {
   objio.startWatch({req, timeOut: 100}).subscribe(() => {
     model.holder.notify();
   });
-
+  
   let mvf = new ModelViewFactory<OBJIOItem>();
   mvf.register(
     DocSpriteSheet,

@@ -1,18 +1,14 @@
 import * as React from 'react';
-import { DocLayout as Base, OBJHolder } from '../server/doc-layout';
+import { DocLayout as Base, DataSourceHolder } from '../server/doc-layout';
 import { LayoutModel, clone, LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem } from 'objio';
 import { DocHolder } from './doc-holder';
-import { FileObjectView } from '../../view/file-object-view';
-import { FileObject } from 'objio-object/file-object';
-
-export interface DocLayoutArgs {
-}
+import { select } from '../../view/prompt';
 
 export class DocLayout extends Base {
   private model = new LayoutModel();
   
-  constructor(args: DocLayoutArgs = {}) {
+  constructor() {
     super();
 
     this.holder.addEventHandler({
@@ -22,11 +18,6 @@ export class DocLayout extends Base {
       },
       onLoad: () => {
         this.objects.holder.addEventHandler({
-          onLoad: () => {
-            this.updateLayoutMap();
-            this.model.delayedNotify();
-            return Promise.resolve();
-          },
           onObjChange: () => {
             this.updateLayoutMap();
             this.model.delayedNotify();
@@ -42,10 +33,19 @@ export class DocLayout extends Base {
     this.model.subscribe(() => {
       this.holder.getObject(this.model.getLastDrop().id)
       .then((obj: DocHolder) => {
-        const objHolder = new OBJHolder(obj.getDoc());
-        return this.holder.createObject(objHolder);
+        const views = DataSourceHolder.findAllViews( OBJIOItem.getClass(obj.getDoc()) );
+
+        if (views.length == 1)
+          return views[0].object(obj.getDoc());
+
+        return select({
+          items: views.map(view => view.viewType)
+        }).then(view => {
+          return views.find(v => v.viewType == view).object(obj.getDoc());
+        });
       })
-      .then((holder: OBJHolder) => {
+      .then((holder: DataSourceHolder) => this.holder.createObject(holder))
+      .then((holder: DataSourceHolder) => {
         this.model.getLastDrop().id = holder.holder.getID();
         this.objects.push(holder);
         
@@ -64,20 +64,15 @@ export class DocLayout extends Base {
 
   updateLayoutMap() {
     const map: {[id: string]: JSX.Element} = {};
-    this.objects.getArray().forEach(obj => {
+    this.objects.getArray().forEach((obj: DataSourceHolder) => {
       const id = obj.holder.getID();
-      const file = obj.get() instanceof FileObject ? obj.get<FileObject>() : null;
-      let jsx: JSX.Element;
-      if (file)
-        jsx = <FileObjectView model={file} prj='n1' createDoc={null} onlyContent/>;
-      else
-        jsx = (
-          <React.Fragment>
-            <div>object {id}</div>
-            <div>data object {obj.get().holder.getID()}</div>
-            <div>type {OBJIOItem.getClass(obj.get()).TYPE_ID}</div>
-          </React.Fragment>
-        );
+      const jsx: JSX.Element = obj.getView() || (
+        <React.Fragment>
+          <div>object {this.holder.getID()}</div>
+          <div>data object {obj.get().holder.getID()}</div>
+          <div>type {OBJIOItem.getClass(obj.get()).TYPE_ID}</div>
+        </React.Fragment>
+      );
 
       map[id] = (
         <div style={{

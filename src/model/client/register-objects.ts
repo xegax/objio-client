@@ -8,8 +8,9 @@ import { StateObject } from 'objio-object/state-object';
 import { DocTable } from './doc-table';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { DocLayout } from './doc-layout';
-import { OBJHolder } from '../server/doc-layout';
 import { DocHolder } from './doc-holder';
+import { LayoutDataList } from './layout-datalist';
+import { DataSourceHolder } from '../server/doc-layout';
 
 export {
   DocContainer,
@@ -30,5 +31,6 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(CSVFileObject);
   fact.registerItem(FileObjImpl);
   fact.registerItem(DocLayout);
-  fact.registerItem(OBJHolder);
+  fact.registerItem(DataSourceHolder);
+  fact.registerItem(LayoutDataList);
 }

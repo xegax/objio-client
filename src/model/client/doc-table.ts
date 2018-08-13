@@ -70,6 +70,10 @@ export class DocTable extends DocTableBase {
     return this.table.getTable();
   }
 
+  getTableRef() {
+    return this.table;
+  }
+
   getFileObjId(): string {
     return this.table.getFileObjId();
   }

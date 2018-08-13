@@ -19,12 +19,9 @@ export class DocContainer extends Base {
 
     this.holder.addEventHandler({
       onLoad: () => {
+        this.updateTree();
 
         this.children.holder.addEventHandler({
-          onLoad: () => {
-            this.updateTree();
-            return Promise.resolve();
-          },
           onObjChange: () => {
             this.updateTree();
           }
