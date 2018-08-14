@@ -112,8 +112,8 @@ export class Select extends React.Component<SelectProps, {}> {
   }
 }
 
-export function select(args: SelectArgs) {
-  return new Promise((resolve, reject) => {
+export function select(args: SelectArgs): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
     const onOk = (text: string) => {
       dlg.close();
       resolve(text);

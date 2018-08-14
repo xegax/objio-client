@@ -35,21 +35,31 @@ export class LayoutDataListView extends React.Component<Props, {}> {
     }));
   }
 
-  render() {
+  renderColumnSelect(): JSX.Element {
     const model = this.props.model;
+    if (model.getViewType() == 'table')
+      return null;
+
     const value = model.getColumn();
     return (
-      <div style={{display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
-        <select
+      <select
           value={value}
           onChange={e => {
             model.setColumn(e.currentTarget.value);
           }}
-        >
-          {model.getColumns().map((col, i) => {
-            return <option key={i} value={col.name}>{col.name}</option>;
-          })}
-        </select>
+      >
+        {model.getColumns().map((col, i) => {
+          return <option key={i} value={col.name}>{col.name}</option>;
+        })}
+      </select>
+    );
+  }
+
+  render() {
+    const model = this.props.model;
+    return (
+      <div style={{display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
+        {this.renderColumnSelect()}
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>
         </FitToParent>

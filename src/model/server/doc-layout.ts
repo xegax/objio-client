@@ -1,6 +1,14 @@
 import { LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem, OBJIOArray, SERIALIZER } from 'objio';
 
+export interface DataSourceHolderArgs<
+  TSource extends OBJIOItem = OBJIOItem,
+  TLayout extends DocLayout = DocLayout> {
+    source: TSource;
+    layout: TLayout;
+    viewType?: string;
+}
+
 export interface LayoutItemViewProps
 <TSource extends OBJIOItem = OBJIOItem, TModel extends OBJIOItem = OBJIOItem> {
   dataSource: TSource;
@@ -11,7 +19,7 @@ export interface FactoryItem {
   classObj: Object;
   viewType?: string;
   view(props: LayoutItemViewProps): JSX.Element;
-  object?(source: OBJIOItem): DataSourceHolder;
+  object?(args: DataSourceHolderArgs): DataSourceHolder;
 }
 
 export class ViewFactory {
@@ -23,7 +31,9 @@ export class ViewFactory {
 
     args = {...args};
     if (!args.object)
-      args.object = (source: OBJIOItem) => new DataSourceHolder({source, viewType: args.viewType});
+      args.object = (args: DataSourceHolderArgs) => {
+        return new DataSourceHolder(args);
+      };
 
     this.items.push(args);
   }
@@ -45,17 +55,22 @@ export class ViewFactory {
   }
 }
 
-export class DataSourceHolder<T extends OBJIOItem = OBJIOItem> extends OBJIOItem {
-  protected source: T;
+export class DataSourceHolder<
+  TSource extends OBJIOItem = OBJIOItem,
+  TLayout extends DocLayout = DocLayout> extends OBJIOItem {
+
+  protected source: TSource;
+  protected layout: TLayout;
   protected viewType: string;
 
-  constructor(args: {source: T, viewType?: string}) {
+  constructor(args: DataSourceHolderArgs<TSource, TLayout>) {
     super();
     if (!args)
       return;
 
     this.source = args.source;
     this.viewType = args.viewType;
+    this.layout = args.layout;
   }
 
   private static viewFactory = new ViewFactory();
@@ -63,7 +78,7 @@ export class DataSourceHolder<T extends OBJIOItem = OBJIOItem> extends OBJIOItem
   static setFactory(vf: ViewFactory): void {
     DataSourceHolder.viewFactory = vf;
   }
-  
+
   static findAllViews(classObj: Object): Array<FactoryItem> {
     return DataSourceHolder.viewFactory.find({ classObj });
   }
@@ -76,8 +91,8 @@ export class DataSourceHolder<T extends OBJIOItem = OBJIOItem> extends OBJIOItem
     });
   }
 
-  get(): T {
-    return this.source as T;
+  get(): TSource {
+    return this.source as TSource;
   }
 
   getViewType(): string {
@@ -87,7 +102,8 @@ export class DataSourceHolder<T extends OBJIOItem = OBJIOItem> extends OBJIOItem
   static TYPE_ID = 'DataSourceHolder';
   static SERIALIZE: SERIALIZER = () => ({
     source:   { type: 'object' },
-    viewType: { type: 'string' }
+    viewType: { type: 'string' },
+    layout:   { type: 'object' }
   });
 }
 

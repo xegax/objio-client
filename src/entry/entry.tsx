@@ -38,6 +38,7 @@ import {
 import { LayoutDataListView } from '../view/layout-datalist';
 
 import '../../styles/styles.scss';
+import { DataSourceHolderArgs } from '../model/server/doc-layout';
 
 let objio: OBJIO;
 
@@ -71,8 +72,21 @@ function initDocLayout(prj: string) {
     view: (props: LayoutItemViewProps<DocTable, LayoutDataList>) => (
       <LayoutDataListView {...props}/>
     ),
-    object: (source: DocTable) => new LayoutDataList({source, viewType: 'datalist'}),
+    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
+      return new LayoutDataList(args);
+    },
     viewType: 'datalist'
+  });
+
+  vf.register({
+    classObj: DocTable,
+    view: (props: LayoutItemViewProps<DocTable, LayoutDataList>) => (
+      <LayoutDataListView {...props}/>
+    ),
+    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
+      return new LayoutDataList(args);
+    },
+    viewType: 'table'
   });
   DataSourceHolder.setFactory(vf);
 }
