@@ -1,5 +1,5 @@
 {
-  "name": "ts-boilerplate",
+  "name": "objio-client",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -47,6 +47,10 @@
     "tslint": "^3.15.1"
   },
   "dependencies": {
+    "objio": "^0.0.28",
+    "objio-object": "^0.0.8",
+    "objio-sqlite-table": "^0.0.8",
+    "ts-react-ui": "^0.1.8",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-transition-group": "^2.3.1"
