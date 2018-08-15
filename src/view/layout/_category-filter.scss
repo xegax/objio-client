@@ -1,0 +1,24 @@
+.category-filter {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+
+  .list-ctrl {
+    .list-ctrl-cell {
+      i {
+        margin-right: 5px;
+        opacity: 0;
+
+        &:hover {
+          opacity: 0.5;
+        }
+      }
+
+      .excluded {
+        i {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

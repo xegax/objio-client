@@ -32,13 +32,11 @@ import {
   ViewFactory,
   LayoutItemViewProps
 } from '../view/doc-layout';
-import {
-  LayoutDataList
-} from '../model/client/layout-datalist';
-import { LayoutDataListView } from '../view/layout-datalist';
+import { DrillDownTableView, DrillDownTable } from '../view/layout/drilldown-table';
 
 import '../../styles/styles.scss';
 import { DataSourceHolderArgs } from '../model/server/doc-layout';
+import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
 
 let objio: OBJIO;
 
@@ -69,24 +67,24 @@ function initDocLayout(prj: string) {
   });
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, LayoutDataList>) => (
-      <LayoutDataListView {...props}/>
+    view: (props: LayoutItemViewProps<DocTable, CategoryFilter>) => (
+      <CategoryFilterView {...props}/>
     ),
     object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new LayoutDataList(args);
+      return new CategoryFilter(args);
     },
-    viewType: 'datalist'
+    viewType: 'category-filter'
   });
 
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, LayoutDataList>) => (
-      <LayoutDataListView {...props}/>
+    view: (props: LayoutItemViewProps<DocTable, DrillDownTable>) => (
+      <DrillDownTableView {...props}/>
     ),
     object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new LayoutDataList(args);
+      return new DrillDownTable(args);
     },
-    viewType: 'table'
+    viewType: 'drilldown-table'
   });
   DataSourceHolder.setFactory(vf);
 }

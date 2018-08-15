@@ -9,8 +9,9 @@ import { DocTable } from './doc-table';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { DocLayout } from './doc-layout';
 import { DocHolder } from './doc-holder';
-import { LayoutDataList } from './layout-datalist';
 import { DataSourceHolder } from '../server/doc-layout';
+import { CategoryFilter } from './layout/category-filter';
+import { DrillDownTable } from './layout/drilldown-table';
 
 export {
   DocContainer,
@@ -32,5 +33,6 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(FileObjImpl);
   fact.registerItem(DocLayout);
   fact.registerItem(DataSourceHolder);
-  fact.registerItem(LayoutDataList);
+  fact.registerItem(DrillDownTable);
+  fact.registerItem(CategoryFilter);
 }
