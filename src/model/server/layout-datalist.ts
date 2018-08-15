@@ -8,10 +8,12 @@ export class LayoutDataList<
   > extends DataSourceHolder<TSource, TLayout> {
 
   protected column: string;
+  protected colsToShow = Array<string>();
 
   static TYPE_ID = 'LayoutDataList';
   static SERIALIZE: SERIALIZER = () => ({
     ...DataSourceHolder.SERIALIZE(),
-    column: { type: 'string' }
+    column: { type: 'string' },
+    colsToShow: { type: 'json' }
   });
 }

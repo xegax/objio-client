@@ -1,6 +1,6 @@
 import { LayoutDataList as Base } from '../server/layout-datalist';
 import { DocTable } from './doc-table';
-import { ColumnAttr, LoadCellsArgs, SubtableAttrs } from 'objio-object/table';
+import { ColumnAttr, LoadCellsArgs, SubtableAttrs, SortPair } from 'objio-object/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { cancelable, Cancelable, timer } from 'objio/common/promise';
 import { DocLayout } from './doc-layout';
@@ -15,7 +15,8 @@ export class LayoutDataList extends Base<DocTable, DocLayout> {
   private rowsNum: number = 0;
   private rowsCache: {[rowIdx: string]: string} = {};
   private sel = Array<string>();
-  private cond: string;
+  private subtableArgs: string;
+  private sort: SortPair;
 
   constructor(args: DataSourceHolderArgs<DocTable, DocLayout>) {
     super(args);
@@ -50,6 +51,10 @@ export class LayoutDataList extends Base<DocTable, DocLayout> {
   }
 
   onInit = () => {
+    this.source.getState().holder.addEventHandler({
+      onObjChange: () => this.holder.notify()
+    });
+
     this.updateSubtable();
     if (this.getViewType() == 'table')
       return Promise.resolve();
@@ -74,19 +79,25 @@ export class LayoutDataList extends Base<DocTable, DocLayout> {
 
   subscriber = () => {
     if (this.viewType == 'table') {
-      const filter = this.layout.getCondition(this);
-      const newFilter = JSON.stringify(filter || {});
-      if (this.cond == newFilter)
-        return;
-      this.cond = newFilter;
-
       const args: Partial<SubtableAttrs> = {};
-
+      const filter = this.layout.getCondition(this);
       if (filter)
         args.filter = filter;
 
+      if (this.sort)
+        args.sort = [this.sort];
+
+      if (this.colsToShow.length)
+        args.cols = this.colsToShow;
+
+      const newArgs = JSON.stringify(args);
+      if (this.subtableArgs == newArgs)
+        return;
+      this.subtableArgs = newArgs;
+
       this.source.getTableRef().createSubtable(args)
       .then(res => {
+        this.colsToRender = res.columns;
         this.subtable = res.subtable;
         this.rowsNum = res.rowsNum;
         this.rowsCache = {};
@@ -100,6 +111,12 @@ export class LayoutDataList extends Base<DocTable, DocLayout> {
   updateSubtable = () => {
     if (this.viewType == 'table') {
       this.colsToRender = this.source.getAllColumns();
+      if (this.colsToShow.length) {
+        this.colsToRender = this.colsToRender.filter(col => {
+          return this.colsToShow.indexOf(col.name) != -1;
+        });
+      }
+
       this.rowsNum = this.source.getTotalRowsNum();
       this.render.reload();
       this.holder.notify();
@@ -135,6 +152,40 @@ export class LayoutDataList extends Base<DocTable, DocLayout> {
 
   getTotalRows() {
     return this.rowsNum;
+  }
+
+  hideColumn(col: string) {
+    if (this.getViewType() != 'table')
+      return;
+
+    if (this.colsToShow.length == 0)
+      this.colsToShow = this.source.getAllColumns().map(col => col.name);
+
+    this.colsToShow.splice(this.colsToShow.indexOf(col), 1);
+    this.holder.save();
+    this.subscriber();
+  }
+
+  showAllColumns() {
+    if (this.getViewType() != 'table')
+      return;
+
+    this.colsToShow = [];
+    this.holder.save();
+    this.subscriber();
+  }
+
+  setSort(column: string, dir: 'asc' | 'desc') {
+    this.sort = { column, dir };
+    this.subscriber();
+  }
+
+  toggleSort(column: string) {
+    if (this.sort && this.sort.column == column)
+      this.sort.dir = this.sort.dir == 'asc' ? 'desc' : 'asc';
+    else
+      this.sort = { column, dir: 'asc' };
+    this.subscriber();
   }
 
   getColumn(): string {
