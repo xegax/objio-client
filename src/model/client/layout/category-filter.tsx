@@ -70,14 +70,19 @@ export class CategoryFilter extends Base<DocTable, DocLayout> {
       this.layout.setCondition(this, { column: this.column, inverse: true, value: Array.from(this.excludeSel)[0]});
     } else {
       const cond: Condition = { op: 'or', values: this.sel.map(value => ({ column: this.column, value }))};
+      const exclude: Condition = {
+        op: 'and',
+        values: Array.from(this.excludeSel).map(value => {
+          return { column: this.column, inverse: true, value };
+        })
+      };
+
       if (this.excludeSel.size == 0) {
         this.layout.setCondition(this, cond);
+      } else if (this.sel.length == 0) {
+        this.layout.setCondition(this, exclude);
       } else {
-        const values: Array<ValueCond> = Array.from(this.excludeSel).map(value => {
-          return { column: this.column, inverse: true, value };
-        });
-        const excl = { op: 'and', values };
-        this.layout.setCondition(this, { op: 'and', values: [ cond, excl ] } as Condition);
+        this.layout.setCondition(this, { op: 'and', values: [ cond, exclude ] } as Condition);
       }
     }
   }
