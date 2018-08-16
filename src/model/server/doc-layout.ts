@@ -111,6 +111,10 @@ export class DocLayout extends OBJIOItem {
   protected layout: LayoutCont = {type: 'row', items: []};
   protected objects = new OBJIOArray<DataSourceHolder>();
 
+  getObjects(): OBJIOArray<DataSourceHolder> {
+    return this.objects;
+  }
+
   static TYPE_ID = 'DocLayout';
   static SERIALIZE: SERIALIZER = () => ({
     layout: { type: 'json' },

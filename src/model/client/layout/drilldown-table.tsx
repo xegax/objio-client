@@ -8,6 +8,7 @@ import { cancelable, Cancelable, timer } from 'objio/common/promise';
 import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { ContextMenu, Menu, MenuItem } from '@blueprintjs/core';
+import { CondHolder, EventType } from './cond-holder';
 
 export class DrillDownTable extends Base<DocTable, DocLayout> {
   private render = new RenderListModel(0, 20);
@@ -18,6 +19,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
   private rowsNum: number = 0;
   private subtableArgs: string;
   private sort: SortPair;
+  private cond = new CondHolder();
 
   constructor(args: DataSourceHolderArgs<DocTable, DocLayout>) {
     super(args);
@@ -48,7 +50,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
       onObjChange: this.updateSubtable
     });
 
-    this.holder.subscribe(this.subscriber);
+    this.holder.subscribe(this.subscriber, EventType.change);
   }
 
   onInit = () => {
@@ -62,7 +64,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
 
   subscriber = () => {
     const args: Partial<SubtableAttrs> = {};
-    const filter = this.layout.getCondition(this);
+    const filter = this.cond.getMergedCondition(this, this.layout.getObjects().getArray());
     if (filter)
       args.filter = filter;
 

@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { CategoryFilter as Base } from '../../server/layout/category-filter';
 import { DocTable } from '../doc-table';
-import { ColumnAttr, LoadCellsArgs, Condition, ValueCond } from 'objio-object/table';
+import { ColumnAttr, LoadCellsArgs, Condition } from 'objio-object/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
 import { cancelable, Cancelable, timer } from 'objio/common/promise';
 import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { cn } from '../../../common/common';
+import { CondHolder, CondHolderOwner } from './cond-holder';
 
 const classes = {
   excluded: 'excluded'
@@ -15,7 +16,9 @@ const classes = {
 
 const TIME_BETWEEN_REQUEST = 300;
 
-export class CategoryFilter extends Base<DocTable, DocLayout> {
+
+
+export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHolderOwner {
   private render = new RenderListModel(0, 20);
   private lastLoadTimer: Cancelable;
   private subtable: string;
@@ -24,6 +27,7 @@ export class CategoryFilter extends Base<DocTable, DocLayout> {
   private rowsCache: {[rowIdx: string]: string} = {};
   private sel = Array<string>();
   private excludeSel = new Set<string>();
+  private condHolder = new CondHolder();
 
   constructor(args: DataSourceHolderArgs<DocTable, DocLayout>) {
     super(args);
@@ -55,6 +59,10 @@ export class CategoryFilter extends Base<DocTable, DocLayout> {
     });
   }
 
+  getCondHolder(): CondHolder {
+    return this.condHolder;
+  }
+
   updateCondition() {
     this.sel = this.render.getSel().map(rowIdx => {
       return this.rowsCache[rowIdx] || (
@@ -63,11 +71,11 @@ export class CategoryFilter extends Base<DocTable, DocLayout> {
     });
 
     if (this.sel.length + this.excludeSel.size == 0) {
-      this.layout.setCondition(this, null);
+      this.setCondition(null);
     } else if (this.sel.length == 1 && this.excludeSel.size == 0) {
-      this.layout.setCondition(this, { column: this.column, value: this.sel[0] });
+      this.setCondition({ column: this.column, value: this.sel[0] });
     } else if (this.sel.length == 0 && this.excludeSel.size == 1) {
-      this.layout.setCondition(this, { column: this.column, inverse: true, value: Array.from(this.excludeSel)[0]});
+      this.setCondition({ column: this.column, inverse: true, value: Array.from(this.excludeSel)[0]});
     } else {
       const cond: Condition = { op: 'or', values: this.sel.map(value => ({ column: this.column, value }))};
       const exclude: Condition = {
@@ -78,13 +86,17 @@ export class CategoryFilter extends Base<DocTable, DocLayout> {
       };
 
       if (this.excludeSel.size == 0) {
-        this.layout.setCondition(this, cond);
+        this.setCondition(cond);
       } else if (this.sel.length == 0) {
-        this.layout.setCondition(this, exclude);
+        this.setCondition(exclude);
       } else {
-        this.layout.setCondition(this, { op: 'and', values: [ cond, exclude ] } as Condition);
+        this.setCondition({ op: 'and', values: [ cond, exclude ] } as Condition);
       }
     }
+  }
+
+  setCondition(cond: Condition): void {
+    this.condHolder.setCondition(cond, this.layout.getObjects().getArray(), this);
   }
 
   onInit = () => {

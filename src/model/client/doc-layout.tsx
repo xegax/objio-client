@@ -6,39 +6,8 @@ import { DocHolder } from './doc-holder';
 import { select } from '../../view/prompt';
 import { Condition } from 'objio-object/table';
 
-class DD {
-  private sourceMap: {[id: string]: {[id: string]: Condition}} = {};
-
-  setCondition(holder: DataSourceHolder, cond: Condition): void {
-    const srcID = holder.get().holder.getID();
-    const compID = holder.holder.getID();
-    const srcMap = this.sourceMap[srcID] || (this.sourceMap[srcID] = {[compID]: cond} );
-    srcMap[compID] = cond;
-  }
-
-  getCondition(holder: DataSourceHolder): Condition {
-    const srcID = holder.get().holder.getID();
-
-    if (!this.sourceMap[srcID])
-      return;
-
-    let conds = Array<Condition>();
-    Object.keys(this.sourceMap[srcID]).forEach(id => {
-      const cond = this.sourceMap[srcID][id];
-      if (!cond)
-        return;
-      conds.push(cond);
-    });
-
-    if (conds.length == 1)
-      return conds[0];
-    return { op: 'and', values: conds };
-  }
-}
-
 export class DocLayout extends Base {
   private model = new LayoutModel();
-  private dd = new DD();
 
   constructor() {
     super();
@@ -92,15 +61,6 @@ export class DocLayout extends Base {
       this.layout = clone(this.model.getLayout()) as LayoutCont;
       this.holder.save();
     }, 'change');
-  }
-
-  setCondition(holder: DataSourceHolder, cond: Condition) {
-    this.dd.setCondition(holder, cond);
-    this.objects.getArray().forEach(obj => obj.holder.notify());
-  }
-
-  getCondition(holder: DataSourceHolder): Condition {
-    return this.dd.getCondition(holder);
   }
 
   updateLayoutMap() {
