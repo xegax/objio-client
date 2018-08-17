@@ -8,9 +8,9 @@ import { cancelable, Cancelable, timer } from 'objio/common/promise';
 import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { ContextMenu, Menu, MenuItem } from '@blueprintjs/core';
-import { CondHolder, EventType } from './cond-holder';
+import { CondHolder, EventType, CondHolderOwner } from './cond-holder';
 
-export class DrillDownTable extends Base<DocTable, DocLayout> {
+export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHolderOwner {
   private render = new RenderListModel(0, 20);
   private lastLoadTimer: Cancelable;
   private maxTimeBetweenRequests: number = 300;
@@ -62,6 +62,10 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
     return Promise.resolve();
   }
 
+  getCondHolder() {
+    return this.cond;
+  }
+
   subscriber = () => {
     const args: Partial<SubtableAttrs> = {};
     const filter = this.cond.getMergedCondition(this, this.layout.getObjects().getArray());
@@ -99,6 +103,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
     }
 
     this.rowsNum = this.source.getTotalRowsNum();
+    this.updateRenderModel();
     this.render.reload();
     this.holder.notify();
   }
@@ -166,6 +171,26 @@ export class DrillDownTable extends Base<DocTable, DocLayout> {
     this.colsToShow = [];
     this.holder.save();
     this.subscriber();
+  }
+
+  applySQLCond(sql: string): void {
+    const args: Partial<SubtableAttrs> = { filter: sql };
+
+    if (this.sort)
+      args.sort = [this.sort];
+
+    if (this.colsToShow.length)
+      args.cols = this.colsToShow;
+
+    this.source.getTableRef().createSubtable(args)
+    .then(res => {
+      this.colsToRender = res.columns;
+      this.subtable = res.subtable;
+      this.rowsNum = res.rowsNum;
+      this.updateRenderModel();
+      this.render.reload();
+      this.holder.notify();
+    });
   }
 
   setSort(column: string, dir: 'asc' | 'desc') {

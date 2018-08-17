@@ -2,6 +2,7 @@ import { OBJIOItem, OBJIO } from 'objio';
 import { Condition } from 'objio-object/table';
 import { DataSourceHolder } from '../../server/doc-layout';
 import { DocTable } from '../doc-table';
+import { CategoryFilter } from './category-filter';
 
 export const EventType = {
   change: 'cond-change'
@@ -13,9 +14,11 @@ export interface CondHolderOwner {
 
 export class CondHolder {
   private cond: Condition;
+  private tgt: DocTable;
 
-  setCondition(cond: Condition, objs: Array<OBJIOItem>, skipNotify?: OBJIOItem): void {
+  setCondition(tgt: DocTable, cond: Condition, objs: Array<OBJIOItem>, skipNotify?: OBJIOItem): void {
     this.cond = cond;
+    this.tgt = tgt;
 
     objs.forEach(obj => {
       if (skipNotify == obj)
@@ -27,23 +30,22 @@ export class CondHolder {
     });
   }
 
-  getCondition(): Condition {
-    return this.cond;
-  }
-
   getMergedCondition(tgtSrc: DataSourceHolder<DocTable>, arr: Array<OBJIOItem>): Condition {
     const srcID = tgtSrc.get().holder.getID();
 
     const values = new Array<Condition>();
     arr.forEach((holder: DataSourceHolder<DocTable>) => {
-      if (holder.get().holder.getID() != srcID)
-        return;
-
       const owner = holder as any as CondHolderOwner;
-      if (owner.getCondHolder)
+      if (!owner.getCondHolder)
         return;
 
-      values.push(owner.getCondHolder().getCondition());
+      const condHolder = owner.getCondHolder();
+      const cond = condHolder.cond;
+      const tgt = condHolder.tgt;
+      if (!cond || tgt.holder.getID() != srcID)
+        return;
+
+      values.push(cond);
     });
 
     if (values.length == 1)

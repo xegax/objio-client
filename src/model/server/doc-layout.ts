@@ -99,6 +99,16 @@ export class DataSourceHolder<
     return this.viewType;
   }
 
+  getAllSources(): Array<TSource> {
+    let srcs = Array<TSource>();
+    this.layout.getObjects().getArray().forEach(holder => {
+      const source = holder.get() as TSource;
+      if (srcs.indexOf(source) == -1)
+        srcs.push(source);
+    });
+    return srcs;
+  }
+
   static TYPE_ID = 'DataSourceHolder';
   static SERIALIZE: SERIALIZER = () => ({
     source:   { type: 'object' },

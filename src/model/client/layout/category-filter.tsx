@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CategoryFilter as Base } from '../../server/layout/category-filter';
 import { DocTable } from '../doc-table';
-import { ColumnAttr, LoadCellsArgs, Condition } from 'objio-object/table';
+import { ColumnAttr, LoadCellsArgs, Condition, CompoundCond } from 'objio-object/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
 import { cancelable, Cancelable, timer } from 'objio/common/promise';
@@ -9,6 +9,7 @@ import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { cn } from '../../../common/common';
 import { CondHolder, CondHolderOwner } from './cond-holder';
+import { OBJIOItem } from 'objio';
 
 const classes = {
   excluded: 'excluded'
@@ -16,9 +17,51 @@ const classes = {
 
 const TIME_BETWEEN_REQUEST = 300;
 
+export interface CategoryFilterOwner extends OBJIOItem {
+  getColumn(): string;
+  setCondition(cond: Condition): void;
+  get(): DocTable;
+}
 
+export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHolderOwner, CategoryFilterOwner {
+  private condHolder = new CondHolder();
+  private impl = new CategoryFilterImpl(this);
 
-export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHolderOwner {
+  getCondHolder(): CondHolder {
+    return this.condHolder;
+  }
+
+  getColumn(): string {
+    return this.column || this.source.getAllColumns()[0].name;
+  }
+
+  setColumn(name: string): boolean {
+    if (!super.setColumn(name))
+      return false;
+
+    this.impl.updateSubtable();
+    return true;
+  }
+
+  getColumns(): Array<ColumnAttr> {
+    return this.source.getAllColumns();
+  }
+
+  setCondition(cond: Condition): void {
+    this.condHolder.setCondition(this.source, cond, this.layout.getObjects().getArray(), this);
+  }
+
+  getTotalRows(): number {
+    return this.impl.getTotalRows();
+  }
+
+  getRender() {
+    return this.impl.getRender();
+  }
+}
+
+export class CategoryFilterImpl<TCategoryFilterOwner extends CategoryFilterOwner = CategoryFilterOwner> {
+  protected owner: TCategoryFilterOwner;
   private render = new RenderListModel(0, 20);
   private lastLoadTimer: Cancelable;
   private subtable: string;
@@ -27,10 +70,9 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
   private rowsCache: {[rowIdx: string]: string} = {};
   private sel = Array<string>();
   private excludeSel = new Set<string>();
-  private condHolder = new CondHolder();
 
-  constructor(args: DataSourceHolderArgs<DocTable, DocLayout>) {
-    super(args);
+  constructor(object: TCategoryFilterOwner) {
+    this.owner = object;
 
     this.render.setHandler({
       loadItems: (first, count) => {
@@ -47,20 +89,20 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
           if (this.subtable)
             args.table = this.subtable;
 
-          return this.source.getTableRef().loadCells(args);
+          return this.getSource().getTableRef().loadCells(args);
         });
       }
     });
 
-    this.holder.addEventHandler({
+    this.owner.holder.addEventHandler({
       onLoad: this.onInit,
       onCreate: this.onInit,
       onObjChange: this.updateSubtable
     });
   }
 
-  getCondHolder(): CondHolder {
-    return this.condHolder;
+  getSource(): DocTable {
+    return this.owner.get();
   }
 
   updateCondition() {
@@ -70,18 +112,19 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
       );
     });
 
+    const column = this.owner.getColumn();
     if (this.sel.length + this.excludeSel.size == 0) {
       this.setCondition(null);
     } else if (this.sel.length == 1 && this.excludeSel.size == 0) {
-      this.setCondition({ column: this.column, value: this.sel[0] });
+      this.setCondition({ column, value: this.sel[0] });
     } else if (this.sel.length == 0 && this.excludeSel.size == 1) {
-      this.setCondition({ column: this.column, inverse: true, value: Array.from(this.excludeSel)[0]});
+      this.setCondition({ column, inverse: true, value: Array.from(this.excludeSel)[0]});
     } else {
-      const cond: Condition = { op: 'or', values: this.sel.map(value => ({ column: this.column, value }))};
+      const cond: Condition = { op: 'or', values: this.sel.map(value => ({ column, value }))};
       const exclude: Condition = {
         op: 'and',
         values: Array.from(this.excludeSel).map(value => {
-          return { column: this.column, inverse: true, value };
+          return { column, inverse: true, value };
         })
       };
 
@@ -96,13 +139,13 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
   }
 
   setCondition(cond: Condition): void {
-    this.condHolder.setCondition(cond, this.layout.getObjects().getArray(), this);
+    this.owner.setCondition(cond);
   }
 
   onInit = () => {
     this.render.setHeader(false);
-    this.source.getState().holder.addEventHandler({
-      onObjChange: () => this.holder.notify()
+    this.owner.get().getState().holder.addEventHandler({
+      onObjChange: () => this.owner.holder.notify()
     });
 
     this.updateSubtable();
@@ -115,8 +158,8 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
   }
 
   updateSubtable = () => {
-    return this.source.getTableRef().createSubtable({
-      distinct: { column: this.getColumn() },
+    return this.owner.get().getTableRef().createSubtable({
+      distinct: { column: this.owner.getColumn() },
       sort: [{ column: 'count', dir: 'desc' }]
     }).then(res => {
       this.colsToRender = res.columns;
@@ -127,7 +170,7 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
       this.rowsCache = {};
       this.sel = [];
       this.render.reload();
-      this.holder.notify();
+      this.owner.holder.notify();
     });
   }
 
@@ -163,15 +206,11 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
     }
 
     this.updateCondition();
-    this.holder.delayedNotify();
+    this.owner.holder.delayedNotify();
   }
 
   getRender(): RenderListModel {
     return this.render;
-  }
-
-  getColumns(): Array<ColumnAttr> {
-    return this.source.getAllColumns();
   }
 
   getColumnsToRender() {
@@ -180,17 +219,5 @@ export class CategoryFilter extends Base<DocTable, DocLayout> implements CondHol
 
   getTotalRows() {
     return this.rowsNum;
-  }
-
-  getColumn(): string {
-    return this.column || this.getColumns()[0].name;
-  }
-
-  setColumn(name: string): void {
-    this.column = name;
-    this.holder.save();
-    this.holder.notify();
-
-    this.updateSubtable();
   }
 }

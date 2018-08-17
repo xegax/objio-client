@@ -54,6 +54,8 @@ export class DocLayout extends Base {
         this.layout = clone(this.model.getLayout()) as LayoutCont;
         this.holder.save();
         this.updateLayoutMap();
+      }).catch(() => {
+        this.model.remove(this.model.getLastDrop().id);
       });
     }, 'drop');
 

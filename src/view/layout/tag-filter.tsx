@@ -2,19 +2,19 @@ import * as React from 'react';
 import { List } from 'ts-react-ui/list';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import './_category-filter.scss';
-import { CategoryFilter } from '../../model/client/layout/category-filter';
+import { TagFilter } from '../../model/client/layout/tag-filter';
 
-export { CategoryFilter };
+export { TagFilter };
 
 const classes = {
   filter: 'category-filter'
 };
 
 interface Props {
-  model: CategoryFilter;
+  model: TagFilter;
 }
 
-export class CategoryFilterView extends React.Component<Props> {
+export class TagFilterView extends React.Component<Props> {
   subscriber = () => {
     this.setState({});
   }
@@ -32,6 +32,7 @@ export class CategoryFilterView extends React.Component<Props> {
     const value = model.getColumn();
     return (
       <select
+        style={{flexGrow: 1}}
         value={value}
         onChange={e => {
           model.setColumn(e.currentTarget.value);
@@ -44,7 +45,25 @@ export class CategoryFilterView extends React.Component<Props> {
     );
   }
 
-  /*renderTargetSelect(): JSX.Element {
+  renderJoinColumnSelect(): JSX.Element {
+    const model = this.props.model;
+    const value = model.getJoinColumn();
+    return (
+      <select
+        style={{flexGrow: 1}}
+        value={value}
+        onChange={e => {
+          model.setJoinColumn(e.currentTarget.value);
+        }}
+      >
+        {model.getColumns().map((col, i) => {
+          return <option key={i} value={col.name}>{col.name}</option>;
+        })}
+      </select>
+    );
+  }
+
+  renderTargetSelect(): JSX.Element {
     const model = this.props.model;
     const all = model.getAllSources();
     const target = model.getTarget() || model.get();
@@ -53,6 +72,7 @@ export class CategoryFilterView extends React.Component<Props> {
 
     return (
       <select
+        style={{flexGrow: 1}}
         value={target.holder.getID()}
         onChange={e => {
           model.setTarget(all.find(src => src.holder.getID() == e.currentTarget.value));
@@ -63,7 +83,7 @@ export class CategoryFilterView extends React.Component<Props> {
         })}
       </select>
     );
-  }*/
+  }
 
   renderData(): JSX.Element {
     const model = this.props.model;
@@ -74,7 +94,9 @@ export class CategoryFilterView extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        {this.renderColumnSelect()}
+        <div style={{display: 'flex'}}>column: {this.renderColumnSelect()}</div>
+        <div style={{display: 'flex'}}>target: {this.renderTargetSelect()}</div>
+        <div style={{display: 'flex'}}>join: {this.renderJoinColumnSelect()}</div>
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>
         </FitToParent>

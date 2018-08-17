@@ -11,6 +11,7 @@ import { FileObjImpl } from 'objio-object/file-obj-impl';
 import { DocLayout, DataSourceHolder } from './doc-layout';
 import { DrillDownTable } from './layout/drilldown-table';
 import { CategoryFilter } from './layout/category-filter';
+import { TagFilter } from './layout/tag-filter';
 
 export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(Animation);
@@ -28,4 +29,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(DataSourceHolder);
   fact.registerItem(DrillDownTable);
   fact.registerItem(CategoryFilter);
+  fact.registerItem(TagFilter);
 }

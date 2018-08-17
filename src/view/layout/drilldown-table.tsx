@@ -16,6 +16,8 @@ interface Props {
 }
 
 export class DrillDownTableView extends React.Component<Props> {
+  private ref = React.createRef<HTMLInputElement>();
+
   subscriber = () => {
     this.setState({});
   }
@@ -49,6 +51,10 @@ export class DrillDownTableView extends React.Component<Props> {
     return (
       <div className={classes.class}>
         {this.renderData()}
+        <input ref={this.ref} onKeyDown={evt => {
+          if (evt.keyCode == 13)
+            this.props.model.applySQLCond(this.ref.current.value);
+        }}/>
       </div>
     );
   }

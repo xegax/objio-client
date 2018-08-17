@@ -37,6 +37,7 @@ import { DrillDownTableView, DrillDownTable } from '../view/layout/drilldown-tab
 import '../../styles/styles.scss';
 import { DataSourceHolderArgs } from '../model/server/doc-layout';
 import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
+import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 
 let objio: OBJIO;
 
@@ -74,6 +75,17 @@ function initDocLayout(prj: string) {
       return new CategoryFilter(args);
     },
     viewType: 'category-filter'
+  });
+
+  vf.register({
+    classObj: DocTable,
+    view: (props: LayoutItemViewProps<DocTable, TagFilter>) => (
+      <TagFilterView {...props}/>
+    ),
+    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
+      return new TagFilter(args);
+    },
+    viewType: 'tag-filter'
   });
 
   vf.register({

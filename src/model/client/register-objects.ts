@@ -12,6 +12,7 @@ import { DocHolder } from './doc-holder';
 import { DataSourceHolder } from '../server/doc-layout';
 import { CategoryFilter } from './layout/category-filter';
 import { DrillDownTable } from './layout/drilldown-table';
+import { TagFilter } from './layout/tag-filter';
 
 export {
   DocContainer,
@@ -35,4 +36,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(DataSourceHolder);
   fact.registerItem(DrillDownTable);
   fact.registerItem(CategoryFilter);
+  fact.registerItem(TagFilter);
 }
