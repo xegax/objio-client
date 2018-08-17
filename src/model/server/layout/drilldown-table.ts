@@ -7,13 +7,27 @@ export class DrillDownTable<
     TLayout extends DocLayout = DocLayout
   > extends DataSourceHolder<TSource, TLayout> {
 
-  protected column: string;
+  protected idColumn: string;
   protected colsToShow = Array<string>();
+
+  getIdColumn(): string {
+    return this.idColumn;
+  }
+
+  setIdColumn(col: string): boolean {
+    if (col == this.idColumn)
+      return false;
+
+    this.idColumn = col;
+    this.holder.save();
+    this.holder.delayedNotify();
+    return true;
+  }
 
   static TYPE_ID = 'DrillDownTable';
   static SERIALIZE: SERIALIZER = () => ({
     ...DataSourceHolder.SERIALIZE(),
-    column:     { type: 'string' },
-    colsToShow: { type: 'json' }
+    idColumn:     { type: 'string' },
+    colsToShow:   { type: 'json' }
   });
 }

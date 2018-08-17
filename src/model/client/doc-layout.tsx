@@ -4,7 +4,6 @@ import { LayoutModel, clone, LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem } from 'objio';
 import { DocHolder } from './doc-holder';
 import { select } from '../../view/prompt';
-import { Condition } from 'objio-object/table';
 
 export class DocLayout extends Base {
   private model = new LayoutModel();
@@ -56,6 +55,7 @@ export class DocLayout extends Base {
         this.updateLayoutMap();
       }).catch(() => {
         this.model.remove(this.model.getLastDrop().id);
+        this.holder.save();
       });
     }, 'drop');
 
@@ -84,9 +84,16 @@ export class DocLayout extends Base {
           flexDirection: 'column',
           border: '1px solid gray'
         }}>
-          <div style={{flexGrow: 0, display: 'flex', backgroundColor: 'silver'}}>
+          <div style={{flexGrow: 0, display: 'flex', backgroundColor: 'silver', minHeight: 20}}>
             <div style={{flexGrow: 1}}>header</div>
             <div style={{flexGrow: 0}}>
+              <i
+                onClick={() => {
+                  obj.toggleEdit();
+                }}
+                style={{cursor: 'pointer', backgroundColor: obj.isEdit() ? 'gray' : null }}
+                className={'fa fa-edit'}
+              />
               <i
                 onClick={() => {
                   this.model.remove(id);
@@ -106,6 +113,18 @@ export class DocLayout extends Base {
       );
     });
     this.model.setMap(map);
+  }
+
+  notifyObjects(notifyType?: string) {
+    this.objects.getArray().forEach(obj => {
+      obj.holder.notify(notifyType);
+    });
+  }
+
+  delayedNotifyObjects(notifyType?: string) {
+    this.objects.getArray().forEach(obj => {
+      obj.holder.delayedNotify(notifyType ? { type: notifyType } : null);
+    });
   }
 
   getLayout(): LayoutModel {

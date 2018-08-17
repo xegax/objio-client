@@ -30,6 +30,29 @@ export class DrillDownTableView extends React.Component<Props> {
     this.props.model.holder.unsubscribe(this.subscriber);
   }
 
+  renderIdColumnSelect(): JSX.Element {
+    const model = this.props.model;
+    if (!model.isEdit())
+      return null;
+
+    const value = model.getIdColumn();
+    return (
+      <div style={{display: 'flex'}}>id column: 
+        <select
+          style={{flexGrow: 1}}
+          value={value}
+          onChange={e => {
+            model.setIdColumn(e.currentTarget.value);
+          }}
+        >
+          {model.getColumns().map((col, i) => {
+            return <option key={i} value={col.name}>{col.name}</option>;
+          })}
+        </select>
+      </div>
+    );
+  }
+
   renderData(): JSX.Element {
     const model = this.props.model;
     const state = model.get().getState();
@@ -39,6 +62,7 @@ export class DrillDownTableView extends React.Component<Props> {
 
     return (
       <React.Fragment>
+        {this.renderIdColumnSelect()}
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>
         </FitToParent>

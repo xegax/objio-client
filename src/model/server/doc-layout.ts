@@ -62,6 +62,16 @@ export class DataSourceHolder<
   protected source: TSource;
   protected layout: TLayout;
   protected viewType: string;
+  protected edit: boolean = false;
+
+  toggleEdit(): void {
+    this.edit = !this.edit;
+    this.holder.delayedNotify();
+  }
+
+  isEdit(): boolean {
+    return this.edit;
+  }
 
   constructor(args: DataSourceHolderArgs<TSource, TLayout>) {
     super();

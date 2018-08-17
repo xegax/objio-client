@@ -9,15 +9,16 @@ import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { ContextMenu, Menu, MenuItem } from '@blueprintjs/core';
 import { CondHolder, EventType, CondHolderOwner } from './cond-holder';
+import { SelectProv, SelectProvOwner, EventTypes } from './common';
 
-export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHolderOwner {
+export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHolderOwner, SelectProvOwner {
   private render = new RenderListModel(0, 20);
   private lastLoadTimer: Cancelable;
   private maxTimeBetweenRequests: number = 300;
   private subtable: string;
   private colsToRender = Array<ColumnAttr>();
+  private colsFromSrv = Array<ColumnAttr>();
   private rowsNum: number = 0;
-  private subtableArgs: string;
   private sort: SortPair;
   private cond = new CondHolder();
 
@@ -47,10 +48,26 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
     this.holder.addEventHandler({
       onLoad: this.onInit,
       onCreate: this.onInit,
-      onObjChange: this.updateSubtable
+      onObjChange: this.updateTable
     });
 
-    this.holder.subscribe(this.subscriber, EventType.change);
+    this.holder.subscribe(this.requestTable, EventType.change);
+    this.render.subscribe(() => {
+      this.layout.delayedNotifyObjects(EventTypes.selProvSelection);
+    }, 'select-row');
+  }
+
+  getSelProv(): SelectProv {
+    return {
+      getSelection: (): Array<string> => {
+        const sel = this.render.getSel();
+        if (!sel.length)
+          return [];
+
+        const row = this.render.getItems(+sel[sel.length - 1], 1)[0];
+        return [ row[this.colsFromSrv.findIndex(col => col.name == this.idColumn)] ];
+      }
+    };
   }
 
   onInit = () => {
@@ -58,7 +75,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
       onObjChange: () => this.holder.notify()
     });
 
-    this.updateSubtable();
+    this.updateTable();
     return Promise.resolve();
   }
 
@@ -66,7 +83,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
     return this.cond;
   }
 
-  subscriber = () => {
+  requestTable = () => {
     const args: Partial<SubtableAttrs> = {};
     const filter = this.cond.getMergedCondition(this, this.layout.getObjects().getArray());
     if (filter)
@@ -76,16 +93,21 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
       args.sort = [this.sort];
 
     if (this.colsToShow.length)
-      args.cols = this.colsToShow;
+      args.cols = this.colsToShow.slice();
 
-    const newArgs = JSON.stringify(args);
-    if (this.subtableArgs == newArgs)
-      return;
-    this.subtableArgs = newArgs;
+    // keep idColumn
+    if (this.idColumn && args.cols && args.cols.indexOf(this.idColumn) == -1)
+      args.cols.splice(0, 0, this.idColumn);
 
     this.source.getTableRef().createSubtable(args)
     .then(res => {
-      this.colsToRender = res.columns;
+      this.colsFromSrv = res.columns.slice();
+      this.colsToRender = res.columns.slice();
+      // if idColumn has to be hidden
+      if (this.colsToShow.length && this.idColumn && this.colsToShow.indexOf(this.idColumn) == -1) {
+        this.colsToRender = this.colsToRender.filter(col => col.name != this.idColumn);
+      }
+
       this.subtable = res.subtable;
       this.rowsNum = res.rowsNum;
       this.updateRenderModel();
@@ -94,7 +116,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
     });
   };
 
-  updateSubtable = () => {
+  updateTable = () => {
     this.colsToRender = this.source.getAllColumns();
     if (this.colsToShow.length) {
       this.colsToRender = this.colsToRender.filter(col => {
@@ -103,9 +125,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
     }
 
     this.rowsNum = this.source.getTotalRowsNum();
-    this.updateRenderModel();
-    this.render.reload();
-    this.holder.notify();
+    this.requestTable();
   }
 
   getRender() {
@@ -127,6 +147,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
   updateRenderModel() {
     this.render.setItemsCount(this.rowsNum);
     this.render.setColumns(this.colsToRender.map((col, c) => {
+      c = this.colsFromSrv.findIndex(srvCol => srvCol.name == col.name);
       return {
         name: col.name,
         render: (args: RenderArgs<Array<string>>) => {
@@ -164,13 +185,13 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
 
     this.colsToShow.splice(this.colsToShow.indexOf(col), 1);
     this.holder.save();
-    this.subscriber();
+    this.requestTable();
   }
 
   showAllColumns() {
     this.colsToShow = [];
     this.holder.save();
-    this.subscriber();
+    this.requestTable();
   }
 
   applySQLCond(sql: string): void {
@@ -195,7 +216,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
 
   setSort(column: string, dir: 'asc' | 'desc') {
     this.sort = { column, dir };
-    this.subscriber();
+    this.requestTable();
   }
 
   toggleSort(column: string) {
@@ -204,18 +225,6 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
     } else {
       this.sort = { column, dir: 'asc' };
     }
-    this.subscriber();
-  }
-
-  getColumn(): string {
-    return this.column || this.getColumns()[0].name;
-  }
-
-  setColumn(name: string): void {
-    this.column = name;
-    this.holder.save();
-    this.holder.notify();
-
-    this.updateSubtable();
+    this.requestTable();
   }
 }

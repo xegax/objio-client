@@ -29,6 +29,9 @@ export class CategoryFilterView extends React.Component<Props> {
 
   renderColumnSelect(): JSX.Element {
     const model = this.props.model;
+    if (!model.isEdit())
+      return null;
+
     const value = model.getColumn();
     return (
       <select
@@ -43,27 +46,6 @@ export class CategoryFilterView extends React.Component<Props> {
       </select>
     );
   }
-
-  /*renderTargetSelect(): JSX.Element {
-    const model = this.props.model;
-    const all = model.getAllSources();
-    const target = model.getTarget() || model.get();
-    if (all.length == 1 && all.indexOf(target) == 0)
-      return null;
-
-    return (
-      <select
-        value={target.holder.getID()}
-        onChange={e => {
-          model.setTarget(all.find(src => src.holder.getID() == e.currentTarget.value));
-        }}
-      >
-        {all.map((src, i) => {
-          return <option key={i} value={src.holder.getID()}>{src.getTable()}</option>;
-        })}
-      </select>
-    );
-  }*/
 
   renderData(): JSX.Element {
     const model = this.props.model;

@@ -29,15 +29,15 @@ import {
   DocLayoutView,
   DocLayout,
   DataSourceHolder,
-  ViewFactory,
-  LayoutItemViewProps
+  ViewFactory
 } from '../view/doc-layout';
 import { DrillDownTableView, DrillDownTable } from '../view/layout/drilldown-table';
 
 import '../../styles/styles.scss';
-import { DataSourceHolderArgs } from '../model/server/doc-layout';
+import { DataSourceHolderArgs, LayoutItemViewProps } from '../model/server/doc-layout';
 import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
 import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
+import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 
 let objio: OBJIO;
 
@@ -97,6 +97,17 @@ function initDocLayout(prj: string) {
       return new DrillDownTable(args);
     },
     viewType: 'drilldown-table'
+  });
+
+  vf.register({
+    classObj: DocTable,
+    view: (props: LayoutItemViewProps<DocTable, SelectDetails>) => (
+      <SelectDetailsView {...props}/>
+    ),
+    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
+      return new SelectDetails(args);
+    },
+    viewType: 'select-details'
   });
   DataSourceHolder.setFactory(vf);
 }

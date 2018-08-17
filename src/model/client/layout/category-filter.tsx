@@ -6,7 +6,6 @@ import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
 import { cancelable, Cancelable, timer } from 'objio/common/promise';
 import { DocLayout } from '../doc-layout';
-import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { cn } from '../../../common/common';
 import { CondHolder, CondHolderOwner } from './cond-holder';
 import { OBJIOItem } from 'objio';

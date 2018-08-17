@@ -29,59 +29,76 @@ export class TagFilterView extends React.Component<Props> {
 
   renderColumnSelect(): JSX.Element {
     const model = this.props.model;
+
+    if (!model.isEdit())
+      return null;
+
     const value = model.getColumn();
     return (
-      <select
-        style={{flexGrow: 1}}
-        value={value}
-        onChange={e => {
-          model.setColumn(e.currentTarget.value);
-        }}
-      >
-        {model.getColumns().map((col, i) => {
-          return <option key={i} value={col.name}>{col.name}</option>;
-        })}
-      </select>
+      <div style={{display: 'flex'}}>column: 
+        <select
+          style={{flexGrow: 1}}
+          value={value}
+          onChange={e => {
+            model.setColumn(e.currentTarget.value);
+          }}
+        >
+          {model.getColumns().map((col, i) => {
+            return <option key={i} value={col.name}>{col.name}</option>;
+          })}
+        </select>
+      </div>
     );
   }
 
   renderJoinColumnSelect(): JSX.Element {
     const model = this.props.model;
+    if (!model.isEdit())
+      return null;
+
     const value = model.getJoinColumn();
     return (
-      <select
-        style={{flexGrow: 1}}
-        value={value}
-        onChange={e => {
-          model.setJoinColumn(e.currentTarget.value);
-        }}
-      >
-        {model.getColumns().map((col, i) => {
-          return <option key={i} value={col.name}>{col.name}</option>;
-        })}
-      </select>
+      <div style={{display: 'flex'}}>join: 
+        <select
+          style={{flexGrow: 1}}
+          value={value}
+          onChange={e => {
+            model.setJoinColumn(e.currentTarget.value);
+          }}
+        >
+          {model.getColumns().map((col, i) => {
+            return <option key={i} value={col.name}>{col.name}</option>;
+          })}
+        </select>
+      </div>
     );
   }
 
   renderTargetSelect(): JSX.Element {
     const model = this.props.model;
+
+    if (!model.isEdit())
+      return null;
+
     const all = model.getAllSources();
     const target = model.getTarget() || model.get();
     if (all.length == 1 && all.indexOf(target) == 0)
       return null;
 
     return (
-      <select
-        style={{flexGrow: 1}}
-        value={target.holder.getID()}
-        onChange={e => {
-          model.setTarget(all.find(src => src.holder.getID() == e.currentTarget.value));
-        }}
-      >
-        {all.map((src, i) => {
-          return <option key={i} value={src.holder.getID()}>{src.getTable()}</option>;
-        })}
-      </select>
+      <div style={{display: 'flex'}}>target: 
+        <select
+          style={{flexGrow: 1}}
+          value={target.holder.getID()}
+          onChange={e => {
+            model.setTarget(all.find(src => src.holder.getID() == e.currentTarget.value));
+          }}
+        >
+          {all.map((src, i) => {
+            return <option key={i} value={src.holder.getID()}>{src.getTable()}</option>;
+          })}
+        </select>
+      </div>
     );
   }
 
@@ -94,9 +111,9 @@ export class TagFilterView extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <div style={{display: 'flex'}}>column: {this.renderColumnSelect()}</div>
-        <div style={{display: 'flex'}}>target: {this.renderTargetSelect()}</div>
-        <div style={{display: 'flex'}}>join: {this.renderJoinColumnSelect()}</div>
+        {this.renderColumnSelect()}
+        {this.renderTargetSelect()}
+        {this.renderJoinColumnSelect()}
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>
         </FitToParent>
