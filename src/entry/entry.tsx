@@ -124,7 +124,8 @@ async function loadAndRender() {
   let factory = await createFactory();
   registerObjects(factory);
 
-  const rootReq = createRequestor({urlBase: '/handler', params: {prj: args.prj || 'n1'}});
+  args.prj = args.prj || 'n1';
+  const rootReq = createRequestor({urlBase: '/handler', params: { prj: args.prj }});
   const req = new AuthRequestor({req: rootReq, showLogin});
   const store = new OBJIORemoteStore({ req });
   /*let store = await createLocalStore(factory);
