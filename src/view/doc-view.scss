@@ -9,6 +9,24 @@
     display: flex;
     height: 30px;
     background-color: silver;
+
+    &-name {
+      padding: 3px;
+      display: flex;
+      flex-grow: 1;
+    }
+
+    &-tools {
+      padding: 3px;
+      flex-grow: 0;
+      i {
+        cursor: pointer;
+        opacity: 0.5;
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
   }
 
   &-content {

@@ -5,11 +5,14 @@ import './doc-view.scss';
 const classes = {
   docView: 'doc-view',
   header: 'doc-view-header',
-  content: 'doc-view-content'
+  content: 'doc-view-content',
+  name: 'doc-view-header-name',
+  tools: 'doc-view-header-tools'
 };
 
 interface Props {
   model: DocHolder;
+  onRemove?();
 }
 
 interface State {
@@ -48,8 +51,24 @@ export class DocView extends React.Component<Props> {
       );
 
     return (
-      <div onDoubleClick={() => this.setState({edit: true})}>
+      <div className={classes.name} onDoubleClick={() => this.setState({edit: true})}>
         {model.getName()}
+      </div>
+    );
+  }
+
+  renderTools() {
+    const remove = (
+      this.props.onRemove && <i
+        title='delete'
+        className='fa fa-trash-o'
+        onClick={() => this.props.onRemove()}
+      />
+    );
+
+    return (
+      <div className={classes.tools}>
+        {remove}
       </div>
     );
   }
@@ -59,6 +78,7 @@ export class DocView extends React.Component<Props> {
       <div className={classes.docView}>
         <div className={classes.header}>
           {this.renderName()}
+          {this.renderTools()}
         </div>
         <div className={classes.content}>
           {this.props.children}

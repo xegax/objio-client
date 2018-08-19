@@ -111,14 +111,17 @@ export class DocContainer extends Base {
     });
   }
 
-  remove(item: DocTreeItem) {
-    let idx = this.children.find(doc => doc == item.doc);
+  remove(holder: DocHolder) {
+    let idx = this.children.find(doc => doc == holder);
     if (idx == -1)
       return;
 
     this.children.remove(idx);
-    this.children.getHolder().save();
+    if (holder == this.select)
+      this.select = null;
+
+    this.children.holder.save();
     this.updateTree();
-    this.holder.notify();
+    this.holder.delayedNotify();
   }
 }

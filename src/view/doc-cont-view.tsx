@@ -75,7 +75,7 @@ export class DocContView extends React.Component<Props, State> {
     return this.props.getWizard(objClass);
   }
 
-  onContextMenu = (e: React.MouseEvent<any>, idx: number) => {
+  onContextMenu = (e: React.MouseEvent<any>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -86,7 +86,7 @@ export class DocContView extends React.Component<Props, State> {
         <MenuItem text='layout' onClick={() => this.createObject(DocLayout)}/>
       </MenuItem>,
       <MenuItem key='delete' text='delete' onClick={() => {
-        this.props.model.remove(this.props.model.getTree().getSelect());
+        this.props.model.remove(this.props.model.getSelect());
       }}/>
     ];
 
@@ -111,7 +111,7 @@ export class DocContView extends React.Component<Props, State> {
       <div
         key='doc-list' className={classes.docList}
         style={{display: 'flex'}}
-        onContextMenu={e => this.onContextMenu(e, -1)}
+        onContextMenu={e => this.onContextMenu(e)}
       >
         <FitToParent wrapToFlex>
           <Tree

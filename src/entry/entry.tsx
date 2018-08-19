@@ -196,9 +196,13 @@ async function loadAndRender() {
   ReactDOM.render(
     <DocContView
       model={model}
-      getView={model => (
-        <DocView model={model}>
-          {mvf.getView(model.getDoc().constructor, {model: model.getDoc()})}
+      getView={docHolder => (
+        <DocView
+          model={docHolder}
+          onRemove={() => {
+            model.remove(docHolder);
+          }}>
+          {mvf.getView(docHolder.getDoc().constructor, {model: docHolder.getDoc()})}
         </DocView>
       )}
       getWizard={objClass => mvf.getWizard(objClass)}
