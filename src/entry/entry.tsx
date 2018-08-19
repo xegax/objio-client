@@ -38,6 +38,7 @@ import { DataSourceHolderArgs, LayoutItemViewProps } from '../model/server/doc-l
 import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
 import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
+import { DocView } from '../view/doc-view';
 
 let objio: OBJIO;
 
@@ -150,7 +151,10 @@ async function loadAndRender() {
     model.getHolder().save();
   }
 
-  objio.startWatch({req, timeOut: 100}).subscribe(() => {
+  objio.startWatch({req, timeOut: 100}).subscribe((objs: Array<OBJIOItem>) => {
+    objs = objs || [];
+    if (model.getChildren().find(obj => objs.indexOf(obj) != -1))
+      model.updateTree();
     model.holder.notify();
   });
   
@@ -192,7 +196,11 @@ async function loadAndRender() {
   ReactDOM.render(
     <DocContView
       model={model}
-      getView={model => mvf.getView(model.constructor, {model})}
+      getView={model => (
+        <DocView model={model}>
+          {mvf.getView(model.getDoc().constructor, {model: model.getDoc()})}
+        </DocView>
+      )}
       getWizard={objClass => mvf.getWizard(objClass)}
       createObject={(objClass: OBJIOItemClass) => {
         /// const wzd = mvf.getWizard(objClass);

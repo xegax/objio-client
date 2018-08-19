@@ -15,6 +15,8 @@ import { FitToParent } from 'ts-react-ui/fittoparent';
 import { DocLayout } from '../model/client/doc-layout';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 
+import './doc-cont-view.scss';
+
 const classes = {
   docContView: 'doc-cont-view',
   docList: 'doc-list',
@@ -25,21 +27,18 @@ const classes = {
 
 interface Props {
   model: DocContainer;
-  getView: (doc: OBJIOItem) => JSX.Element;
+  getView: (doc: DocHolder) => JSX.Element;
   createObject: (objClass: OBJIOItemClass) => DocHolder;
   getWizard: (objClass: OBJIOItemClass) => JSX.Element;
 }
 
 interface State {
-  select?: DocHolder;
   fileDrop?: boolean;
 }
 
 export class DocContView extends React.Component<Props, State> {
   private subscriber = () => {
-    const tree = this.props.model.getTree();
-    const select = tree.getSelect();
-    this.setState( select ? {select: select.doc} : {});
+    this.setState({});
   };
 
   private dropTgt: React.Ref<HTMLDivElement> = React.createRef<HTMLDivElement>();
@@ -51,12 +50,7 @@ export class DocContView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const tree = this.props.model.getTree();
     this.props.model.holder.subscribe(this.subscriber);
-    tree.subscribe(() => {
-      const select = tree.getSelect();
-      this.setState( select ? {select: select.doc} : {});
-    }, 'select');
   }
 
   componentWillUnmount() {
@@ -102,7 +96,7 @@ export class DocContView extends React.Component<Props, State> {
   append = (doc: DocHolder) => {
     return this.props.model.append(doc)
     .then(() => {
-      this.setState({select: doc});
+      this.props.model.setSelect(doc);
     });
   }
 
@@ -130,8 +124,8 @@ export class DocContView extends React.Component<Props, State> {
   }
 
   renderDoc() {
-    const doc = this.state.select;
-    const view = doc ? this.props.getView(doc.getDoc()) : null;
+    const doc = this.props.model.getSelect();
+    const view = doc ? this.props.getView(doc) : null;
     return (
       <div className={classes.docContent}>
         {view || 'Document does not have a view'}
@@ -169,7 +163,7 @@ export class DocContView extends React.Component<Props, State> {
     const doc = new DocHolder({ doc: fileObj, name: file.name });
 
     this.props.model.append(doc).then(() => {
-      this.setState({ select: doc });
+      this.props.model.setSelect(doc);
       fileObj.sendFile(file);
     });
 

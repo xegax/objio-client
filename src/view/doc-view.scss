@@ -1,0 +1,19 @@
+.doc-view {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+
+  &-header {
+    padding: 3px;
+    flex-grow: 0;
+    display: flex;
+    height: 30px;
+    background-color: silver;
+  }
+
+  &-content {
+    padding: 5px;
+    flex-grow: 1;
+    display: flex;
+  }
+}

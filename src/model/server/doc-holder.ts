@@ -61,9 +61,13 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
     return this.name;
   }
 
-  setName(name: string) {
+  setName(name: string): void {
+    if (this.name == name)
+      return;
+
     this.name = name;
-    return this.getHolder();
+    this.holder.save();
+    this.holder.delayedNotify();
   }
 
   getDoc(): T {

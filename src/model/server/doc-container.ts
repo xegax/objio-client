@@ -7,6 +7,18 @@ import { DocHolder } from './doc-holder';
 
 export class DocContainer extends OBJIOItem {
   protected children = new OBJIOArray<DocHolder>();
+  protected select: DocHolder;
+
+  setSelect(select: DocHolder) {
+    if (this.select == select)
+      return;
+    this.select = select;
+    this.holder.delayedNotify();
+  }
+
+  getSelect(): DocHolder {
+    return this.select;
+  }
 
   getDoc(idx: number): DocHolder {
     return this.children.get(idx);

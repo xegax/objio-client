@@ -30,14 +30,18 @@ export class DocContainer extends Base {
         return Promise.resolve();
       }
     });
+
+    this.tree.subscribe(() => {
+      this.setSelect(this.tree.getSelect().doc);
+    }, 'select');
   }
 
-  private updateTree(select?: DocHolder) {
+  updateTree() {
     let selItem: DocTreeItem;
     const docs = this.children.getArray();
     const makeItem = (doc: DocHolder): TreeItem => {
       const item = { doc, label: doc.getName() };
-      if (select == doc)
+      if (this.select == doc)
         selItem = item;
       return item;
     };
@@ -90,6 +94,8 @@ export class DocContainer extends Base {
 
     if (selItem)
       this.tree.setSelect(selItem);
+
+    this.holder.delayedNotify();
   }
 
   getTree() {
@@ -100,7 +106,7 @@ export class DocContainer extends Base {
     return this.holder.createObject<DocHolder>(doc)
     .then(() => {
       this.children.push(doc).save();
-      this.updateTree(doc);
+      this.updateTree();
       this.holder.notify();
     });
   }
