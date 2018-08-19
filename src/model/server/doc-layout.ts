@@ -59,6 +59,7 @@ export class DataSourceHolder<
   TSource extends OBJIOItem = OBJIOItem,
   TLayout extends DocLayout = DocLayout> extends OBJIOItem {
 
+  protected name: string;
   protected source: TSource;
   protected layout: TLayout;
   protected viewType: string;
@@ -119,11 +120,25 @@ export class DataSourceHolder<
     return srcs;
   }
 
+  getName(): string {
+    return this.name;
+  }
+
+  setName(name: string): void {
+    if (name == this.name)
+      return;
+    
+    this.name = name;
+    this.holder.save();
+    this.holder.delayedNotify();
+  }
+
   static TYPE_ID = 'DataSourceHolder';
   static SERIALIZE: SERIALIZER = () => ({
     source:   { type: 'object' },
     viewType: { type: 'string' },
-    layout:   { type: 'object' }
+    layout:   { type: 'object' },
+    name:     { type: 'string' }
   });
 }
 
@@ -137,7 +152,7 @@ export class DocLayout extends OBJIOItem {
 
   static TYPE_ID = 'DocLayout';
   static SERIALIZE: SERIALIZER = () => ({
-    layout: { type: 'json' },
-    objects: { type: 'object' }
+    layout:   { type: 'json' },
+    objects:  { type: 'object' }
   });
 }

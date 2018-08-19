@@ -4,9 +4,11 @@ import { LayoutModel, clone, LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem } from 'objio';
 import { DocHolder } from './doc-holder';
 import { select } from '../../view/prompt';
+import { LayoutContView } from '../../view/layout/layout-cont-view';
 
 export class DocLayout extends Base {
   private model = new LayoutModel();
+  private edit: DataSourceHolder;
 
   constructor() {
     super();
@@ -77,39 +79,32 @@ export class DocLayout extends Base {
         </React.Fragment>
       );
 
+      const owner = {
+        onRemove: () => {
+          this.model.remove(id);
+          this.layout = clone( this.model.getLayout() ) as LayoutCont;
+          this.holder.save();
+          const idx = this.objects.find(obj => obj.holder.getID() == id);
+          this.objects.remove(idx);
+          this.objects.holder.save();
+        },
+        onEdit: () => {
+          this.edit = obj;
+          obj.holder.delayedNotify();
+        },
+        setName: (name: string) => {
+          obj.setName(name);
+          this.edit = null;
+          obj.holder.delayedNotify();
+        },
+        isEdit: () => {
+          return this.edit == obj;
+        }
+      };
       map[id] = (
-        <div style={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          border: '1px solid gray'
-        }}>
-          <div style={{flexGrow: 0, display: 'flex', backgroundColor: 'silver', minHeight: 20}}>
-            <div style={{flexGrow: 1}}>header</div>
-            <div style={{flexGrow: 0}}>
-              <i
-                onClick={() => {
-                  obj.toggleEdit();
-                }}
-                style={{cursor: 'pointer', backgroundColor: obj.isEdit() ? 'gray' : null }}
-                className={'fa fa-edit'}
-              />
-              <i
-                onClick={() => {
-                  this.model.remove(id);
-                  this.layout = clone( this.model.getLayout() ) as LayoutCont;
-                  this.holder.save();
-                  const idx = this.objects.find(obj => obj.holder.getID() == id);
-                  this.objects.remove(idx);
-                  this.objects.holder.save();
-                }}
-                style={{cursor: 'pointer'}}
-                className='fa fa-remove'
-              />
-            </div>
-          </div>
+        <LayoutContView model={obj} owner={owner}>
           {jsx}
-        </div>
+        </LayoutContView>
       );
     });
     this.model.setMap(map);

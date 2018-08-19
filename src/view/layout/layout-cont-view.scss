@@ -1,0 +1,23 @@
+.layout-cont {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+
+  &-header {
+    flex-grow: 0;
+    display: flex;
+    background-color: silver;
+    min-height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  &-title {
+    flex-grow: 1;
+
+    &wrap {
+      min-height: 20px;
+    }
+  }
+}

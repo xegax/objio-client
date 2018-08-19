@@ -20,6 +20,18 @@ interface Props {
 }
 
 export class DocLayoutView extends React.Component<Props, {}> {
+  subscriber = () => {
+    this.setState({});
+  }
+
+  componentDidMount() {
+    this.props.model.holder.subscribe(this.subscriber);
+  }
+
+  componentWillUnmount() {
+    this.props.model.holder.unsubscribe(this.subscriber);
+  }
+
   render() {
     const model = this.props.model;
     return (
