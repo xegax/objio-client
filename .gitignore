@@ -4,8 +4,6 @@ node_modules
 src/**/*.js.map
 src/**/*.js
 data
-fonts
 env.conf
 nginx/temp/**/*
 nginx/logs/**/*
-package-lock.json

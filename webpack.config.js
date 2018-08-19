@@ -37,6 +37,8 @@ module.exports = [
           test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
           loader: 'url-loader',
           options: {
+			name: '[name].[ext]',
+			outputPath: '../build',
             limit: 10000
           }
         }
