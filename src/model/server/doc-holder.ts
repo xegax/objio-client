@@ -52,6 +52,8 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
       path.push('tables');
     } else if (this.doc instanceof DocLayout) {
       path.push('layout');
+    } else {
+      path.push('other');
     }
 
     return path;

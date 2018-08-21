@@ -39,6 +39,7 @@ import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filt
 import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 import { DocView } from '../view/doc-view';
+import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 
 let objio: OBJIO;
 
@@ -109,6 +110,17 @@ function initDocLayout(prj: string) {
       return new SelectDetails(args);
     },
     viewType: 'select-details'
+  });
+
+  vf.register({
+    classObj: DocTable,
+    view: (props: LayoutItemViewProps<DocTable, RangeFilter>) => (
+      <RangeFilterView {...props}/>
+    ),
+    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
+      return new RangeFilter(args);
+    },
+    viewType: 'range-filter'
   });
   DataSourceHolder.setFactory(vf);
 }
