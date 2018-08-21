@@ -3,6 +3,7 @@ import { RangeSliderModel } from 'ts-react-ui/model/range-slider';
 import { DocLayout } from '../doc-layout';
 import { DocTable } from '../doc-table';
 import { CondHolderOwner, CondHolder } from './cond-holder';
+import { ColumnAttr } from 'objio-object/table';
 
 export {
   RangeSliderModel
@@ -11,6 +12,7 @@ export {
 export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolderOwner {
   protected slider = new RangeSliderModel();
   protected cond = new CondHolder();
+  protected colType: string;
 
   constructor(args) {
     super(args);
@@ -34,6 +36,10 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
   }
 
   onInit = () => {
+    const col = this.source.getAllColumns().find(col => col.name == this.column);
+    this.colType = col.type.toUpperCase();
+    this.slider.setRound(this.isIntType());
+
     this.source.getTableRef().getNumStats({column: this.getColumn()})
     .then(res => {
       this.slider.setMinMax({from: res.min, to: res.max});
@@ -47,7 +53,7 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
     return this.slider;
   }
 
-  setColumn(column: string) {
+  setColumn(column: string): boolean {
     if (!super.setColumn(column))
       return false;
 
@@ -55,11 +61,21 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
     return true;
   }
 
+  getColumnType(): string {
+    return this.colType;
+  }
+
+  isIntType(): boolean {
+    return this.colType == 'INTEGER';
+  }
+
   getCondHolder(): CondHolder {
     return this.cond;
   }
 
-  getColumns() {
-    return this.source.getAllColumns();
+  getColumns(): Array<ColumnAttr> {
+    return this.source.getAllColumns().filter(col => {
+      return ['INTEGER', 'REAL'].indexOf(col.type.toUpperCase()) != -1;
+    });
   }
 }
