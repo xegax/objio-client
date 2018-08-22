@@ -220,8 +220,7 @@ export class DocTableView extends React.Component<Props, State> {
               };
 
               model.holder.getObject<FileObject>(model.getFileObjId())
-              .then(file => {
-                const csv = file.getImpl<CSVFileObject>();
+              .then((csv: CSVFileObject) => {
                 args.columns = csv.getColumns();
                 model.execute(args);
               });

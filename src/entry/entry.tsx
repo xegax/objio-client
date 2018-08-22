@@ -40,6 +40,10 @@ import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
+import { CSVFileObject } from 'objio-object/csv-file-object';
+import { CSVFileView } from '../view/csv-file-view';
+import { VideoFileObject } from 'objio-object/video-file-object';
+import { VideoFileView } from '../view/video-file-view';
 
 let objio: OBJIO;
 
@@ -155,7 +159,7 @@ async function loadAndRender() {
   });*/
 
   initDocLayout(args.prj);
-  
+
   let model: DocContainer;
   try {
     model = await objio.loadObject<DocContainer>();
@@ -170,7 +174,7 @@ async function loadAndRender() {
       model.updateTree();
     model.holder.notify();
   });
-  
+
   let mvf = new ModelViewFactory<OBJIOItem>();
   mvf.register(
     DocSpriteSheet,
@@ -196,6 +200,35 @@ async function loadAndRender() {
     ),
     null
   );
+  mvf.register(
+    CSVFileObject,
+    (props: {model: CSVFileObject}) => (
+      <CSVFileView
+        key={props.model.holder.getID()}
+        createDoc={newObj => {
+          return model.append(new DocHolder({doc: newObj})).then(() => newObj);
+        }}
+        prj={args.prj}
+        {...props}
+      />
+    ),
+    null
+  );
+  mvf.register(
+    VideoFileObject,
+    (props: {model: VideoFileObject}) => (
+      <VideoFileView
+        key={props.model.holder.getID()}
+        createDoc={newObj => {
+          return model.append(new DocHolder({doc: newObj})).then(() => newObj);
+        }}
+        prj={args.prj}
+        {...props}
+      />
+    ),
+    null
+  );
+
   mvf.register(
     DocLayout,
     (props: {model: DocLayout}) => (

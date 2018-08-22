@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { FileObject } from 'objio-object/file-object';
+import { FitToParent } from 'ts-react-ui/fittoparent';
 import { OBJIOItem } from 'objio';
+import { VideoFileObject } from 'objio-object/video-file-object';
 
 interface Props {
   onlyContent?: boolean;
-  model: FileObject;
+  model: VideoFileObject;
   prj: string;
   createDoc<T extends OBJIOItem = OBJIOItem>(model?: T): Promise<T>;
 }
 
-const images = [ '.png', '.jpg', '.jpeg', '.gif' ];
-export class FileObjectView extends React.Component<Props> {
+export class VideoFileView extends React.Component<Props> {
   subscriber = () => {
     this.setState({});
   }
@@ -23,17 +23,17 @@ export class FileObjectView extends React.Component<Props> {
     this.props.model.holder.unsubscribe(this.subscriber);
   }
 
-  renderImage(): JSX.Element {
-    if (images.indexOf(this.props.model.getExt().toLowerCase()) == -1)
+  renderVideo(): JSX.Element {
+    if (!(this.props.model instanceof VideoFileObject))
       return null;
 
-    return <div style={{
-      flexGrow: 1,
-      backgroundImage: `url(${this.getPath()})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      backgroundSize: 'contain'
-    }}/>;
+    return (
+      <div style={{display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
+        <FitToParent wrapToFlex>
+          <video controls src={this.getPath()}/>
+        </FitToParent>
+      </div>
+    );
   }
 
   getPath(): string {
@@ -45,7 +45,7 @@ export class FileObjectView extends React.Component<Props> {
     if (!state.isValid() || state.getProgress() < 1)
       return null;
 
-    return this.renderImage();
+    return this.renderVideo();
   }
 
   render() {

@@ -8,7 +8,8 @@ import { DocSpriteSheet } from '../model/doc-sprite-sheet';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 import { DocTable } from '../model/client/doc-table';
 import { OBJIOItemClass, OBJIOItem } from 'objio';
-import { FileObject, FileArgs } from 'objio-object/file-object';
+import { createFileObject } from 'objio-object';
+import { FileArgs } from 'objio-object/file-object';
 import { Tree } from 'ts-react-ui/tree';
 import { showWizard } from '../view/wizard';
 import { FitToParent } from 'ts-react-ui/fittoparent';
@@ -155,11 +156,11 @@ export class DocContView extends React.Component<Props, State> {
 
     const file = event.dataTransfer.items[0].getAsFile();
     const fileArgs: FileArgs = {
-      originName: file.name,
-      originSize: file.size,
+      name: file.name,
+      size: file.size,
       mime: file.type
     };
-    const fileObj = new FileObject(fileArgs);
+    const fileObj = createFileObject(fileArgs);
     const doc = new DocHolder({ doc: fileObj, name: file.name });
 
     this.props.model.append(doc).then(() => {

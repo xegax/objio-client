@@ -2,12 +2,13 @@ import { OBJIOFactory } from 'objio';
 import { DocContainer } from './doc-container';
 import { DocSpriteSheet, Animation } from '../doc-sprite-sheet';
 import { Table } from 'objio-object/table';
+
 import { FileObject } from 'objio-object/file-object';
-import { FileObjImpl } from 'objio-object/file-obj-impl';
 import { VideoFileObject } from 'objio-object/video-file-object';
+import { CSVFileObject } from 'objio-object/csv-file-object';
+
 import { StateObject } from 'objio-object/state-object';
 import { DocTable } from './doc-table';
-import { CSVFileObject } from 'objio-object/csv-file-object';
 import { DocLayout } from './doc-layout';
 import { DocHolder } from './doc-holder';
 import { DataSourceHolder } from '../server/doc-layout';
@@ -30,12 +31,13 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Animation);
   fact.registerItem(Table);
+
   fact.registerItem(FileObject);
-  fact.registerItem(StateObject);
-  fact.registerItem(DocTable);
   fact.registerItem(CSVFileObject);
   fact.registerItem(VideoFileObject);
-  fact.registerItem(FileObjImpl);
+
+  fact.registerItem(StateObject);
+  fact.registerItem(DocTable);
   fact.registerItem(DocLayout);
   fact.registerItem(DataSourceHolder);
   fact.registerItem(DrillDownTable);
