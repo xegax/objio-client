@@ -28,10 +28,15 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
 
     this.slider.subscribe(() => {
       const range = this.slider.getRange();
-      this.cond.setCondition(this.source, {
-        column: this.getColumn(),
-        value: [range.from, range.to]
-      }, this.layout.getObjects().getArray(), this);
+      const minMax = this.slider.getMinMax();
+      if (range.from == minMax.from && range.to == minMax.to) {
+        this.cond.setCondition(this.source, null, this.layout.getObjects().getArray(), this);
+      } else {
+        this.cond.setCondition(this.source, {
+          column: this.getColumn(),
+          value: [range.from, range.to]
+        }, this.layout.getObjects().getArray(), this);
+      }
     }, 'changed');
   }
 

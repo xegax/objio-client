@@ -186,6 +186,7 @@ async function loadAndRender() {
     FileObject,
     (props: {model: FileObject}) => (
       <FileObjectView
+        key={props.model.holder.getID()}
         createDoc={newObj => {
           return model.append(new DocHolder({doc: newObj})).then(() => newObj);
         }}
