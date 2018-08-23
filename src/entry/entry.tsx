@@ -42,7 +42,7 @@ import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { CSVFileView } from '../view/csv-file-view';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { DocVideo } from '../model/client/doc-video';
 import { VideoFileView } from '../view/video-file-view';
 
 let objio: OBJIO;
@@ -215,8 +215,8 @@ async function loadAndRender() {
     null
   );
   mvf.register(
-    VideoFileObject,
-    (props: {model: VideoFileObject}) => (
+    DocVideo,
+    (props: {model: DocVideo}) => (
       <VideoFileView
         key={props.model.holder.getID()}
         createDoc={newObj => {

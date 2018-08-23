@@ -15,8 +15,10 @@ import { showWizard } from '../view/wizard';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { DocLayout } from '../model/client/doc-layout';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
+import { DocVideo } from '../model/client/doc-video';
 
 import './doc-cont-view.scss';
+import { VideoFileObject } from 'objio-object/video-file-object';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -160,8 +162,13 @@ export class DocContView extends React.Component<Props, State> {
       size: file.size,
       mime: file.type
     };
-    const fileObj = createFileObject(fileArgs);
-    const doc = new DocHolder({ doc: fileObj, name: file.name });
+    let fileObj = createFileObject(fileArgs);
+    let doc: DocHolder;
+    if (fileObj instanceof VideoFileObject) {
+      doc = new DocHolder({doc: new DocVideo(fileObj as VideoFileObject)});
+    } else {
+      doc = new DocHolder({ doc: fileObj, name: file.name });
+    }
 
     this.props.model.append(doc).then(() => {
       this.props.model.setSelect(doc);

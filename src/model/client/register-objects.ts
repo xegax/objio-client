@@ -17,6 +17,7 @@ import { DrillDownTable } from './layout/drilldown-table';
 import { TagFilter } from './layout/tag-filter';
 import { SelectDetails } from './layout/select-details';
 import { RangeFilter } from './layout/range-filter';
+import { DocVideo } from './doc-video';
 
 export {
   DocContainer,
@@ -45,4 +46,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(TagFilter);
   fact.registerItem(SelectDetails);
   fact.registerItem(RangeFilter);
+  fact.registerItem(DocVideo);
 }

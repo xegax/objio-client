@@ -16,6 +16,7 @@ import { CategoryFilter } from './layout/category-filter';
 import { TagFilter } from './layout/tag-filter';
 import { SelectDetails } from './layout/select-details';
 import { RangeFilter } from './layout/range-filter';
+import { DocVideo } from './doc-video';
 
 export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(Animation);
@@ -37,4 +38,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(TagFilter);
   fact.registerItem(SelectDetails);
   fact.registerItem(RangeFilter);
+  fact.registerItem(DocVideo);
 }

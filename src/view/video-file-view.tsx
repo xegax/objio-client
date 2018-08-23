@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { OBJIOItem } from 'objio';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { DocVideo } from '../model/client/doc-video';
 
 interface Props {
   onlyContent?: boolean;
-  model: VideoFileObject;
+  model: DocVideo;
   prj: string;
   createDoc<T extends OBJIOItem = OBJIOItem>(model?: T): Promise<T>;
 }
@@ -24,9 +24,6 @@ export class VideoFileView extends React.Component<Props> {
   }
 
   renderVideo(): JSX.Element {
-    if (!(this.props.model instanceof VideoFileObject))
-      return null;
-
     return (
       <div style={{display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
         <FitToParent wrapToFlex>

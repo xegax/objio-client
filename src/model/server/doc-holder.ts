@@ -2,6 +2,7 @@ import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
 import { DocTable } from './doc-table';
 import { DocLayout } from './doc-layout';
 import { FileObject } from 'objio-object/file-object';
+import { DocVideo } from './doc-video';
 
 export interface DocHolderClass extends OBJIOItemClass {
 }
@@ -34,7 +35,7 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
 
   getTypePath(): Array<string> {
     const path = [];
-    if (this.doc instanceof FileObject) {
+    if (this.doc instanceof FileObject || this.doc instanceof DocVideo) {
       path.push('files');
 
       if (this.doc.getExt() == '.csv')

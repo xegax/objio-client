@@ -12,4 +12,5 @@ async function runDocServer() {
   });
 }
 
+console.log(process.env['FFMPEG']);
 runDocServer();
