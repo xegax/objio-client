@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
+import { FileObject } from 'objio-object/file-object';
 
 const classes = {
   docView: 'doc-view',
@@ -11,7 +12,7 @@ const classes = {
 };
 
 interface Props {
-  model: DocHolder;
+  model: DocHolder | FileObject;
   onRemove?();
 }
 

@@ -35,26 +35,10 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
 
   getTypePath(): Array<string> {
     const path = [];
-    if (this.doc instanceof FileObject || this.doc instanceof DocVideo) {
-      path.push('files');
-
-      if (this.doc.getExt() == '.csv')
-        path.push('csv');
-
-      if (['.png', '.gif', '.jpg', '.jpeg'].indexOf(this.doc.getExt()) != -1)
-        path.push('images');
-
-      if (['.mp4', '.avi'].indexOf(this.doc.getExt()) != -1)
-        path.push('video');
-
-      if (['.mp3', '.ogg'].indexOf(this.doc.getExt()) != -1)
-        path.push('music');
-    } else if (this.doc instanceof DocTable) {
+    if (this.doc instanceof DocTable) {
       path.push('tables');
     } else if (this.doc instanceof DocLayout) {
       path.push('layout');
-    } else {
-      path.push('other');
     }
 
     return path;

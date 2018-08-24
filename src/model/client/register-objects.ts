@@ -1,5 +1,5 @@
 import { OBJIOFactory } from 'objio';
-import { DocContainer } from './doc-container';
+import { DocRoot } from './doc-root';
 import { DocSpriteSheet, Animation } from '../doc-sprite-sheet';
 import { Table } from 'objio-object/table';
 
@@ -20,14 +20,13 @@ import { RangeFilter } from './layout/range-filter';
 import { DocVideo } from './doc-video';
 
 export {
-  DocContainer,
   DocHolder,
   DocSpriteSheet,
   DocTable
 };
 
 export function registerObjects(fact: OBJIOFactory) {
-  fact.registerItem(DocContainer);
+  fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Animation);

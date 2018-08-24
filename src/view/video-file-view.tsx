@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { OBJIOItem } from 'objio';
-import { DocVideo } from '../model/client/doc-video';
+import { VideoFileObject } from 'objio-object/video-file-object';
 
 interface Props {
   onlyContent?: boolean;
-  model: DocVideo;
+  model: VideoFileObject;
   prj: string;
   createDoc<T extends OBJIOItem = OBJIOItem>(model?: T): Promise<T>;
 }
@@ -27,7 +27,7 @@ export class VideoFileView extends React.Component<Props> {
     return (
       <div style={{display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
         <FitToParent wrapToFlex>
-          <video controls src={this.getPath()}/>
+          <video controls src={`${this.getPath()}?${this.props.model.holder.getVersion()}`}/>
         </FitToParent>
       </div>
     );

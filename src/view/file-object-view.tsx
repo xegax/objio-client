@@ -29,7 +29,7 @@ export class FileObjectView extends React.Component<Props> {
 
     return <div style={{
       flexGrow: 1,
-      backgroundImage: `url(${this.getPath()})`,
+      backgroundImage: `url("${this.getPath()}?v=${this.props.model.holder.getVersion()}")`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundSize: 'contain'

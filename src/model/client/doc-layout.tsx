@@ -43,10 +43,15 @@ export class DocLayout extends Base {
         return select({
           items: views.map(view => view.viewType)
         }).then(view => {
-          return views.find(v => v.viewType == view).object({source: obj.getDoc(), layout: this, viewType: view});
+          return (
+            views.find(v => v.viewType == view)
+            .object({source: obj.getDoc(), layout: this, viewType: view})
+          );
         });
       })
-      .then((holder: DataSourceHolder) => this.holder.createObject(holder))
+      .then((holder: DataSourceHolder) => {
+        return this.holder.createObject(holder);
+      })
       .then((holder: DataSourceHolder) => {
         this.model.getLastDrop().id = holder.holder.getID();
         this.objects.push(holder);
@@ -55,7 +60,8 @@ export class DocLayout extends Base {
         this.layout = clone(this.model.getLayout()) as LayoutCont;
         this.holder.save();
         this.updateLayoutMap();
-      }).catch(() => {
+      }).catch(e => {
+        console.log(e);
         this.model.remove(this.model.getLastDrop().id);
         this.holder.save();
       });

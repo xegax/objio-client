@@ -13,12 +13,10 @@ import {
 } from 'objio';
 import {
   registerObjects,
-  DocContainer,
   DocHolder,
   DocSpriteSheet,
   DocTable
 } from '../model/client/register-objects';
-import { DocContView } from '../view/doc-cont-view';
 import { ModelViewFactory } from '../view/register-objects';
 import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
 
@@ -44,6 +42,8 @@ import { CSVFileObject } from 'objio-object/csv-file-object';
 import { CSVFileView } from '../view/csv-file-view';
 import { DocVideo } from '../model/client/doc-video';
 import { VideoFileView } from '../view/video-file-view';
+import { DocRootView, DocRoot } from '../view/doc-root-view';
+import { VideoFileObject } from 'objio-object/video-file-object';
 
 let objio: OBJIO;
 
@@ -160,17 +160,18 @@ async function loadAndRender() {
 
   initDocLayout(args.prj);
 
-  let model: DocContainer;
+  let model: DocRoot;
   try {
-    model = await objio.loadObject<DocContainer>();
+    model = await objio.loadObject<DocRoot>();
   } catch (e) {
-    model = await objio.createObject<DocContainer>(new DocContainer());
+    model = new DocRoot();
+    await objio.createObject<DocRoot>(model);
     model.getHolder().save();
   }
 
   objio.startWatch({req, timeOut: 100}).subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
-    if (model.getChildren().find(obj => objs.indexOf(obj) != -1))
+    if (model.exists(objs))
       model.updateTree();
     model.holder.notify();
   });
@@ -184,7 +185,8 @@ async function loadAndRender() {
   mvf.register(
     DocTable,
     (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,
-    () => <DocTableWizard model={model}/>
+    null
+    //() => <DocTableWizard model={model}/>
   );
   mvf.register(
     FileObject,
@@ -215,8 +217,8 @@ async function loadAndRender() {
     null
   );
   mvf.register(
-    DocVideo,
-    (props: {model: DocVideo}) => (
+    VideoFileObject,
+    (props: {model: VideoFileObject}) => (
       <VideoFileView
         key={props.model.holder.getID()}
         createDoc={newObj => {
@@ -241,15 +243,21 @@ async function loadAndRender() {
   document.body.appendChild(cont);
 
   ReactDOM.render(
-    <DocContView
+    <DocRootView
       model={model}
-      getView={docHolder => (
+      getView={(obj: DocHolder | FileObject) => (
         <DocView
-          model={docHolder}
+          model={obj}
           onRemove={() => {
-            model.remove(docHolder);
+            model.remove(obj);
           }}>
-          {mvf.getView(docHolder.getDoc().constructor, {model: docHolder.getDoc()})}
+          {
+            obj instanceof DocHolder ? (
+              mvf.getView(obj.getDoc().constructor, {model: obj.getDoc()})
+            ) : (
+              mvf.getView(obj.constructor, { model: obj })
+            )
+          }
         </DocView>
       )}
       getWizard={objClass => mvf.getWizard(objClass)}

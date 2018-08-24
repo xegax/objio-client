@@ -41,8 +41,10 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
   }
 
   onInit = () => {
-    const col = this.source.getAllColumns().find(col => col.name == this.column);
-    this.colType = col.type.toUpperCase();
+    const selCol = this.getColumn();
+    const col = this.source.getAllColumns().find(col => col.name == selCol);
+    if (col)
+      this.colType = col.type.toUpperCase();
     this.slider.setRound(this.isIntType());
 
     this.source.getTableRef().getNumStats({column: this.getColumn()})

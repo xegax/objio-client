@@ -1,8 +1,3 @@
-import {
-  OBJIOItem,
-  SERIALIZER,
-  OBJIOArray
-} from 'objio';
 import { DocHolder } from './doc-holder';
 import { TreeModel, TreeItem } from 'ts-react-ui/model/tree';
 import { DocContainer as Base } from '../server/doc-container';
@@ -13,6 +8,7 @@ export interface DocTreeItem extends TreeItem {
 
 export class DocContainer extends Base {
   protected tree = new TreeModel<DocTreeItem>();
+  protected select: DocHolder;
 
   constructor() {
     super();
@@ -34,6 +30,17 @@ export class DocContainer extends Base {
     this.tree.subscribe(() => {
       this.setSelect(this.tree.getSelect().doc);
     }, 'select');
+  }
+
+  setSelect(select: DocHolder) {
+    if (this.select == select)
+      return;
+    this.select = select;
+    this.holder.delayedNotify();
+  }
+
+  getSelect(): DocHolder {
+    return this.select;
   }
 
   updateTree() {

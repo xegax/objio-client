@@ -1,6 +1,6 @@
 import { OBJIOFactory } from 'objio';
 import { Table } from 'objio-sqlite-table';
-import { DocContainer } from './doc-container';
+import { DocRoot } from './doc-root';
 import { DocTable } from './doc-table';
 import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
 import { StateObject } from 'objio-object/state-object';
@@ -20,7 +20,7 @@ import { DocVideo } from './doc-video';
 
 export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(Animation);
-  fact.registerItem(DocContainer);
+  fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Table);
