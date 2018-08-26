@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {DocHolder} from '../model/client/doc-holder';
+import { DocHolder } from '../model/client/doc-holder';
 import { DocTreeItem } from '../model/client/doc-root';
 import { DocSpriteSheet } from '../model/doc-sprite-sheet';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
@@ -12,11 +12,8 @@ import { showWizard } from '../view/wizard';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { DocLayout } from '../model/client/doc-layout';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
-import { DocVideo } from '../model/client/doc-video';
 import { DocRoot } from '../model/client/doc-root';
-
-import './doc-cont-view.scss';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import './doc-root.scss';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -33,8 +30,6 @@ export {
 interface Props {
   model: DocRoot;
   getView: (doc: OBJIOItem) => JSX.Element;
-  createObject: (objClass: OBJIOItemClass) => DocHolder;
-  getWizard: (objClass: OBJIOItemClass) => JSX.Element;
 }
 
 interface State {
@@ -46,13 +41,8 @@ export class DocRootView extends React.Component<Props, State> {
     this.setState({});
   };
 
+  state: Readonly<State> = {};
   private dropTgt: React.Ref<HTMLDivElement> = React.createRef<HTMLDivElement>();
-
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {};
-  }
 
   componentDidMount() {
     this.props.model.holder.subscribe(this.subscriber);
@@ -63,7 +53,8 @@ export class DocRootView extends React.Component<Props, State> {
   }
 
   createObject(objClass: OBJIOItemClass): Promise<OBJIOItem> {
-    const obj = this.props.createObject(objClass);
+    return Promise.resolve(null);
+    /*const obj = this.props.createObject(objClass);
     return (
       this.props.model.append(obj)
       .then(() => {
@@ -73,12 +64,12 @@ export class DocRootView extends React.Component<Props, State> {
 
         return obj;
       })
-    );
+    );*/
   }
 
-  showWizard(objClass: OBJIOItemClass): JSX.Element {
+  /*showWizard(objClass: OBJIOItemClass): JSX.Element {
     return this.props.getWizard(objClass);
-  }
+  }*/
 
   onContextMenu = (e: React.MouseEvent<any>) => {
     e.preventDefault();

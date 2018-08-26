@@ -14,25 +14,23 @@ import {
 import {
   registerObjects,
   DocHolder,
-  DocSpriteSheet,
-  DocTable
+  DocSpriteSheet
 } from '../model/client/register-objects';
-import { ModelViewFactory } from '../view/register-objects';
-import { SpriteSheetView, SpriteWizard } from '../view/sprite-sheet';
+import { ViewFactory } from '../common/view-factory';
+import { SpriteSheetView } from '../view/sprite-sheet';
 
-import { DocTableView, DocTableWizard } from '../view/doc-table-view';
-import { FileObject } from 'objio-object/file-object';
+import { DocTable, DocTableView } from '../view/doc-table-view';
+import { FileObject, FileArgs } from 'objio-object/file-object';
 import { FileObjectView } from '../view/file-object-view';
 import {
   DocLayoutView,
   DocLayout,
-  DataSourceHolder,
-  ViewFactory
+  DataSourceHolder
 } from '../view/doc-layout';
 import { DrillDownTableView, DrillDownTable } from '../view/layout/drilldown-table';
 
 import '../../styles/styles.scss';
-import { DataSourceHolderArgs, LayoutItemViewProps } from '../model/server/doc-layout';
+import { LayoutItemViewProps } from '../model/server/doc-layout';
 import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
 import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
@@ -40,102 +38,101 @@ import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { CSVFileView } from '../view/csv-file-view';
-import { DocVideo } from '../model/client/doc-video';
 import { VideoFileView } from '../view/video-file-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { VideoFileObject } from 'objio-object/video-file-object';
+import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 
 let objio: OBJIO;
 
 function initDocLayout(prj: string) {
-  const vf = new ViewFactory();
+  const vf = DataSourceHolder.getFactory<DocTable, DocLayout>();
+
   vf.register({
     classObj: FileObject,
-    view: (props: LayoutItemViewProps<FileObject>) => (
+    object: args => new DataSourceHolder(args),
+    viewType: 'content',
+    view: props => (
       <FileObjectView
-        model={props.dataSource}
+        model={props.dataSource as FileObject}
         prj={prj}
         createDoc={null}
         onlyContent
       />
-    ),
-    viewType: 'content'
+    )
   });
+
   vf.register({
     classObj: FileObject,
-    view: (props: LayoutItemViewProps<FileObject>) => (
+    object: args => new DataSourceHolder(args),
+    viewType: 'objInfo',
+    view: (props: LayoutItemViewProps<FileObject, FileObject>) => (
       <div>
         <div>extention: {props.dataSource.getExt()}</div>
         <div>size: {props.dataSource.getSize()}</div>
         <div>name: {props.dataSource.getName()}</div>
       </div>
-    ),
-    viewType: 'objInfo'
-  });
-  vf.register({
-    classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, CategoryFilter>) => (
-      <CategoryFilterView {...props}/>
-    ),
-    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new CategoryFilter(args);
-    },
-    viewType: 'category-filter'
+    )
   });
 
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, TagFilter>) => (
-      <TagFilterView {...props}/>
-    ),
-    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new TagFilter(args);
-    },
-    viewType: 'tag-filter'
+    object: args => new CategoryFilter(args),
+    viewType: 'category-filter',
+    view: props => (
+      <CategoryFilterView model = {props.model as CategoryFilter}/>
+    )
   });
 
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, DrillDownTable>) => (
-      <DrillDownTableView {...props}/>
-    ),
-    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new DrillDownTable(args);
-    },
-    viewType: 'drilldown-table'
+    object: args => new TagFilter(args),
+    viewType: 'tag-filter',
+    view: props => (
+      <TagFilterView model={props.model as TagFilter}/>
+    )
   });
 
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, SelectDetails>) => (
-      <SelectDetailsView {...props}/>
-    ),
-    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new SelectDetails(args);
-    },
-    viewType: 'select-details'
+    object: args => new DrillDownTable(args),
+    viewType: 'drilldown-table',
+    view: props => (
+      <DrillDownTableView model={props.model as DrillDownTable}/>
+    )
   });
 
   vf.register({
     classObj: DocTable,
-    view: (props: LayoutItemViewProps<DocTable, RangeFilter>) => (
-      <RangeFilterView {...props}/>
-    ),
-    object: (args: DataSourceHolderArgs<DocTable, DocLayout>) => {
-      return new RangeFilter(args);
-    },
-    viewType: 'range-filter'
+    object: args => new SelectDetails(args),
+    viewType: 'select-details',
+    view: props => (
+      <SelectDetailsView model={ props.model as SelectDetails }/>
+    )
   });
-  DataSourceHolder.setFactory(vf);
+
+  vf.register({
+    classObj: DocTable,
+    object: args => new RangeFilter(args),
+    viewType: 'range-filter',
+    view: props => (
+      <RangeFilterView model = {props.model as RangeFilter}/>
+    )
+  });
+}
+
+function parseParams(args: string): {[key: string]: string} {
+  const res = {};
+  args.split('&').forEach(item => {
+    const pair = item.split('=');
+    res[pair[0]] = pair[1];
+  });
+  return res;
 }
 
 async function loadAndRender() {
   const p = window.location.search.split('?')[1] || '';
-  const args: {prj?: string} = {};
-  p.split('&').forEach(item => {
-    const pair = item.split('=');
-    args[pair[0]] = pair[1];
-  });
+  const args: {prj?: string, objId?: string} = parseParams(p);
 
   let factory = await createFactory();
   registerObjects(factory);
@@ -169,6 +166,13 @@ async function loadAndRender() {
     model.getHolder().save();
   }
 
+  let obj: OBJIOItem;
+  try {
+    if (args.objId)
+      obj = await objio.getObject(args.objId);
+  } catch (e) {
+  }
+
   objio.startWatch({req, timeOut: 100}).subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
     if (model.exists(objs))
@@ -176,21 +180,25 @@ async function loadAndRender() {
     model.holder.notify();
   });
 
-  let mvf = new ModelViewFactory<OBJIOItem>();
-  mvf.register(
-    DocSpriteSheet,
-    (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
-    () => <SpriteWizard list={['default.png', 'prehistoric.png', 'SNES_MK1_reptile.png']}/>
-  );
-  mvf.register(
-    DocTable,
-    (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,
-    null
-    //() => <DocTableWizard model={model}/>
-  );
-  mvf.register(
-    FileObject,
-    (props: {model: FileObject}) => (
+  //let mvf = new ModelViewFactory<OBJIOItem>();
+  let mvf = new ViewFactory();
+  mvf.register({
+    classObj: DocSpriteSheet,
+    object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
+    view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
+    // () => <SpriteWizard list={['default.png', 'prehistoric.png', 'SNES_MK1_reptile.png']}/>
+  });
+
+  mvf.register({
+    classObj: DocTable,
+    object: () => new DocTable(),
+    view: (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>
+  });
+
+  mvf.register({
+    classObj: FileObject,
+    object: (args: FileArgs) => new FileObject(args),
+    view: (props: {model: FileObject}) => (
       <FileObjectView
         key={props.model.holder.getID()}
         createDoc={newObj => {
@@ -199,12 +207,12 @@ async function loadAndRender() {
         prj={args.prj}
         {...props}
       />
-    ),
-    null
-  );
-  mvf.register(
-    CSVFileObject,
-    (props: {model: CSVFileObject}) => (
+    )
+  });
+
+  mvf.register({
+    classObj: CSVFileObject,
+    view: (props: {model: CSVFileObject}) => (
       <CSVFileView
         key={props.model.holder.getID()}
         createDoc={newObj => {
@@ -214,11 +222,12 @@ async function loadAndRender() {
         {...props}
       />
     ),
-    null
-  );
-  mvf.register(
-    VideoFileObject,
-    (props: {model: VideoFileObject}) => (
+    object: (args: FileArgs) => new CSVFileObject(args)
+  });
+
+  mvf.register({
+    classObj: VideoFileObject as OBJIOItemClass,
+    view: (props: {model: VideoFileObject}) => (
       <VideoFileView
         key={props.model.holder.getID()}
         createDoc={newObj => {
@@ -228,48 +237,76 @@ async function loadAndRender() {
         {...props}
       />
     ),
-    null
-  );
+    object: (args: FileArgs) => new VideoFileObject(args)
+  });
 
-  mvf.register(
-    DocLayout,
-    (props: {model: DocLayout}) => (
+  mvf.register({
+    classObj: DocLayout,
+    view: (props: {model: DocLayout}) => (
       <DocLayoutView {...props}/>
     ),
-    null
-  );
+    object: () => new DocLayout()
+  });
+
+  mvf.register({
+    classObj: DocHolder,
+    view: (props: {model: DocHolder}) => {
+      const doc = props.model.getDoc();
+      return (
+        <DocView {...props}>
+          {mvf.getView({classObj: doc.constructor, props: {model: doc}})}
+        </DocView>
+      );
+    },
+    object: () => new DocHolder()
+  });
+
+  mvf.register({
+    classObj: DocRoot,
+    view: (props: {model: DocRoot}) => (
+      <DocRootView
+        getView={(obj: DocHolder | FileObject) => (
+          <DocView
+            model={obj}
+            onRemove={() => {
+              model.remove(obj);
+            }}>
+            {
+              obj instanceof DocHolder ? (
+                mvf.getView({classObj: obj.getDoc().constructor, props: {model: obj.getDoc()}})
+              ) : (
+                mvf.getView({classObj: obj.constructor, props: { model: obj }})
+              )
+            }
+          </DocView>
+        )}
+        {...props}
+      />
+    ),
+    object: () => new DocRoot()
+  });
 
   let cont = document.createElement('div');
+  cont.style.position = 'absolute';
+  cont.style.left = '0px';
+  cont.style.top = '0px';
+  cont.style.bottom = '0px';
+  cont.style.right = '0px';
+  cont.style.display = 'flex';
   document.body.appendChild(cont);
+  document.body.style.overflow = 'hidden';
 
-  ReactDOM.render(
-    <DocRootView
-      model={model}
-      getView={(obj: DocHolder | FileObject) => (
-        <DocView
-          model={obj}
-          onRemove={() => {
-            model.remove(obj);
-          }}>
-          {
-            obj instanceof DocHolder ? (
-              mvf.getView(obj.getDoc().constructor, {model: obj.getDoc()})
-            ) : (
-              mvf.getView(obj.constructor, { model: obj })
-            )
-          }
-        </DocView>
-      )}
-      getWizard={objClass => mvf.getWizard(objClass)}
-      createObject={(objClass: OBJIOItemClass) => {
-        /// const wzd = mvf.getWizard(objClass);
-        /// const args: DocHolderArgs = wzd && await showWizard<DocHolderArgs>(wzd);
-        const doc = mvf.create(objClass, {});
-        return new DocHolder({doc});
-      }}
-    />,
-    cont
-  );
+  if (obj) {
+    ReactDOM.render(
+      mvf.getView({ classObj: obj.constructor, props: {model: obj}}),
+      cont
+    );
+  } else {
+    ReactDOM.render(
+      mvf.getView({ classObj: model.constructor, props: {model}}),
+      cont
+    );
+  }
 }
 
 loadAndRender();

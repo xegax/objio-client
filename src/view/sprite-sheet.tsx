@@ -2,10 +2,10 @@ import * as React from 'react';
 import { DocSpriteSheet, Animation, FrameInfo } from '../model/doc-sprite-sheet';
 import { WizardContent } from './wizard';
 import { Rect, CSSRect, cssRectToRect, Point, rectToCSSRect } from '../common/point';
-import { startDragging } from '../common/start-dragging';
+import { startDragging } from 'ts-react-ui/common/start-dragging';
+import { isLeftDown } from 'ts-react-ui/common/event-helpers'
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem, Tab, Tabs } from '@blueprintjs/core';
-import { isLeftDown } from '../common/event-helpers';
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(v, max));

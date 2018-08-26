@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { DocTable } from '../model/client/doc-table';
-import { WizardContent } from './wizard';
 import { ExecuteArgs } from 'objio-object/table';
-import { DocContainer } from '../model/client/doc-container';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { RenderListModel, RenderArgs } from 'ts-react-ui/model/list';
 import { List } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 import { CSVFileObject } from 'objio-object/csv-file-object';
+
+export { DocTable };
 
 interface Props {
   model: DocTable;
@@ -101,17 +101,6 @@ export class DocTableView extends React.Component<Props, State> {
                     }).then(update);
                   }}
                 />,
-                /*<MenuItem
-                  key='filter'
-                  text='Hide empty'
-                  onClick={() => {
-                    let filter: CompoundCond = this.props.model.getFilter() as CompoundCond || { op: 'or', values: [] };
-                    filter.values = filter.values.filter((val: ValueCond) => val.column != col.name);
-                    filter.values.push({ column: col.name, inverse: true, value: '' });
-
-                    this.props.model.updateSubtable({ filter }).then(update);
-                  }}
-                />,*/
                 <MenuItem
                   key='distinct'
                   text='Distinct'
@@ -120,21 +109,6 @@ export class DocTableView extends React.Component<Props, State> {
                   }}
                 />
               ];
-              /*let filter = this.props.model.getFilter() as CompoundCond;
-              let idx;
-              if (filter && (idx = filter.values.findIndex((val: ValueCond) => val.column == col.name)) != -1) {
-                items.push(
-                  <MenuItem
-                    key='unfilter'
-                    text='Show all values'
-                    onClick={() => {
-                      filter = this.props.model.getFilter() as CompoundCond;
-                      filter.values.splice(idx, 1);
-                      this.props.model.updateSubtable({ filter }).then(update);
-                    }}
-                  />
-                );
-              }*/
 
               evt.preventDefault();
               evt.stopPropagation();
@@ -172,16 +146,6 @@ export class DocTableView extends React.Component<Props, State> {
     this.updateModel();
     this.setState({});
   };
-
-  /*append() {
-    const table = this.props.model;
-
-    const args: PushRowArgs = {values: {}};
-    table.getColumns().forEach(col => {
-      args.values[col.name] = [this.input[col.name].current.value];
-    });
-    table.pushCells(args);
-  }*/
 
   renderTable(): JSX.Element {
     return (
@@ -239,86 +203,6 @@ export class DocTableView extends React.Component<Props, State> {
     return (
       <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
         {model.getState().isValid() ? this.renderValid() : this.renderInvalid()}
-      </div>
-    );
-  }
-}
-
-export class DocTableWizard extends WizardContent<{model: DocContainer}> {
-  private src: React.RefObject<HTMLSelectElement> = React.createRef<HTMLSelectElement>();
-  private name: React.RefObject<HTMLInputElement> = React.createRef<HTMLInputElement>();
-
-  getSrcObj(): FileObject {
-    const id = this.src.current.value;
-    if (id == '-1')
-      return null;
-
-    const doc = this.props.model.getChildren().getArray().find(item => {
-      return item.holder.getID() == id;
-    });
-
-    return doc.getDoc() as FileObject;
-  }
-
-  getResult() {
-    const srcObj = this.getSrcObj();
-
-    if (!srcObj) {
-      return {
-        table: this.name.current.value,
-        columns: [
-          { name: 'col1', type: 'INTEGER' },
-          { name: 'col2', type: 'TEXT' },
-          { name: 'col3', type: 'TEXT' }
-        ]
-      };
-    } else {
-      return {
-        table: this.name.current.value,
-        fileObjId: srcObj.holder.getID()
-      };
-    }
-  }
-
-  renderSrcSelect(): JSX.Element {
-    const docs = this.props.model.getChildren().getArray().filter(item => {
-      const doc = item.getDoc();
-      return doc instanceof FileObject && doc.getName().toLocaleLowerCase().endsWith('.csv');
-    });
-
-    return (
-      <div>
-        <select ref={this.src} onChange={() => {
-          const srcObj = this.getSrcObj();
-          if (srcObj) {
-            this.name.current.value = srcObj.getName();
-          } else {
-            this.name.current.value = 'table_' + Date.now().toString(16);
-          }
-        }}>
-          <option value='-1'>create new</option>
-          {docs.map((item, i) => {
-            const file = item.getDoc() as FileObject;
-            return <option value={item.holder.getID()}>{file.getName()}</option>;
-          })}
-        </select>
-      </div>
-    );
-  }
-
-  renderTableName() {
-    return (
-      <div>
-        <input ref={this.name} defaultValue={`table_${Date.now().toString(16)}`}/>
-      </div>
-    );
-  }
-
-  render() {
-    return (
-      <div>
-        {this.renderSrcSelect()}
-        {this.renderTableName()}
       </div>
     );
   }

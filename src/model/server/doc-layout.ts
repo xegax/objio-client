@@ -1,5 +1,9 @@
 import { LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem, OBJIOArray, SERIALIZER } from 'objio';
+import { ViewFactory, FactoryItem } from '../../common/view-factory';
+import { DocTable } from './doc-table';
+
+export { ViewFactory, FactoryItem };
 
 export interface DataSourceHolderArgs<
   TSource extends OBJIOItem = OBJIOItem,
@@ -10,49 +14,9 @@ export interface DataSourceHolderArgs<
 }
 
 export interface LayoutItemViewProps
-<TSource extends OBJIOItem = OBJIOItem, TModel extends OBJIOItem = OBJIOItem> {
+<TModel extends OBJIOItem = OBJIOItem, TSource extends OBJIOItem = OBJIOItem> {
   dataSource: TSource;
   model: TModel;
-}
-
-export interface FactoryItem {
-  classObj: Object;
-  viewType?: string;
-  view(props: LayoutItemViewProps): JSX.Element;
-  object?(args: DataSourceHolderArgs): DataSourceHolder;
-}
-
-export class ViewFactory {
-  private items = Array<FactoryItem>();
-
-  register(args: FactoryItem): void {
-    if (this.items.find(item => args.classObj == item.classObj && args.viewType == item.viewType))
-      throw 'this already registered';
-
-    args = {...args};
-    if (!args.object)
-      args.object = (args: DataSourceHolderArgs) => {
-        return new DataSourceHolder(args);
-      };
-
-    this.items.push(args);
-  }
-
-  find(args: {classObj: Object, viewType?: string}): Array<FactoryItem> {
-    if ('viewType' in args)
-      return this.items.filter(item => {
-        item.classObj == args.classObj && item.viewType == args.viewType
-      });
-    return this.items.filter(item => item.classObj == args.classObj);
-  }
-
-  getView(args: {classObj: Object, viewType: string, props: LayoutItemViewProps}): JSX.Element {
-    const item = this.items.find(item => item.classObj == args.classObj && item.viewType == args.viewType);
-    if (!item)
-      return null;
-
-    return item.view(args.props);
-  }
 }
 
 export class DataSourceHolder<
@@ -86,8 +50,12 @@ export class DataSourceHolder<
 
   private static viewFactory = new ViewFactory();
 
-  static setFactory(vf: ViewFactory): void {
-    DataSourceHolder.viewFactory = vf;
+  static getFactory<TSource extends OBJIOItem, TLayout extends DocLayout>() {
+    return DataSourceHolder.viewFactory as ViewFactory<
+      LayoutItemViewProps<OBJIOItem>,
+      DataSourceHolderArgs<TSource, TLayout>,
+      DataSourceHolder<TSource, TLayout>
+    >;
   }
 
   static findAllViews(classObj: Object): Array<FactoryItem> {

@@ -61,14 +61,25 @@ export class DocView extends React.Component<Props> {
   renderTools() {
     const remove = (
       this.props.onRemove && <i
+      style={{marginLeft: 10, marginRight: 10}}
         title='delete'
         className='fa fa-trash-o'
         onClick={() => this.props.onRemove()}
       />
     );
 
+    const link = (
+      <i
+        style={{marginLeft: 10}}
+        title='link'
+        className='fa fa-link'
+        onClick={() => location.assign(`/?objId=${this.props.model.holder.getID()}`)}
+      />
+    );
+
     return (
       <div className={classes.tools}>
+        {link}
         {remove}
       </div>
     );
