@@ -111,7 +111,15 @@ export class DocRootView extends React.Component<Props, State> {
         style={{display: 'flex', flexDirection: 'column'}}
         onContextMenu={e => this.onContextMenu(e)}
       >
-        <button onClick={() => createDocWizard(this.props.model, this.props.vf)}>create</button>
+        <button
+          onClick={() => {
+            createDocWizard(this.props.model, this.props.vf)
+            .catch(() => {
+              console.log('create cancel');
+            });
+          }}>
+          create
+        </button>
         <FitToParent wrapToFlex>
           <Tree
             model={this.props.model.getTree()}
