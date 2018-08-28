@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { DocSpriteSheet, Animation, FrameInfo } from '../model/doc-sprite-sheet';
+import { DocSpriteSheet, Animation, FrameInfo, DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import { WizardContent } from './wizard';
 import { Rect, CSSRect, cssRectToRect, Point, rectToCSSRect } from '../common/point';
 import { startDragging } from 'ts-react-ui/common/start-dragging';
 import { isLeftDown } from 'ts-react-ui/common/event-helpers'
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem, Tab, Tabs } from '@blueprintjs/core';
+import { DocConfig } from './doc-config';
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(v, max));
@@ -40,7 +41,7 @@ function getFrameStyle(rect: Rect, model: DocSpriteSheet, ofs?: Point): React.CS
   return {
     position: 'relative',
     border: '1px solid black',
-    backgroundImage: `url(/data/image/${model.getImageUrl()})`,
+    backgroundImage: `url(${model.getImageUrl()})`,
     backgroundPosition: `${-(rect.x + ofs.x)}px ${-(rect.y + ofs.y)}px`,
     width: rect.width,
     height: rect.height,
@@ -358,7 +359,7 @@ export class SpriteSheetView extends React.Component<Props, State> {
 
     const frame: React.CSSProperties = {
       border: '1px solid black',
-      backgroundImage: `url(/data/image/${model.getImageUrl()})`,
+      backgroundImage: `url(${model.getImageUrl()})`,
       backgroundPosition: `${-rect.x}px ${-rect.y}px`,
       width: rect.width,
       height: rect.height
@@ -384,7 +385,7 @@ export class SpriteSheetView extends React.Component<Props, State> {
         onMouseDown={this.onCanvasMouseDown}
         onContextMenu={this.onRectContextMenu}
       >
-        <img src={'/data/image/' + model.getImageUrl()} ref={this.img}/>
+        <img src={model.getImageUrl()} ref={this.img}/>
         {this.renderRects()}
         {this.renderPreview()}
       </div>
@@ -553,23 +554,32 @@ export class SpriteSheetView extends React.Component<Props, State> {
   }
 }
 
-export class SpriteWizard extends WizardContent<{list: Array<string>}> {
-  private sel: HTMLSelectElement;
-  private onRef = e => this.sel = e;
+export class SpriteConfig extends DocConfig<DocSpriteSheetArgs> {
+  private ref: React.RefObject<HTMLSelectElement> = React.createRef();
 
-  getResult() {
-    return {
-      imageUrl: this.sel.value
-    };
+  getFiles() {
+    return this.props.root.getFiles().filter(file => ['.png', '.jpg'].indexOf(file.getExt()) != -1);
+  }
+
+  componentDidMount() {
+    const files = this.getFiles();
+    this.config.file = files[0];
   }
 
   render() {
+    const files = this.getFiles();
     return (
-      <select ref={this.onRef}>
-        {this.props.list.map((item, i) => {
-          return <option key={i} value={item}>{item}</option>;
-        })}
-      </select>
+      <div>
+        <select
+          ref={this.ref}
+          onChange={evt => {
+            this.config.file = files[evt.currentTarget.value];
+          }}>
+          {files.map((item, i) => {
+            return <option key={i} value={i} title={item.getOriginName()}>{item.getName()}</option>;
+          })}
+        </select>
+      </div>
     );
   }
 }

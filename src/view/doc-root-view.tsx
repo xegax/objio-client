@@ -14,6 +14,8 @@ import { DocLayout } from '../model/client/doc-layout';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { DocRoot } from '../model/client/doc-root';
 import './doc-root.scss';
+import { CreateDocWizard, createDocWizard } from './create-doc-wizard';
+import { ViewFactory } from '../common/view-factory';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -28,6 +30,7 @@ export {
 };
 
 interface Props {
+  vf: ViewFactory;
   model: DocRoot;
   getView: (doc: OBJIOItem) => JSX.Element;
 }
@@ -108,7 +111,7 @@ export class DocRootView extends React.Component<Props, State> {
         style={{display: 'flex', flexDirection: 'column'}}
         onContextMenu={e => this.onContextMenu(e)}
       >
-        <button>create</button>
+        <button onClick={() => createDocWizard(this.props.model, this.props.vf)}>create</button>
         <FitToParent wrapToFlex>
           <Tree
             model={this.props.model.getTree()}

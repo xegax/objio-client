@@ -1,0 +1,16 @@
+.create-doc-wizard {
+  display: flex;
+
+  > .object-list {
+    display: flex;
+    width: 200px;
+    height: 200px;
+    flex-grow: 0;
+  }
+
+  > .object-params {
+    display: flex;
+    flex-grow: 1;
+    margin-left: 10px;
+  }
+}

@@ -1,10 +1,12 @@
-import { OBJIOItem } from 'objio';
+import { OBJIOItem, OBJIOItemClass } from 'objio';
+import { Props } from '../view/doc-config';
 
 export interface FactoryItem< TProps = {}, TArgs = {}, TObject = OBJIOItem> {
-  classObj: Object;
+  classObj: OBJIOItemClass;
   viewType?: string;
   view(props: TProps): JSX.Element;
   object(args: TArgs): TObject;
+  config?(props: Props): JSX.Element;
 }
 
 export class ViewFactory< TProps extends Object = {},
@@ -35,5 +37,9 @@ export class ViewFactory< TProps extends Object = {},
       return null;
 
     return item.view(args.props);
+  }
+
+  getItems() {
+    return this.items;
   }
 }

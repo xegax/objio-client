@@ -17,7 +17,7 @@ import {
   DocSpriteSheet
 } from '../model/client/register-objects';
 import { ViewFactory } from '../common/view-factory';
-import { SpriteSheetView } from '../view/sprite-sheet';
+import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
 import { DocTable, DocTableView } from '../view/doc-table-view';
 import { FileObject, FileArgs } from 'objio-object/file-object';
@@ -186,6 +186,7 @@ async function loadAndRender() {
     classObj: DocSpriteSheet,
     object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
+    config: props => <SpriteConfig {...props}/>
     // () => <SpriteWizard list={['default.png', 'prehistoric.png', 'SNES_MK1_reptile.png']}/>
   });
 
@@ -253,7 +254,7 @@ async function loadAndRender() {
     view: (props: {model: DocHolder}) => {
       const doc = props.model.getDoc();
       return (
-        <DocView {...props}>
+        <DocView {...props} onRemove={() => model.remove(props.model)}>
           {mvf.getView({classObj: doc.constructor, props: {model: doc}})}
         </DocView>
       );
@@ -265,21 +266,23 @@ async function loadAndRender() {
     classObj: DocRoot,
     view: (props: {model: DocRoot}) => (
       <DocRootView
-        getView={(obj: DocHolder | FileObject) => (
-          <DocView
-            model={obj}
-            onRemove={() => {
-              model.remove(obj);
-            }}>
-            {
-              obj instanceof DocHolder ? (
-                mvf.getView({classObj: obj.getDoc().constructor, props: {model: obj.getDoc()}})
-              ) : (
-                mvf.getView({classObj: obj.constructor, props: { model: obj }})
-              )
-            }
-          </DocView>
-        )}
+        vf={mvf}
+        getView={(obj: DocHolder | FileObject) => {
+          let view = mvf.getView({classObj: obj.constructor, props: { model: obj }});
+          if (obj instanceof FileObject) {
+            view = (
+              <DocView
+                model={obj}
+                onRemove={() => {
+                  model.remove(obj);
+                }}>
+                {view}
+              </DocView>
+            );
+          }
+
+          return view;
+        }}
         {...props}
       />
     ),

@@ -1,9 +1,9 @@
 import { SERIALIZER, OBJIOItem, OBJIOArray } from 'objio';
-import { DocHolderArgs } from './server/doc-holder';
 import { Point, Size, Rect, inRect } from '../common/point';
+import { FileObject } from 'objio-object/file-object';
 
-export interface DocSpriteSheetArgs extends DocHolderArgs {
-  imageUrl?: string;
+export interface DocSpriteSheetArgs {
+  file?: FileObject;
 }
 
 export interface FrameInfo {
@@ -39,7 +39,7 @@ export class Animation extends OBJIOItem {
 }
 
 export class DocSpriteSheet extends OBJIOItem {
-  private imageUrl: string = 'default.png';
+  private file: FileObject;
   private rects = Array<Rect>();
   private anim = new OBJIOArray<Animation>([new Animation('default', [])]);
 
@@ -49,11 +49,14 @@ export class DocSpriteSheet extends OBJIOItem {
     if (!args)
       return;
 
-    this.imageUrl = args.imageUrl || this.imageUrl;
+    this.file = args.file;
   }
 
   getImageUrl(): string {
-    return this.imageUrl;
+    if (!this.file)
+      return '';
+
+    return `/data/projects/n1/${this.file.getPath()}`;
   }
 
   getRects(): Array<Rect> {
@@ -70,7 +73,7 @@ export class DocSpriteSheet extends OBJIOItem {
 
   static TYPE_ID = 'DocSpriteSheet';
   static SERIALIZE: SERIALIZER = () => ({
-    imageUrl: {type: 'string'},
+    file: {type: 'object'},
     rects: {type: 'json'},
     anim: {type: 'object'}
   });

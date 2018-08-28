@@ -14,7 +14,6 @@ class Container extends React.Component<Props, {}> {
   }
 }
 
-
 export function showModal(jsx: JSX.Element) {
   if (!cont)
     cont = document.createElement('div');
