@@ -558,22 +558,25 @@ export class SpriteConfig extends DocConfig<DocSpriteSheetArgs> {
   private ref: React.RefObject<HTMLSelectElement> = React.createRef();
 
   getFiles() {
-    return this.props.root.getFiles().filter(file => ['.png', '.jpg'].indexOf(file.getExt()) != -1);
+    return this.props.root.getFiles().filter(file => ['.png', '.jpg', '.gif'].indexOf(file.getExt()) != -1);
   }
 
   componentDidMount() {
     const files = this.getFiles();
-    this.config.file = files[0];
+    this.config.source = files[0];
   }
 
   render() {
+    if (this.props.source)
+      return null;
+
     const files = this.getFiles();
     return (
       <div>
         <select
           ref={this.ref}
           onChange={evt => {
-            this.config.file = files[evt.currentTarget.value];
+            this.config.source = files[evt.currentTarget.value];
           }}>
           {files.map((item, i) => {
             return <option key={i} value={i} title={item.getOriginName()}>{item.getName()}</option>;

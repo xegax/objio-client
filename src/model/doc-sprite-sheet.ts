@@ -3,7 +3,7 @@ import { Point, Size, Rect, inRect } from '../common/point';
 import { FileObject } from 'objio-object/file-object';
 
 export interface DocSpriteSheetArgs {
-  file?: FileObject;
+  source?: FileObject;
 }
 
 export interface FrameInfo {
@@ -33,8 +33,8 @@ export class Animation extends OBJIOItem {
 
   static TYPE_ID = 'Animation';
   static SERIALIZE: SERIALIZER = () => ({
-    name: {type: 'string'},
-    frames: {type: 'json'}
+    name:   { type: 'string' },
+    frames: { type: 'json' }
   });
 }
 
@@ -49,14 +49,14 @@ export class DocSpriteSheet extends OBJIOItem {
     if (!args)
       return;
 
-    this.file = args.file;
+    this.file = args.source;
   }
 
   getImageUrl(): string {
     if (!this.file)
       return '';
 
-    return `/data/projects/n1/${this.file.getPath()}`;
+    return this.holder.getFilePath(this.file.getPath());
   }
 
   getRects(): Array<Rect> {

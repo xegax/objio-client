@@ -8,6 +8,12 @@ import {
   ColumnAttr
 } from 'objio-object/table';
 import { DocTable as DocTableBase } from '../server/doc-table';
+import { CSVFileObject } from 'objio-object/csv-file-object';
+
+export interface DocTableArgs {
+  source: CSVFileObject;
+  tableName: string;
+}
 
 export class DocTable extends DocTableBase {
   private render = new RenderListModel(0, 20);
@@ -16,7 +22,7 @@ export class DocTable extends DocTableBase {
   private totalRows: number = 0;
   private cols = Array<ColumnAttr>();
 
-  constructor() {
+  constructor(args?: DocTableArgs) {
     super();
 
     this.render.setHandler({
@@ -40,6 +46,13 @@ export class DocTable extends DocTableBase {
         this.cols = this.table.getColumns();
         this.holder.notify();
         return Promise.resolve();
+      },
+      onCreate: () => {
+        return this.execute({
+          fileObjId: args.source.holder.getID(),
+          columns: args.source.getColumns(),
+          table: args.tableName
+        });
       },
       onObjChange: () => {
         if (this.totalRows == this.table.getTotalRowsNum())

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DocTable } from '../model/client/doc-table';
+import { DocTable, DocTableArgs } from '../model/client/doc-table';
 import { ExecuteArgs } from 'objio-object/table';
 import { FileObject } from 'objio-object/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
@@ -7,6 +7,8 @@ import { RenderListModel, RenderArgs } from 'ts-react-ui/model/list';
 import { List } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
 import { CSVFileObject } from 'objio-object/csv-file-object';
+import { DocConfig } from './doc-config';
+import { OBJIOItem } from 'objio';
 
 export { DocTable };
 
@@ -203,6 +205,25 @@ export class DocTableView extends React.Component<Props, State> {
     return (
       <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
         {model.getState().isValid() ? this.renderValid() : this.renderInvalid()}
+      </div>
+    );
+  }
+}
+
+export class DocTableConfig extends DocConfig<DocTableArgs> {
+  componentDidMount() {
+    this.config.tableName = 'table';
+  }
+
+  render() {
+    return (
+      <div>
+        <div>
+          table name: 
+          <input onChange={evt => {
+            this.config.tableName = evt.currentTarget.value;
+          }}/>
+        </div>
       </div>
     );
   }

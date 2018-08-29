@@ -19,7 +19,7 @@ import {
 import { ViewFactory } from '../common/view-factory';
 import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
-import { DocTable, DocTableView } from '../view/doc-table-view';
+import { DocTable, DocTableView, DocTableConfig } from '../view/doc-table-view';
 import { FileObject, FileArgs } from 'objio-object/file-object';
 import { FileObjectView } from '../view/file-object-view';
 import {
@@ -42,6 +42,7 @@ import { VideoFileView } from '../view/video-file-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { VideoFileObject } from 'objio-object/video-file-object';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
+import { DocTableArgs } from '../model/client/doc-table';
 
 let objio: OBJIO;
 
@@ -147,7 +148,7 @@ async function loadAndRender() {
   } catch(e) {
     console.log('localStorage can not be loaded');
   }*/
-  objio = await createOBJIO({factory, store});
+  objio = await createOBJIO({factory, store, context: { path: `/data/projects/${args.prj}/`, db: '' }});
   /*objio.addObserver({
     onSave: () => {
       console.log('saving ' + Date.now());
@@ -173,27 +174,29 @@ async function loadAndRender() {
   } catch (e) {
   }
 
-  objio.startWatch({req, timeOut: 100}).subscribe((objs: Array<OBJIOItem>) => {
+  objio.startWatch({req, timeOut: 100})
+  .subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
     if (model.exists(objs))
       model.updateTree();
     model.holder.notify();
   });
 
-  //let mvf = new ModelViewFactory<OBJIOItem>();
   let mvf = new ViewFactory();
   mvf.register({
     classObj: DocSpriteSheet,
     object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
-    config: props => <SpriteConfig {...props}/>
-    // () => <SpriteWizard list={['default.png', 'prehistoric.png', 'SNES_MK1_reptile.png']}/>
+    config: props => <SpriteConfig {...props}/>,
+    sources: [ FileObject ]
   });
 
   mvf.register({
     classObj: DocTable,
-    object: () => new DocTable(),
-    view: (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>
+    object: (args: DocTableArgs) => new DocTable(args),
+    view: (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,
+    config: props => <DocTableConfig {...props}/>,
+    sources: [ CSVFileObject ]
   });
 
   mvf.register({
@@ -254,7 +257,7 @@ async function loadAndRender() {
     view: (props: {model: DocHolder}) => {
       const doc = props.model.getDoc();
       return (
-        <DocView {...props} onRemove={() => model.remove(props.model)}>
+        <DocView {...props} root={model} vf={mvf}>
           {mvf.getView({classObj: doc.constructor, props: {model: doc}})}
         </DocView>
       );
@@ -273,9 +276,9 @@ async function loadAndRender() {
             view = (
               <DocView
                 model={obj}
-                onRemove={() => {
-                  model.remove(obj);
-                }}>
+                root={model}
+                vf={mvf}
+              >
                 {view}
               </DocView>
             );

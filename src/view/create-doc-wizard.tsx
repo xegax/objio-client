@@ -9,7 +9,8 @@ import { ContainerModel, ContItem } from 'ts-react-ui/container';
 import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
 import { DocConfig } from './doc-config';
 import { DocRoot } from '../model/client/doc-root';
-import { DocHolder } from '../model/client/doc-holder';
+import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
+import { FileObject } from 'objio-object/file-object';
 
 const classes = {
   wizard: 'create-doc-wizard',
@@ -23,6 +24,7 @@ interface OKArgs {
 }
 
 interface Props {
+  source: OBJIOItem;
   root: DocRoot;
   vf: ViewFactory;
   onOK(args: OKArgs);
@@ -39,7 +41,10 @@ export class CreateDocWizard extends React.Component<Props> {
   ref = React.createRef<DocConfig>();
 
   componentDidMount() {
-    const items = this.props.vf.getItems();
+    let items = this.props.vf.getItems();
+    if (this.props.source)
+      items = this.props.vf.findBySource(OBJIOItem.getClass(this.props.source));
+
     const list = new RenderListModel( items.length );
     list.setHandler({
       loadItems: (from, count) => {
@@ -63,6 +68,7 @@ export class CreateDocWizard extends React.Component<Props> {
         this.setState({item: null});
       }
     }, 'select-row');
+    list.setSelRow(0);
 
     this.setState({list});
   }
@@ -79,8 +85,10 @@ export class CreateDocWizard extends React.Component<Props> {
               </FitToParent>
             </div>
             <div className={classes.objectParams}>
+              { this.props.source ? <p>This will be created from {OBJIOItem.getClass(this.props.source).TYPE_ID}</p> : null }
               { item && item.config && React.cloneElement(item.config({
-                  root: this.props.root
+                  root: this.props.root,
+                  source: this.props.source
                 }), {key: item.classObj.TYPE_ID, ref: this.ref}) || null }
             </div>
           </div>
@@ -91,7 +99,7 @@ export class CreateDocWizard extends React.Component<Props> {
               text='OK'
               intent={Intent.PRIMARY}
               onClick={() => {
-                this.props.onOK({item, args: this.ref && this.ref.current.getConfig() || {} });
+                this.props.onOK({item, args: this.ref && this.ref.current && this.ref.current.getConfig() || {} });
               }}
             />
             <Button text='Cancel' onClick={this.props.onCancel}/>
@@ -102,13 +110,22 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 }
 
-export function createDocWizard(root: DocRoot, vf: ViewFactory): Promise<OBJIOItem> {
+export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: OBJIOItem): Promise<OBJIOItem> {
   return new Promise((resolve, reject) => {
     let item: ContItem;
     const onResult = (okArgs: OKArgs) => {
       if (okArgs) {
-        let doc = okArgs.item.classObj.create(okArgs.args);
-        root.append(new DocHolder({ doc }))
+        let doc = okArgs.item.classObj.create({...okArgs.args, source});
+        const args: DocHolderArgs = { doc };
+        if (source) {
+          if (source instanceof FileObject) {
+            args.name = source.getName();
+          } else {
+            args.name = OBJIOItem.getClass(source).TYPE_ID;
+          }
+        }
+
+        root.append(new DocHolder(args))
         .then(() => resolve(doc));
       } else {
         reject();
@@ -118,6 +135,7 @@ export function createDocWizard(root: DocRoot, vf: ViewFactory): Promise<OBJIOIt
 
     item = ContainerModel.get().append(
       <CreateDocWizard
+        source={source}
         root={root}
         vf={vf}
         onOK={okArgs => onResult(okArgs)}

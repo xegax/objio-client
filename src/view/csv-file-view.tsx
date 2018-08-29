@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { OBJIOItem } from 'objio';
+import { OBJIOItem, OBJIOArray } from 'objio';
 import { CSVFileObject } from 'objio-object/csv-file-object';
 import { prompt } from './prompt';
 import { DocTable } from '../model/client/doc-table';
@@ -31,31 +31,6 @@ export class CSVFileView extends React.Component<Props> {
 
     return (
       <div>
-        <div>
-          <button>
-            table
-          </button>
-          <button onClick={() => {
-            const table = new DocTable();
-            this.props.createDoc(table)
-            .then(() => 
-              prompt({
-                title: 'Prompt',
-                prompt: 'Enter table name',
-                placeholder: 'new table name'
-              })
-            )
-            .then(name => 
-              table.execute({
-                table: name,
-                fileObjId: this.props.model.holder.getID(),
-                columns: csv.getColumns()
-              })
-            );
-          }}>
-            table + data
-          </button>
-        </div>
         <table>
           <tr>
             <td>Name</td>
@@ -100,10 +75,6 @@ export class CSVFileView extends React.Component<Props> {
         </table>
       </div>
     );
-  }
-
-  getPath(): string {
-    return `/data/projects/${this.props.prj}/${this.props.model.getPath()}`;
   }
 
   renderContent(): JSX.Element | string {
