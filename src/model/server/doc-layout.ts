@@ -1,7 +1,6 @@
 import { LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem, OBJIOArray, SERIALIZER } from 'objio';
 import { ViewFactory, FactoryItem } from '../../common/view-factory';
-import { DocTable } from './doc-table';
 
 export { ViewFactory, FactoryItem };
 

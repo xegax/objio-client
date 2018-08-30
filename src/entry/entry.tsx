@@ -36,9 +36,7 @@ import { SelectDetailsView, SelectDetails } from '../view/layout/select-details'
 import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { CSVFileObject } from 'objio-object/client/csv-file-object';
-import { VideoFileView } from '../view/video-file-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
-import { VideoFileObject } from 'objio-object/client/video-file-object';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import { DocTableArgs } from '../model/client/doc-table';
 import * as Objects from 'objio-object/client';
@@ -189,21 +187,6 @@ async function loadAndRender() {
     view: (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,
     config: props => <DocTableConfig {...props}/>,
     sources: [ CSVFileObject ]
-  });
-
-  mvf.register({
-    classObj: VideoFileObject as OBJIOItemClass,
-    view: (props: {model: VideoFileObject}) => (
-      <VideoFileView
-        key={props.model.holder.getID()}
-        createDoc={newObj => {
-          return model.append(new DocHolder({doc: newObj})).then(() => newObj);
-        }}
-        prj={args.prj}
-        {...props}
-      />
-    ),
-    object: (args: FileArgs) => new VideoFileObject(args)
   });
 
   mvf.register({
