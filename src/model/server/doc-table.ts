@@ -1,5 +1,5 @@
 import { OBJIOItem, SERIALIZER } from 'objio';
-import { Table } from 'objio-object/table';
+import { Table } from 'objio-object/client/table';
 
 export class DocTable extends OBJIOItem {
   protected table = new Table();

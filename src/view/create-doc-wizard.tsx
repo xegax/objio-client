@@ -10,7 +10,7 @@ import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
 import { DocConfig } from './doc-config';
 import { DocRoot } from '../model/client/doc-root';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject } from 'objio-object/client/file-object';
 
 const classes = {
   wizard: 'create-doc-wizard',
@@ -73,6 +73,13 @@ export class CreateDocWizard extends React.Component<Props> {
     this.setState({list});
   }
 
+  getRootObjects = (): Array<OBJIOItem> => {
+    return [
+      ...this.props.root.getFiles(),
+      ...this.props.root.getDocs().map(holder => holder.getDoc())
+    ];
+  }
+
   render() {
     const item = this.state.item;
     return (
@@ -87,7 +94,7 @@ export class CreateDocWizard extends React.Component<Props> {
             <div className={classes.objectParams}>
               { this.props.source ? <p>This will be created from {OBJIOItem.getClass(this.props.source).TYPE_ID}</p> : null }
               { item && item.config && React.cloneElement(item.config({
-                  root: this.props.root,
+                  objects: this.getRootObjects,
                   source: this.props.source
                 }), {key: item.classObj.TYPE_ID, ref: this.ref}) || null }
             </div>

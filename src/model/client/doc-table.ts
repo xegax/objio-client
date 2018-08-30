@@ -6,9 +6,9 @@ import {
   ExecuteArgs,
   SubtableAttrs,
   ColumnAttr
-} from 'objio-object/table';
+} from 'objio-object/client/table';
 import { DocTable as DocTableBase } from '../server/doc-table';
-import { CSVFileObject } from 'objio-object/csv-file-object';
+import { CSVFileObject } from 'objio-object/client/csv-file-object';
 
 export interface DocTableArgs {
   source: CSVFileObject;

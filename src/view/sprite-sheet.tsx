@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { DocSpriteSheet, Animation, FrameInfo, DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
-import { WizardContent } from './wizard';
 import { Rect, CSSRect, cssRectToRect, Point, rectToCSSRect } from '../common/point';
 import { startDragging } from 'ts-react-ui/common/start-dragging';
 import { isLeftDown } from 'ts-react-ui/common/event-helpers'
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem, Tab, Tabs } from '@blueprintjs/core';
 import { DocConfig } from './doc-config';
+import { FileObject } from 'objio-object/client/file-object';
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(v, max));
@@ -558,7 +558,13 @@ export class SpriteConfig extends DocConfig<DocSpriteSheetArgs> {
   private ref: React.RefObject<HTMLSelectElement> = React.createRef();
 
   getFiles() {
-    return this.props.root.getFiles().filter(file => ['.png', '.jpg', '.gif'].indexOf(file.getExt()) != -1);
+    const objs = this.props.objects();
+    return objs.filter(file => {
+      if (!(file instanceof FileObject))
+        return false;
+
+      return ['.png', '.jpg', '.gif'].indexOf(file.getExt()) != -1
+    }) as Array<FileObject>;
   }
 
   componentDidMount() {

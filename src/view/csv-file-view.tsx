@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { OBJIOItem, OBJIOArray } from 'objio';
-import { CSVFileObject } from 'objio-object/csv-file-object';
-import { prompt } from './prompt';
+import { CSVFileObject } from 'objio-object/client/csv-file-object';
 import { DocTable } from '../model/client/doc-table';
 
 interface Props {

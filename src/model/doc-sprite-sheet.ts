@@ -1,6 +1,6 @@
 import { SERIALIZER, OBJIOItem, OBJIOArray } from 'objio';
 import { Point, Size, Rect, inRect } from '../common/point';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject } from 'objio-object/client/file-object';
 
 export interface DocSpriteSheetArgs {
   source?: FileObject;
@@ -56,7 +56,7 @@ export class DocSpriteSheet extends OBJIOItem {
     if (!this.file)
       return '';
 
-    return this.holder.getFilePath(this.file.getPath());
+    return this.file.getPath();
   }
 
   getRects(): Array<Rect> {

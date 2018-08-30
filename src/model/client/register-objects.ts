@@ -1,13 +1,7 @@
 import { OBJIOFactory } from 'objio';
 import { DocRoot } from './doc-root';
 import { DocSpriteSheet, Animation } from '../doc-sprite-sheet';
-import { Table } from 'objio-object/table';
-
-import { FileObject } from 'objio-object/file-object';
-import { VideoFileObject } from 'objio-object/video-file-object';
-import { CSVFileObject } from 'objio-object/csv-file-object';
-
-import { StateObject } from 'objio-object/state-object';
+import * as Objects from 'objio-object/client';
 import { DocTable } from './doc-table';
 import { DocLayout } from './doc-layout';
 import { DocHolder } from './doc-holder';
@@ -26,17 +20,15 @@ export {
 };
 
 export function registerObjects(fact: OBJIOFactory) {
+  Objects.getClasses().forEach(classObj => {
+    fact.registerItem(classObj);
+  });
+
   fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Animation);
-  fact.registerItem(Table);
 
-  fact.registerItem(FileObject);
-  fact.registerItem(CSVFileObject);
-  fact.registerItem(VideoFileObject);
-
-  fact.registerItem(StateObject);
   fact.registerItem(DocTable);
   fact.registerItem(DocLayout);
   fact.registerItem(DataSourceHolder);

@@ -1,7 +1,7 @@
 import { SelectDetails as Base, FieldItem } from '../../server/layout/select-details';
 import { DocLayout } from '../doc-layout';
 import { DocTable } from '../doc-table';
-import { ColumnAttr } from 'objio-object/table';
+import { ColumnAttr } from 'objio-object/client/table';
 import { EventTypes, SelectProvOwner } from './common';
 
 export interface FieldsMap {

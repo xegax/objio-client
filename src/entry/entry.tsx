@@ -16,12 +16,11 @@ import {
   DocHolder,
   DocSpriteSheet
 } from '../model/client/register-objects';
-import { ViewFactory } from '../common/view-factory';
+import { ViewFactory, FactoryItem } from '../common/view-factory';
 import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
 import { DocTable, DocTableView, DocTableConfig } from '../view/doc-table-view';
-import { FileObject, FileArgs } from 'objio-object/file-object';
-import { FileObjectView } from '../view/file-object-view';
+import { FileObject, FileArgs } from 'objio-object/client/file-object';
 import {
   DocLayoutView,
   DocLayout,
@@ -36,13 +35,15 @@ import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
-import { CSVFileObject } from 'objio-object/csv-file-object';
+import { CSVFileObject } from 'objio-object/client/csv-file-object';
 import { CSVFileView } from '../view/csv-file-view';
 import { VideoFileView } from '../view/video-file-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { VideoFileObject } from 'objio-object/client/video-file-object';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import { DocTableArgs } from '../model/client/doc-table';
+import { getClasses } from 'objio-pack/client';
+import * as Objects from 'objio-object/client';
 
 let objio: OBJIO;
 
@@ -53,14 +54,7 @@ function initDocLayout(prj: string) {
     classObj: FileObject,
     object: args => new DataSourceHolder(args),
     viewType: 'content',
-    view: props => (
-      <FileObjectView
-        model={props.dataSource as FileObject}
-        prj={prj}
-        createDoc={null}
-        onlyContent
-      />
-    )
+    view: props => null
   });
 
   vf.register({
@@ -200,21 +194,6 @@ async function loadAndRender() {
   });
 
   mvf.register({
-    classObj: FileObject,
-    object: (args: FileArgs) => new FileObject(args),
-    view: (props: {model: FileObject}) => (
-      <FileObjectView
-        key={props.model.holder.getID()}
-        createDoc={newObj => {
-          return model.append(new DocHolder({doc: newObj})).then(() => newObj);
-        }}
-        prj={args.prj}
-        {...props}
-      />
-    )
-  });
-
-  mvf.register({
     classObj: CSVFileObject,
     view: (props: {model: CSVFileObject}) => (
       <CSVFileView
@@ -290,6 +269,27 @@ async function loadAndRender() {
       />
     ),
     object: () => new DocRoot()
+  });
+
+  [
+    ...Objects.getClasses(),
+    ...getClasses()
+  ].forEach(classObj => {
+    classObj.getClientViews().forEach(viewItem => {
+      const factItem: FactoryItem = {
+        classObj,
+        view: viewItem.view,
+        object: () => classObj.create()
+      };
+
+      if (classObj.getClientConfig)
+        factItem.config = props => classObj.getClientConfig(props);
+
+      if (viewItem.viewType)
+        factItem.viewType = viewItem.viewType;
+
+      mvf.register(factItem);
+    });
   });
 
   let cont = document.createElement('div');

@@ -1,5 +1,5 @@
 import { CategoryFilter, CategoryFilterImpl } from './category-filter';
-import { ColumnAttr, LoadCellsArgs, Condition, CompoundCond } from 'objio-object/table';
+import { ColumnAttr, LoadCellsArgs, Condition, CompoundCond } from 'objio-object/client/table';
 import { TagFilter as Base } from '../../server/layout/tag-filter';
 import { DocTable } from '../doc-table';
 import { OBJIOItem } from 'objio';

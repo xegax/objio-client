@@ -1,5 +1,5 @@
 import { OBJIOArray, OBJIOItem, SERIALIZER } from 'objio';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject } from 'objio-object/client/file-object';
 import { DocHolder } from './doc-holder';
 
 export class DocRoot extends OBJIOItem {

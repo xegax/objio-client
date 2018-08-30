@@ -3,7 +3,7 @@ import { RangeSliderModel } from 'ts-react-ui/model/range-slider';
 import { DocLayout } from '../doc-layout';
 import { DocTable } from '../doc-table';
 import { CondHolderOwner, CondHolder } from './cond-holder';
-import { ColumnAttr } from 'objio-object/table';
+import { ColumnAttr } from 'objio-object/client/table';
 
 export {
   RangeSliderModel

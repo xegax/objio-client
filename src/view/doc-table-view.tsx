@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { DocTable, DocTableArgs } from '../model/client/doc-table';
-import { ExecuteArgs } from 'objio-object/table';
-import { FileObject } from 'objio-object/file-object';
+import { ExecuteArgs } from 'objio-object/client/table';
+import { FileObject } from 'objio-object/client/file-object';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { RenderListModel, RenderArgs } from 'ts-react-ui/model/list';
 import { List } from 'ts-react-ui/list';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
-import { CSVFileObject } from 'objio-object/csv-file-object';
+import { CSVFileObject } from 'objio-object/client/csv-file-object';
 import { DocConfig } from './doc-config';
 import { OBJIOItem } from 'objio';
 

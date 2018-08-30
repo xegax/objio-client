@@ -3,12 +3,8 @@ import { Table } from 'objio-sqlite-table';
 import { DocRoot } from './doc-root';
 import { DocTable } from './doc-table';
 import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
-import { StateObject } from 'objio-object/state-object';
+import * as Objects from 'objio-object/server';
 import { DocHolder } from './doc-holder';
-
-import { FileObject } from 'objio-object/server/file-object';
-import { CSVFileObject } from 'objio-object/server/csv-file-object';
-import { VideoFileObject } from 'objio-object/server/video-file-object';
 
 import { DocLayout, DataSourceHolder } from './doc-layout';
 import { DrillDownTable } from './layout/drilldown-table';
@@ -19,18 +15,16 @@ import { RangeFilter } from './layout/range-filter';
 import { DocVideo } from './doc-video';
 
 export function registerObjects(fact: OBJIOFactory) {
+  Objects.getClasses().forEach(classObj => {
+    fact.registerItem(classObj);
+  });
+
   fact.registerItem(Animation);
   fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Table);
-  fact.registerItem(StateObject);
   fact.registerItem(DocTable);
-
-  fact.registerItem(FileObject);
-  fact.registerItem(CSVFileObject);
-  fact.registerItem(VideoFileObject);
-
   fact.registerItem(DocLayout);
   fact.registerItem(DataSourceHolder);
   fact.registerItem(DrillDownTable);

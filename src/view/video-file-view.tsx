@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { OBJIOItem } from 'objio';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { VideoFileObject } from 'objio-object/client/video-file-object';
 
 interface Props {
   onlyContent?: boolean;
@@ -34,7 +34,7 @@ export class VideoFileView extends React.Component<Props> {
   }
 
   getPath(): string {
-    return `/data/projects/${this.props.prj}/${this.props.model.getPath()}`;
+    return this.props.model.getPath();
   }
 
   renderContent(): JSX.Element | string {

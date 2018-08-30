@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { DocRoot } from '../model/client/doc-root';
 import { OBJIOItem } from 'objio';
 
 export interface Props {
-  root: DocRoot;
+  objects(): Array<OBJIOItem>;
   source?: OBJIOItem;
 }
 

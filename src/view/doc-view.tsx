@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject } from 'objio-object/client/file-object';
 import { ViewFactory } from '../common/view-factory';
 import { DocRoot } from '../model/client/doc-root';
 import { OBJIOItem } from 'objio';

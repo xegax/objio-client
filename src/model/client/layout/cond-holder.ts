@@ -1,5 +1,5 @@
 import { OBJIOItem, OBJIO } from 'objio';
-import { Condition } from 'objio-object/table';
+import { Condition } from 'objio-object/client/table';
 import { DataSourceHolder } from '../../server/doc-layout';
 import { DocTable } from '../doc-table';
 import { CategoryFilter } from './category-filter';

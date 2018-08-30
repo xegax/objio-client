@@ -1,5 +1,5 @@
 import { OBJIOItem, SERIALIZER } from 'objio';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { VideoFileObject } from 'objio-object/client/video-file-object';
 
 export class DocVideo extends OBJIOItem {
   protected video: VideoFileObject;

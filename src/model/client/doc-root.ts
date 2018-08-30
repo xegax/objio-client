@@ -1,10 +1,10 @@
 import { DocRoot as Base } from '../server/doc-root';
-import { FileObject } from 'objio-object/file-object';
+import { FileObject } from 'objio-object/client/file-object';
 import { DocHolder } from './doc-holder';
 import { TreeModel, TreeItem } from 'ts-react-ui/model/tree';
 import { OBJIOItem, OBJIOArray } from 'objio';
-import { CSVFileObject } from 'objio-object/csv-file-object';
-import { VideoFileObject } from 'objio-object/video-file-object';
+import { CSVFileObject } from 'objio-object/client/csv-file-object';
+import { VideoFileObject } from 'objio-object/client/video-file-object';
 
 export interface DocTreeItem extends TreeItem {
   obj?: DocHolder | FileObject;
