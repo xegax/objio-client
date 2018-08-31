@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DrillDownTable as Base } from '../../server/layout/drilldown-table';
-import { DocTable } from '../doc-table';
+import { DocTable } from 'objio-object/client/doc-table';
 import { ColumnAttr, LoadCellsArgs, SubtableAttrs, SortPair } from 'objio-object/client/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs, ListColumn } from 'ts-react-ui/model/list';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CategoryFilter as Base } from '../../server/layout/category-filter';
-import { DocTable } from '../doc-table';
-import { ColumnAttr, LoadCellsArgs, Condition, CompoundCond } from 'objio-object/client/table';
+import { DocTable } from 'objio-object/client/doc-table';
+import { ColumnAttr, LoadCellsArgs, Condition } from 'objio-object/client/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
 import { cancelable, Cancelable, timer } from 'objio/common/promise';

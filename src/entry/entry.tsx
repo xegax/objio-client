@@ -8,8 +8,7 @@ import {
   createFactory,
   createOBJIO,
   OBJIORemoteStore,
-  OBJIO,
-  OBJIOItemClass
+  OBJIO
 } from 'objio';
 import {
   registerObjects,
@@ -19,8 +18,8 @@ import {
 import { ViewFactory, FactoryItem } from '../common/view-factory';
 import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
-import { DocTable, DocTableView, DocTableConfig } from '../view/doc-table-view';
-import { FileObject, FileArgs } from 'objio-object/client/file-object';
+import { DocTable } from 'objio-object/client/doc-table';
+import { FileObject } from 'objio-object/client/file-object';
 import {
   DocLayoutView,
   DocLayout,
@@ -35,15 +34,13 @@ import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
 import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
-import { CSVFileObject } from 'objio-object/client/csv-file-object';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
-import { DocTableArgs } from '../model/client/doc-table';
-import * as Objects from 'objio-object/client';
+import * as Objects from 'objio-object/view';
 
 let objio: OBJIO;
 
-function initDocLayout(prj: string) {
+function initDocLayout() {
   const vf = DataSourceHolder.getFactory<DocTable, DocLayout>();
 
   vf.register({
@@ -146,7 +143,7 @@ async function loadAndRender() {
     }
   });*/
 
-  initDocLayout(args.prj);
+  initDocLayout();
 
   let model: DocRoot;
   try {
@@ -179,14 +176,6 @@ async function loadAndRender() {
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     config: props => <SpriteConfig {...props}/>,
     sources: [ FileObject ]
-  });
-
-  mvf.register({
-    classObj: DocTable,
-    object: (args: DocTableArgs) => new DocTable(args),
-    view: (props: {model: DocTable}) => <DocTableView key={props.model.holder.getID()} {...props}/>,
-    config: props => <DocTableConfig {...props}/>,
-    sources: [ CSVFileObject ]
   });
 
   mvf.register({
@@ -238,13 +227,13 @@ async function loadAndRender() {
   });
 
   [
-    ...Objects.getClasses()
+    ...Objects.getViews()
   ].forEach(classObj => {
     classObj.getClientViews().forEach(viewItem => {
       const factItem: FactoryItem = {
         classObj,
         view: viewItem.view,
-        object: () => classObj.create()
+        object: args => classObj.create(args)
       };
 
       if (classObj.getClientConfig)
@@ -252,6 +241,9 @@ async function loadAndRender() {
 
       if (viewItem.viewType)
         factItem.viewType = viewItem.viewType;
+
+      if (classObj.getClassSources)
+        factItem.sources = classObj.getClassSources();
 
       mvf.register(factItem);
     });

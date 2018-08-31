@@ -1,9 +1,6 @@
 import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
-import { DocTable } from './doc-table';
+import { DocTable } from 'objio-object/server/doc-table';
 import { DocLayout } from './doc-layout';
-
-export interface DocHolderClass extends OBJIOItemClass {
-}
 
 export interface DocHolderArgs<T = OBJIOItem> {
   name?: string;

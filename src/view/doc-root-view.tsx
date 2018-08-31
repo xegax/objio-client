@@ -3,18 +3,17 @@ import { DocHolder } from '../model/client/doc-holder';
 import { DocTreeItem } from '../model/client/doc-root';
 import { DocSpriteSheet } from '../model/doc-sprite-sheet';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';
-import { DocTable } from '../model/client/doc-table';
+import { DocTable } from 'objio-object/client/doc-table';
 import { OBJIOItemClass, OBJIOItem } from 'objio';
 import { createFileObject } from 'objio-object/client';
 import { FileArgs, FileObject } from 'objio-object/client/file-object';
 import { Tree } from 'ts-react-ui/tree';
-import { showWizard } from '../view/wizard';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { DocLayout } from '../model/client/doc-layout';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { DocRoot } from '../model/client/doc-root';
 import './doc-root.scss';
-import { CreateDocWizard, createDocWizard } from './create-doc-wizard';
+import { createDocWizard } from './create-doc-wizard';
 import { ViewFactory } from '../common/view-factory';
 
 const classes = {

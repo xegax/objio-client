@@ -1,7 +1,6 @@
 import { OBJIOFactory } from 'objio';
-import { Table } from 'objio-sqlite-table';
+import { SQLite3Table } from 'objio-sqlite-table';
 import { DocRoot } from './doc-root';
-import { DocTable } from './doc-table';
 import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
 import * as Objects from 'objio-object/server';
 import { DocHolder } from './doc-holder';
@@ -18,13 +17,12 @@ export function registerObjects(fact: OBJIOFactory) {
   Objects.getClasses().forEach(classObj => {
     fact.registerItem(classObj);
   });
+  fact.registerItem(SQLite3Table);
 
   fact.registerItem(Animation);
   fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
-  fact.registerItem(Table);
-  fact.registerItem(DocTable);
   fact.registerItem(DocLayout);
   fact.registerItem(DataSourceHolder);
   fact.registerItem(DrillDownTable);

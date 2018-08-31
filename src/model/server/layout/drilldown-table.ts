@@ -1,5 +1,5 @@
 import { DataSourceHolder, DocLayout } from '../doc-layout';
-import { DocTable } from '../doc-table';
+import { DocTable } from 'objio-object/server/doc-table';
 import { SERIALIZER } from 'objio';
 
 export class DrillDownTable<
