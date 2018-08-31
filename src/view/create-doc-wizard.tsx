@@ -122,7 +122,7 @@ export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: OBJIOIt
     let item: ContItem;
     const onResult = (okArgs: OKArgs) => {
       if (okArgs) {
-        let doc = okArgs.item.classObj.create({...okArgs.args, source});
+        let doc = okArgs.item.classObj.create({source, ...okArgs.args});
         const args: DocHolderArgs = { doc };
         if (source) {
           if (source instanceof FileObject) {

@@ -37,6 +37,7 @@ import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import * as Objects from 'objio-object/view';
+import { Database } from 'objio-sqlite-table/client/database';
 
 let objio: OBJIO;
 
@@ -224,6 +225,12 @@ async function loadAndRender() {
       />
     ),
     object: () => new DocRoot()
+  });
+
+  mvf.register({
+    classObj: Database,
+    view: (props: {model: Database}) => <div>SQLITE3 Database {props.model.holder.getID()}</div>,
+    object: () => new Database()
   });
 
   [
