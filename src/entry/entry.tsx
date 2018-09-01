@@ -206,7 +206,10 @@ async function loadAndRender() {
       <DocRootView
         vf={mvf}
         getView={(obj: DocHolder | FileObject) => {
-          let view = mvf.getView({classObj: obj.constructor, props: { model: obj }});
+          let view = React.cloneElement(
+            mvf.getView({classObj: obj.constructor, props: { model: obj }}),
+            { key: obj.holder.getID() }
+          );
           if (obj instanceof FileObject) {
             view = (
               <DocView
