@@ -136,7 +136,7 @@ async function loadAndRender() {
   } catch(e) {
     console.log('localStorage can not be loaded');
   }*/
-  objio = await createOBJIO({factory, store, context: { path: `/data/projects/${args.prj}/`, db: '' }});
+  objio = await createOBJIO({factory, store, context: { path: `/data/projects/${args.prj}/` }});
   /*objio.addObserver({
     onSave: () => {
       console.log('saving ' + Date.now());
@@ -151,7 +151,7 @@ async function loadAndRender() {
     model = await objio.loadObject<DocRoot>();
   } catch (e) {
     model = new DocRoot();
-    await objio.createObject<DocRoot>(model);
+    await objio.createObject(model);
     model.getHolder().save();
   }
 

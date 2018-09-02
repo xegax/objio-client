@@ -51,6 +51,9 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
     .then(res => {
       this.slider.setMinMax({from: res.min, to: res.max});
       this.slider.setRange({from: res.min, to: res.max});
+    })
+    .catch(err => {
+      console.log('error', err);
     });
 
     return Promise.resolve();

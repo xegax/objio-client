@@ -437,7 +437,9 @@ export class SpriteSheetView extends React.Component<Props, State> {
     if (anim.find(v => v.name == newName) != -1)
       return;
 
-    anim.push( await anim.getHolder().createObject(new Animation(newName)) );
+    let newAnim = new Animation(newName);
+    await anim.getHolder().createObject(newAnim)
+    anim.push( newAnim );
     anim.getHolder().save();
     this.setState({mode: null});
   }

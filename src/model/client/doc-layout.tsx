@@ -50,7 +50,8 @@ export class DocLayout extends Base {
         });
       })
       .then((holder: DataSourceHolder) => {
-        return this.holder.createObject(holder);
+        this.holder.createObject(holder);
+        return holder;
       })
       .then((holder: DataSourceHolder) => {
         this.model.getLastDrop().id = holder.holder.getID();
