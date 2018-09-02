@@ -38,6 +38,10 @@ import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import * as Objects from 'objio-object/view';
 import { Database } from 'objio-sqlite-table/client/database';
+import { Toaster, Position, Intent } from '@blueprintjs/core';
+export const AppToaster = Toaster.create({
+  position: Position.TOP,
+});
 
 let objio: OBJIO;
 
@@ -137,6 +141,18 @@ async function loadAndRender() {
     console.log('localStorage can not be loaded');
   }*/
   objio = await createOBJIO({factory, store, context: { path: `/data/projects/${args.prj}/` }});
+  objio.setErrorHandler(args => {
+    let message = args.error.data || args.error.toString();
+    AppToaster.show({
+      message: (
+        <div>
+          <div>{message}</div>
+          <div>{JSON.stringify(args.args, null, ' ')}</div>
+        </div>
+      ),
+      intent: Intent.DANGER
+    });
+  });
   /*objio.addObserver({
     onSave: () => {
       console.log('saving ' + Date.now());
