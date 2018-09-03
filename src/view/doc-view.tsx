@@ -6,6 +6,7 @@ import { ViewFactory } from '../common/view-factory';
 import { DocRoot } from '../model/client/doc-root';
 import { OBJIOItem } from 'objio';
 import { createDocWizard } from './create-doc-wizard';
+import { ObjectBase } from 'objio-object/server/object-base';
 
 const classes = {
   docView: 'doc-view',
@@ -42,14 +43,15 @@ export class DocView extends React.Component<Props> {
 
   renderName(): JSX.Element {
     const model = this.props.model;
+    let obj = model instanceof DocHolder ? model.getDoc() : model;
 
     if (this.state.edit)
       return (
         <input
-          defaultValue={ model.getName() }
+          defaultValue={ obj.getName() }
           onKeyDown={ evt => {
             if (evt.keyCode == 13) {
-              model.setName(evt.currentTarget.value);
+              obj.setName(evt.currentTarget.value);
               this.setState({ edit: false });
             }
           }}
@@ -58,7 +60,7 @@ export class DocView extends React.Component<Props> {
 
     return (
       <div className={classes.name} onDoubleClick={() => this.setState({edit: true})}>
-        {model.getName()}
+        {obj.getName()}
       </div>
     );
   }
@@ -89,7 +91,9 @@ export class DocView extends React.Component<Props> {
         title='create'
         className='fa fa-plus'
         onClick={() => {
-          createDocWizard(this.props.root, this.props.vf, this.props.model)
+          const model = this.props.model;
+          const obj: ObjectBase | FileObject = model instanceof DocHolder ? model.getDoc() : model;
+          createDocWizard(this.props.root, this.props.vf, obj)
           .catch(e => {
             console.log('cancel');
           });

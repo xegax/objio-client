@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { DocHolder } from '../model/client/doc-holder';
 import { DocTreeItem } from '../model/client/doc-root';
 import { DocSpriteSheet } from '../model/doc-sprite-sheet';
 import { Menu, ContextMenu, MenuItem } from '@blueprintjs/core';

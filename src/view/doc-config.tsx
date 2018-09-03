@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { OBJIOItem } from 'objio';
+import { ObjectBase } from 'objio-object/client/object-base';
 
 export interface Props {
-  objects(): Array<OBJIOItem>;
-  source?: OBJIOItem;
+  objects(): Array<ObjectBase>;
+  source?: ObjectBase;
 }
 
 export abstract class DocConfig<TObjArgs extends Object = Object> extends React.Component<Partial<Props>> {

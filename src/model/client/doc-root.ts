@@ -101,9 +101,13 @@ export class DocRoot extends Base {
   }
 
   exists(objs: Array<OBJIOItem>): boolean {
-    return [this.files, this.docs].some((lst: OBJIOArray<OBJIOItem>) => {
-      return !!lst.find(obj => objs.indexOf(obj) != -1);
-    });
+    const arr = [
+      ...this.files.getArray(),
+      ...this.docs.getArray(),
+      ...this.docs.getArray().map(holder => holder.getDoc())
+    ];
+  
+    return !!arr.find(obj => objs.indexOf(obj) != -1);
   }
 
   protected getPathOf(obj: OBJIOItem): Array<string> {
@@ -133,7 +137,7 @@ export class DocRoot extends Base {
     const makeItem = (obj: DocHolder | FileObject): DocTreeItem => {
       let label = '';
       if (obj instanceof DocHolder) {
-        label = obj.getName();
+        label = obj.getDoc().getName();
       } else if (obj instanceof FileObject) {
         label = obj.getName();
       }

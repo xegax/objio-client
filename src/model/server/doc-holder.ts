@@ -1,16 +1,15 @@
 import { OBJIOItem, SERIALIZER, OBJIOItemClass } from 'objio';
 import { DocTable } from 'objio-object/server/doc-table';
 import { DocLayout } from './doc-layout';
+import { ObjectBase } from 'objio-object/server/object-base';
 
-export interface DocHolderArgs<T = OBJIOItem> {
-  name?: string;
+export interface DocHolderArgs<T = ObjectBase> {
   path?: Array<string>;
   doc: T;
 }
 
-export class DocHolder<T = OBJIOItem> extends OBJIOItem {
+export class DocHolder<T = ObjectBase> extends OBJIOItem {
   protected path: Array<string> = [];
-  protected name: string = 'unnamed';
   protected doc: T;
 
   constructor(args?: DocHolderArgs<T>) {
@@ -19,37 +18,12 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
     if (!args)
       return;
 
-    this.name = args.name || this.name;
     this.path = (args.path || this.path).slice();
     this.doc = args.doc;
   }
 
   getPath(): Array<string> {
     return this.path;
-  }
-
-  getTypePath(): Array<string> {
-    const path = [];
-    if (this.doc instanceof DocTable) {
-      path.push('tables');
-    } else if (this.doc instanceof DocLayout) {
-      path.push('layout');
-    }
-
-    return path;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  setName(name: string): void {
-    if (this.name == name)
-      return;
-
-    this.name = name;
-    this.holder.save();
-    this.holder.delayedNotify();
   }
 
   getDoc(): T {
@@ -66,7 +40,6 @@ export class DocHolder<T = OBJIOItem> extends OBJIOItem {
   static TYPE_ID = 'DocHolder';
   static SERIALIZE: SERIALIZER = () => ({
     path: {type: 'json'},
-    name: {type: 'string'},
     doc: {type: 'object'}
   });
 }

@@ -26,6 +26,7 @@ export function registerObjects(fact: OBJIOFactory) {
     fact.registerItem(classObj);
   });
 
+  fact.registerItem(DocHolder);
   fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);

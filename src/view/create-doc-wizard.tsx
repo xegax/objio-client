@@ -11,6 +11,7 @@ import { DocConfig } from './doc-config';
 import { DocRoot } from '../model/client/doc-root';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
 import { FileObject } from 'objio-object/client/file-object';
+import { ObjectBase } from 'objio-object/client/object-base';
 
 const classes = {
   wizard: 'create-doc-wizard',
@@ -24,7 +25,7 @@ interface OKArgs {
 }
 
 interface Props {
-  source: OBJIOItem;
+  source: ObjectBase;
   root: DocRoot;
   vf: ViewFactory;
   onOK(args: OKArgs);
@@ -73,7 +74,7 @@ export class CreateDocWizard extends React.Component<Props> {
     this.setState({list});
   }
 
-  getRootObjects = (): Array<OBJIOItem> => {
+  getRootObjects = (): Array<ObjectBase> => {
     return [
       ...this.props.root.getFiles(),
       ...this.props.root.getDocs().map(holder => holder.getDoc())
@@ -117,18 +118,18 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 }
 
-export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: OBJIOItem): Promise<OBJIOItem> {
+export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
   return new Promise((resolve, reject) => {
     let item: ContItem;
     const onResult = (okArgs: OKArgs) => {
       if (okArgs) {
-        let doc = okArgs.item.classObj.create({source, ...okArgs.args});
+        let doc = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
         const args: DocHolderArgs = { doc };
         if (source) {
           if (source instanceof FileObject) {
-            args.name = source.getName();
+            doc.setName(source.getName());
           } else {
-            args.name = OBJIOItem.getClass(source).TYPE_ID;
+            doc.setName(OBJIOItem.getClass(source).TYPE_ID);
           }
         }
 
