@@ -5,6 +5,8 @@ import { OBJIOItem } from 'objio';
 import { DocHolder } from './doc-holder';
 import { select } from '../../view/prompt';
 import { LayoutContView } from '../../view/layout/layout-cont-view';
+import { FileObject } from 'objio-object/client/file-object';
+import { ObjectBase } from 'objio-object/client/object-base';
 
 export class DocLayout extends Base {
   private model = new LayoutModel();
@@ -27,31 +29,33 @@ export class DocLayout extends Base {
         });
 
         this.model.setLayout( clone(this.layout) as LayoutCont );
-        this.updateLayoutMap();
         return Promise.resolve();
       }
     });
 
     this.model.subscribe(() => {
       this.holder.getObject(this.model.getLastDrop().id)
-      .then((obj: DocHolder) => {
-        const views = DataSourceHolder.findAllViews( OBJIOItem.getClass(obj.getDoc()) );
+      .then((holder: DocHolder | FileObject) => {
+        let obj: ObjectBase = holder instanceof DocHolder ? holder.getDoc() : holder;
+        const views = DataSourceHolder.findAllViews( OBJIOItem.getClass(obj) );
 
         if (views.length == 1)
-          return views[0].object({source: obj.getDoc(), layout: this, viewType: views[0].viewType});
+          return views[0].object({source: obj, layout: this, viewType: views[0].viewType});
 
         return select({
           items: views.map(view => view.viewType)
         }).then(view => {
           return (
             views.find(v => v.viewType == view)
-            .object({source: obj.getDoc(), layout: this, viewType: view})
+            .object({source: obj, layout: this, viewType: view})
           );
         });
       })
       .then((holder: DataSourceHolder) => {
-        this.holder.createObject(holder);
-        return holder;
+        return (
+          this.holder.createObject(holder)
+          .then(() => holder)
+        );
       })
       .then((holder: DataSourceHolder) => {
         this.model.getLastDrop().id = holder.holder.getID();
@@ -59,8 +63,8 @@ export class DocLayout extends Base {
 
         this.objects.holder.save();
         this.layout = clone(this.model.getLayout()) as LayoutCont;
-        this.holder.save();
         this.updateLayoutMap();
+        this.holder.save();
       }).catch(e => {
         console.log(e);
         this.model.remove(this.model.getLastDrop().id);
@@ -78,7 +82,7 @@ export class DocLayout extends Base {
     const map: {[id: string]: JSX.Element} = {};
     this.objects.getArray().forEach((obj: DataSourceHolder) => {
       const id = obj.holder.getID();
-      const jsx: JSX.Element = obj.getView() || (
+      const jsx: JSX.Element = (obj.getView() || 
         <React.Fragment>
           <div>object {this.holder.getID()}</div>
           <div>data object {obj.get().holder.getID()}</div>

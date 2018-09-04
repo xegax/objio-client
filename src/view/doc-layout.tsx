@@ -25,6 +25,7 @@ export class DocLayoutView extends React.Component<Props, {}> {
   }
 
   componentDidMount() {
+    this.props.model.updateLayoutMap();
     this.props.model.holder.subscribe(this.subscriber);
   }
 

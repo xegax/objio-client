@@ -52,6 +52,7 @@ export class DocView extends React.Component<Props> {
           onKeyDown={ evt => {
             if (evt.keyCode == 13) {
               obj.setName(evt.currentTarget.value);
+              this.props.root.updateTree();
               this.setState({ edit: false });
             }
           }}

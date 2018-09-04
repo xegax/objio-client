@@ -46,6 +46,8 @@ export class CreateDocWizard extends React.Component<Props> {
     if (this.props.source)
       items = this.props.vf.findBySource(OBJIOItem.getClass(this.props.source));
 
+    items = items.filter(item => (item.flags as Set<string>).has('create-wizard'));
+
     const list = new RenderListModel( items.length );
     list.setHandler({
       loadItems: (from, count) => {

@@ -50,6 +50,9 @@ export class CondHolder {
     if (values.length == 1)
       return values[0];
 
+    if (values.length == 0)
+      return null;
+
     return { op: 'and', values };
   }
 }

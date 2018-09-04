@@ -8,6 +8,7 @@ export interface FactoryItem< TProps = {}, TArgs = {}, TObject = OBJIOItem> {
   object(args: TArgs): TObject;
   config?(props: Props): JSX.Element;
   sources?:  Array<OBJIOItemClass>;
+  flags?: Set<string> | Array<string>;
 }
 
 export class ViewFactory< TProps extends Object = {},
@@ -20,6 +21,9 @@ export class ViewFactory< TProps extends Object = {},
       throw 'this already registered';
 
     args = {...args};
+    if (Array.isArray(args.flags || []))
+      args.flags = new Set(args.flags || []);
+
     this.items.push(args);
   }
 

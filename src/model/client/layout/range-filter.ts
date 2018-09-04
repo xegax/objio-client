@@ -19,7 +19,8 @@ export class RangeFilter extends Base<DocTable, DocLayout> implements CondHolder
 
     this.holder.addEventHandler({
       onLoad: this.onInit,
-      onCreate: this.onInit
+      onCreate: this.onInit,
+      onObjChange: this.onInit
     });
 
     this.slider.subscribe(() => {

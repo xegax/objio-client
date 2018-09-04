@@ -45,14 +45,19 @@ export const AppToaster = Toaster.create({
 
 let objio: OBJIO;
 
-function initDocLayout() {
+function initDocLayout(mvf: ViewFactory) {
   const vf = DataSourceHolder.getFactory<DocTable, DocLayout>();
 
   vf.register({
     classObj: FileObject,
     object: args => new DataSourceHolder(args),
     viewType: 'content',
-    view: props => null
+    view: (props: LayoutItemViewProps<FileObject, FileObject>) => {
+      return mvf.getView({
+        classObj: FileObject,
+        props: { model: props.dataSource, onlyContent: true }
+      });
+    }
   });
 
   vf.register({
@@ -160,8 +165,9 @@ async function loadAndRender() {
     }
   });*/
 
-  initDocLayout();
-
+  let mvf = new ViewFactory();
+  initDocLayout(mvf);
+  
   let model: DocRoot;
   try {
     model = await objio.loadObject<DocRoot>();
@@ -186,13 +192,13 @@ async function loadAndRender() {
     model.holder.notify();
   });
 
-  let mvf = new ViewFactory();
   mvf.register({
     classObj: DocSpriteSheet,
     object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     config: props => <SpriteConfig {...props}/>,
-    sources: [ FileObject ]
+    sources: [ FileObject ],
+    flags: [ 'create-wizard' ]
   });
 
   mvf.register({
@@ -200,7 +206,8 @@ async function loadAndRender() {
     view: (props: {model: DocLayout}) => (
       <DocLayoutView {...props}/>
     ),
-    object: () => new DocLayout()
+    object: () => new DocLayout(),
+    flags: [ 'create-wizard' ]
   });
 
   mvf.register({
@@ -226,19 +233,20 @@ async function loadAndRender() {
             mvf.getView({classObj: obj.constructor, props: { model: obj }}),
             { key: obj.holder.getID() }
           );
-          if (obj instanceof FileObject) {
-            view = (
-              <DocView
-                model={obj}
-                root={model}
-                vf={mvf}
-              >
-                {view}
-              </DocView>
-            );
-          }
 
-          return view;
+          if (obj instanceof DocHolder)
+            return view;
+
+          return (
+            <DocView
+              model={obj}
+              root={model}
+              vf={mvf}
+              key={obj.holder.getID()}
+            >
+              {view}
+            </DocView>
+          );
         }}
         {...props}
       />
@@ -249,28 +257,34 @@ async function loadAndRender() {
   mvf.register({
     classObj: Database,
     view: (props: {model: Database}) => <div>SQLITE3 Database {props.model.holder.getID()}</div>,
-    object: () => new Database()
+    object: () => new Database(),
+    flags: ['create-wizard']
   });
 
   [
     ...Objects.getViews()
   ].forEach(classObj => {
-    classObj.getClientViews().forEach(viewItem => {
+    if (!classObj.getViewDesc)
+      return;
+
+    const viewDesc = classObj.getViewDesc();
+    (viewDesc.views || []).forEach(viewItem => {
       const factItem: FactoryItem = {
         classObj,
         view: viewItem.view,
         object: args => classObj.create(args)
       };
 
-      if (classObj.getClientConfig)
-        factItem.config = props => classObj.getClientConfig(props);
+      if (viewDesc.config)
+        factItem.config = props => viewDesc.config(props);
 
       if (viewItem.viewType)
         factItem.viewType = viewItem.viewType;
 
-      if (classObj.getClassSources)
-        factItem.sources = classObj.getClassSources();
+      if (viewDesc.sources)
+        factItem.sources = viewDesc.sources;
 
+      factItem.flags = viewDesc.flags as Set<string>;
       mvf.register(factItem);
     });
   });

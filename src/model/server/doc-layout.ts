@@ -1,6 +1,7 @@
 import { LayoutCont } from 'ts-react-ui/model/layout';
 import { OBJIOItem, OBJIOArray, SERIALIZER } from 'objio';
 import { ViewFactory, FactoryItem } from '../../common/view-factory';
+import { ObjectBase } from 'objio-object/server/object-base';
 
 export { ViewFactory, FactoryItem };
 
@@ -109,7 +110,7 @@ export class DataSourceHolder<
   });
 }
 
-export class DocLayout extends OBJIOItem {
+export class DocLayout extends ObjectBase {
   protected layout: LayoutCont = {type: 'row', items: []};
   protected objects = new OBJIOArray<DataSourceHolder>();
 
@@ -119,6 +120,7 @@ export class DocLayout extends OBJIOItem {
 
   static TYPE_ID = 'DocLayout';
   static SERIALIZE: SERIALIZER = () => ({
+    ...ObjectBase.SERIALIZE(),
     layout:   { type: 'json' },
     objects:  { type: 'object' }
   });

@@ -1,6 +1,7 @@
 import { SERIALIZER, OBJIOItem, OBJIOArray } from 'objio';
 import { Point, Size, Rect, inRect } from '../common/point';
 import { FileObject } from 'objio-object/client/file-object';
+import { ObjectBase } from 'objio-object/client/object-base';
 
 export interface DocSpriteSheetArgs {
   source?: FileObject;
@@ -38,7 +39,7 @@ export class Animation extends OBJIOItem {
   });
 }
 
-export class DocSpriteSheet extends OBJIOItem {
+export class DocSpriteSheet extends ObjectBase {
   private file: FileObject;
   private rects = Array<Rect>();
   private anim = new OBJIOArray<Animation>([new Animation('default', [])]);
@@ -73,6 +74,7 @@ export class DocSpriteSheet extends OBJIOItem {
 
   static TYPE_ID = 'DocSpriteSheet';
   static SERIALIZE: SERIALIZER = () => ({
+    ...ObjectBase.SERIALIZE(),
     file: {type: 'object'},
     rects: {type: 'json'},
     anim: {type: 'object'}

@@ -124,7 +124,6 @@ export class DocRoot extends Base {
       }
     } else if (obj instanceof DocHolder) {
       path.push('docs');
-      path.push(...obj.getPath());
     }
 
     return path;
