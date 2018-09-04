@@ -58,8 +58,7 @@ export class CreateDocWizard extends React.Component<Props> {
     list.setColumns([{
       name: 'object name',
       render: (args: RenderArgs<FactoryItem>) => {
-        const classObj = args.item.classObj as OBJIOItemClass;
-        return <div>{classObj.TYPE_ID}</div>;
+        return <div>{args.item.description}</div>;
       }
     }]);
     list.setHeader(false);

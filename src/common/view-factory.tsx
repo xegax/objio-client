@@ -9,6 +9,7 @@ export interface FactoryItem< TProps = {}, TArgs = {}, TObject = OBJIOItem> {
   config?(props: Props): JSX.Element;
   sources?:  Array<OBJIOItemClass>;
   flags?: Set<string> | Array<string>;
+  description?: string;
 }
 
 export class ViewFactory< TProps extends Object = {},
@@ -20,7 +21,10 @@ export class ViewFactory< TProps extends Object = {},
     if (this.items.find(item => args.classObj == item.classObj && args.viewType == item.viewType))
       throw 'this already registered';
 
-    args = {...args};
+    args = {
+      description: args.classObj.TYPE_ID,
+      ...args
+    };
     if (Array.isArray(args.flags || []))
       args.flags = new Set(args.flags || []);
 

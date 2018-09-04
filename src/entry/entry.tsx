@@ -198,7 +198,8 @@ async function loadAndRender() {
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     config: props => <SpriteConfig {...props}/>,
     sources: [ FileObject ],
-    flags: [ 'create-wizard' ]
+    flags: [ 'create-wizard' ],
+    description: 'Sprite sheet object'
   });
 
   mvf.register({
@@ -207,7 +208,8 @@ async function loadAndRender() {
       <DocLayoutView {...props}/>
     ),
     object: () => new DocLayout(),
-    flags: [ 'create-wizard' ]
+    flags: [ 'create-wizard' ],
+    description: 'Layout object'
   });
 
   mvf.register({
@@ -258,7 +260,8 @@ async function loadAndRender() {
     classObj: Database,
     view: (props: {model: Database}) => <div>SQLITE3 Database {props.model.holder.getID()}</div>,
     object: () => new Database(),
-    flags: ['create-wizard']
+    flags: ['create-wizard'],
+    description: 'SQLITE3 Database'
   });
 
   [
@@ -285,6 +288,7 @@ async function loadAndRender() {
         factItem.sources = viewDesc.sources;
 
       factItem.flags = viewDesc.flags as Set<string>;
+      factItem.description = viewDesc.desc;
       mvf.register(factItem);
     });
   });
