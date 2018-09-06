@@ -14,6 +14,7 @@ import { DocRoot } from '../model/client/doc-root';
 import './doc-root.scss';
 import { createDocWizard } from './create-doc-wizard';
 import { ViewFactory } from '../common/view-factory';
+import { DocHolder } from '../model/client/doc-holder';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -164,14 +165,20 @@ export class DocRootView extends React.Component<Props, State> {
       size: file.size,
       mime: file.type
     };
-    let fileObj = createFileObject(fileArgs);
-    let select = this.props.model.getSelect() as FileObject;
-    if (select && select.constructor == fileObj.constructor) {
-      select.sendFile(file);
+    
+    let select = this.props.model.getSelect();
+    let holder = select as DocHolder;
+    let fileObj = select as FileObject;
+
+    if (holder instanceof DocHolder && 'sendFile' in holder.getDoc()) {
+      (holder.getDoc() as any).sendFile(file);
+    } else if (fileObj && 'sendFile' in fileObj) {
+      fileObj.sendFile(file);
     } else {
-      this.props.model.append(fileObj)
+      let newFileObj = createFileObject(fileArgs);
+      this.props.model.append(newFileObj)
       .then(() => {
-        fileObj.sendFile(file);
+        newFileObj.sendFile(file);
       });
     }
 

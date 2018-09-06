@@ -42,9 +42,10 @@ export class CreateDocWizard extends React.Component<Props> {
   ref = React.createRef<DocConfig>();
 
   componentDidMount() {
-    let items = this.props.vf.getItems();
-    if (this.props.source)
-      items = this.props.vf.findBySource(OBJIOItem.getClass(this.props.source));
+    const { vf, source } = this.props;
+    let items = vf.getItems();
+    if (source)
+      items = vf.findBySource(OBJIOItem.getClass(source));
 
     items = items.filter(item => (item.flags as Set<string>).has('create-wizard'));
 
@@ -94,7 +95,6 @@ export class CreateDocWizard extends React.Component<Props> {
               </FitToParent>
             </div>
             <div className={classes.objectParams}>
-              { this.props.source ? <p>This will be created from {OBJIOItem.getClass(this.props.source).TYPE_ID}</p> : null }
               { item && item.config && React.cloneElement(item.config({
                   objects: this.getRootObjects,
                   source: this.props.source
