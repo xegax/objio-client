@@ -47,10 +47,10 @@
     "tslint": "^3.15.1"
   },
   "dependencies": {
-    "objio": "^0.0.29",
-    "objio-object": "^0.0.9",
-    "objio-sqlite-table": "^0.0.9",
-    "ts-react-ui": "^0.1.9",
+    "objio": "^0.0.30",
+    "objio-object": "^0.0.10",
+    "objio-sqlite-table": "^0.0.10",
+    "ts-react-ui": "^0.1.10",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-transition-group": "^2.3.1"
