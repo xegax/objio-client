@@ -13,10 +13,6 @@ export class DocVideo extends OBJIOItem {
     return this.video.getExt();
   }
 
-  getState() {
-    return this.video.getState();
-  }
-
   getPath() {
     return this.video.getPath();
   }

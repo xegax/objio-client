@@ -71,10 +71,6 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
   }
 
   onInit = () => {
-    this.source.getState().holder.addEventHandler({
-      onObjChange: () => this.holder.notify()
-    });
-
     this.updateTable();
     return Promise.resolve();
   }

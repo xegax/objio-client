@@ -85,8 +85,8 @@ export class DocView extends React.Component<Props> {
       />
     );
 
-    let depends = this.props.vf.findBySource(OBJIOItem.getClass(this.props.model));
-    const create = depends.length ? (
+    // let depends = this.props.vf.findBySource(OBJIOItem.getClass(this.props.model));
+    const create = null; /*depends.length ? (
       <i
         style={{marginLeft: 10}}
         title='create'
@@ -100,7 +100,7 @@ export class DocView extends React.Component<Props> {
           });
         }}
       />
-    ) : null;
+    ) : null;*/;
 
     return (
       <div className={classes.tools}>

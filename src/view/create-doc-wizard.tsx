@@ -22,6 +22,7 @@ const classes = {
 interface OKArgs {
   item: FactoryItem;
   args: Partial<Object>;
+  name: string;
 }
 
 interface Props {
@@ -40,14 +41,26 @@ interface State {
 export class CreateDocWizard extends React.Component<Props> {
   state: Partial<State> = {};
   ref = React.createRef<DocConfig>();
+  name = React.createRef<HTMLInputElement>();
 
   componentDidMount() {
-    const { vf, source } = this.props;
+    const { vf } = this.props;
     let items = vf.getItems();
-    if (source)
-      items = vf.findBySource(OBJIOItem.getClass(source));
+    /* if (source)
+      items = vf.findBySource( OBJIOItem.getClass(source) );
+    */
 
     items = items.filter(item => (item.flags as Set<string>).has('create-wizard'));
+    
+    const sources = this.getRootObjects();
+    items = items.filter(item => {
+      if (!item.sources || item.sources.length == 0)
+        return true;
+
+      return item.sources.some(bunch => bunch.every( (source: any) => {
+        return sources.some(obj => obj instanceof source);
+      }));
+    });
 
     const list = new RenderListModel( items.length );
     list.setHandler({
@@ -94,7 +107,8 @@ export class CreateDocWizard extends React.Component<Props> {
                 <List model={this.state.list}/>
               </FitToParent>
             </div>
-            <div className={classes.objectParams}>
+            <div className={classes.objectParams} key={item && item.classObj.TYPE_ID}>
+              { item && <div>name: <input ref={this.name} defaultValue={`new ${item.description || item.classObj.TYPE_ID}`}/></div> }
               { item && item.config && React.cloneElement(item.config({
                   objects: this.getRootObjects,
                   source: this.props.source
@@ -108,7 +122,11 @@ export class CreateDocWizard extends React.Component<Props> {
               text='OK'
               intent={Intent.PRIMARY}
               onClick={() => {
-                this.props.onOK({item, args: this.ref && this.ref.current && this.ref.current.getConfig() || {} });
+                this.props.onOK({
+                  item,
+                  args: this.ref && this.ref.current && this.ref.current.getConfig() || {},
+                  name: this.name.current.value
+                });
               }}
             />
             <Button text='Cancel' onClick={this.props.onCancel}/>
@@ -124,18 +142,20 @@ export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectB
     let item: ContItem;
     const onResult = (okArgs: OKArgs) => {
       if (okArgs) {
-        let doc = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
-        const args: DocHolderArgs = { doc };
+        let newObj = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
+        newObj.setName(okArgs.name);
+
+        const args: DocHolderArgs = { doc: newObj };
         if (source) {
           if (source instanceof FileObject) {
-            doc.setName(source.getName());
+            newObj.setName(source.getName());
           } else {
-            doc.setName(OBJIOItem.getClass(source).TYPE_ID);
+            newObj.setName(OBJIOItem.getClass(source).TYPE_ID);
           }
         }
 
         root.append(new DocHolder(args))
-        .then(() => resolve(doc));
+        .then(() => resolve(newObj));
       } else {
         reject();
       }

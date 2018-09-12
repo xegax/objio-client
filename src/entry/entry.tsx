@@ -197,7 +197,7 @@ async function loadAndRender() {
     object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     config: props => <SpriteConfig {...props}/>,
-    sources: [ FileObject ],
+    sources: [ [ FileObject ] ],
     flags: [ 'create-wizard' ],
     description: 'Sprite sheet object'
   });

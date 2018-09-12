@@ -143,10 +143,6 @@ export class CategoryFilterImpl<TCategoryFilterOwner extends CategoryFilterOwner
 
   onInit = () => {
     this.render.setHeader(false);
-    this.owner.get().getState().holder.addEventHandler({
-      onObjChange: () => this.owner.holder.notify()
-    });
-
     this.updateSubtable();
 
     this.render.subscribe(() => {

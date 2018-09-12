@@ -55,8 +55,8 @@ export class DrillDownTableView extends React.Component<Props> {
 
   renderData(): JSX.Element {
     const model = this.props.model;
-    const state = model.get().getState();
-    if (!state.isValid()) {
+    const state = model.get();
+    if (!state.isStatusValid()) {
       return <React.Fragment>in progress: {state.getProgress()}</React.Fragment>;
     }
 

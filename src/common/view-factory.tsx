@@ -7,7 +7,7 @@ export interface FactoryItem< TProps = {}, TArgs = {}, TObject = OBJIOItem> {
   view(props: TProps): JSX.Element;
   object(args: TArgs): TObject;
   config?(props: Props): JSX.Element;
-  sources?:  Array<OBJIOItemClass>;
+  sources?:  Array<Array<OBJIOItemClass>>;
   flags?: Set<string> | Array<string>;
   description?: string;
 }
@@ -40,10 +40,11 @@ export class ViewFactory< TProps extends Object = {},
     ));
   }
 
-  findBySource(srcClass: OBJIOItemClass): Array<FactoryItem> {
-    return this.items.filter(item => {
+  findBySource(srcClass: Array<OBJIOItemClass>): Array<FactoryItem> {
+    return [];
+    /*return this.items.filter(item => {
       return item.sources && item.sources.indexOf(srcClass) != -1;
-    });
+    });*/
   }
 
   getView(args: {classObj: Object, viewType?: string, props: TProps}): JSX.Element {
