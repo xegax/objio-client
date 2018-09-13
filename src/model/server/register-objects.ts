@@ -1,5 +1,4 @@
 import { OBJIOFactory } from 'objio';
-import * as SQLITE3 from 'objio-sqlite-table/server';
 import { DocRoot } from './doc-root';
 import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
 import * as Objects from 'objio-object/server';
@@ -12,11 +11,14 @@ import { SelectDetails } from './layout/select-details';
 import { RangeFilter } from './layout/range-filter';
 import { DocVideo } from './doc-video';
 import { DocHolder } from './doc-holder';
+import * as MYSQL from 'objio-mysql-database/server';
+import * as SQLITE3 from 'objio-sqlite-table/server';
 
 export function registerObjects(fact: OBJIOFactory) {
   [
     ...Objects.getClasses(),
-    ...SQLITE3.getClasses()
+    ...SQLITE3.getClasses(),
+    ...MYSQL.getClasses()
   ].forEach(classObj => {
     fact.registerItem(classObj);
   });

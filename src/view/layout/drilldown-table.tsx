@@ -53,6 +53,18 @@ export class DrillDownTableView extends React.Component<Props> {
     );
   }
 
+  renderTableName(): JSX.Element {
+    const model = this.props.model;
+    if (!model.isEdit())
+      return null;
+
+    return (
+      <div style={{display: 'flex'}}>
+        table: {model.get().getTableRef().getTable()}
+      </div>
+    );
+  }
+
   renderData(): JSX.Element {
     const model = this.props.model;
     const state = model.get();
@@ -62,6 +74,7 @@ export class DrillDownTableView extends React.Component<Props> {
 
     return (
       <React.Fragment>
+        {this.renderTableName()}
         {this.renderIdColumnSelect()}
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>
@@ -75,10 +88,6 @@ export class DrillDownTableView extends React.Component<Props> {
     return (
       <div className={classes.class}>
         {this.renderData()}
-        <input ref={this.ref} onKeyDown={evt => {
-          if (evt.keyCode == 13)
-            this.props.model.applySQLCond(this.ref.current.value);
-        }}/>
       </div>
     );
   }

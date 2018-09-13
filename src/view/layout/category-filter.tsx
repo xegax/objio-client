@@ -47,6 +47,18 @@ export class CategoryFilterView extends React.Component<Props> {
     );
   }
 
+  renderTableName(): JSX.Element {
+    const model = this.props.model;
+    if (!model.isEdit())
+      return;
+
+    return (
+      <div>
+        table: {model.get().getTableRef().getTable()}
+      </div>
+    );
+  }
+
   renderData(): JSX.Element {
     const model = this.props.model;
     const state = model.get();
@@ -56,6 +68,7 @@ export class CategoryFilterView extends React.Component<Props> {
 
     return (
       <React.Fragment>
+        {this.renderTableName()}
         {this.renderColumnSelect()}
         <FitToParent wrapToFlex>
           <List border model={model.getRender()}/>

@@ -95,7 +95,7 @@ export class TagFilterView extends React.Component<Props> {
           }}
         >
           {all.map((src, i) => {
-            return <option key={i} value={src.holder.getID()}>{src.getTable()}</option>;
+            return <option key={i} value={src.holder.getID()}>{src.getTableRef().getTable()}</option>;
           })}
         </select>
       </div>

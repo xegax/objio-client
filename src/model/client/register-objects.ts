@@ -12,6 +12,7 @@ import { SelectDetails } from './layout/select-details';
 import { RangeFilter } from './layout/range-filter';
 import { DocVideo } from './doc-video';
 import * as SQLITE3 from 'objio-sqlite-table/client';
+import * as MYSQL from 'objio-mysql-database/client';
 
 export {
   DocHolder,
@@ -21,7 +22,8 @@ export {
 export function registerObjects(fact: OBJIOFactory) {
   [
     ...Objects.getClasses(),
-    ...SQLITE3.getClasses()
+    ...SQLITE3.getClasses(),
+    ...MYSQL.getClasses()
   ].forEach(classObj => {
     fact.registerItem(classObj);
   });

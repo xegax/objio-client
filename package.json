@@ -50,6 +50,7 @@
     "objio": "^0.0.30",
     "objio-object": "^0.0.10",
     "objio-sqlite-table": "^0.0.10",
+	"objio-mysql-database": "^0.0.10",
     "ts-react-ui": "^0.1.10",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

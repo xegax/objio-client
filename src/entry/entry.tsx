@@ -37,8 +37,11 @@ import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 import * as Objects from 'objio-object/view';
+import * as MYSQL from 'objio-mysql-database/view';
 import { Database } from 'objio-sqlite-table/client/database';
 import { Toaster, Position, Intent } from '@blueprintjs/core';
+
+
 export const AppToaster = Toaster.create({
   position: Position.TOP,
 });
@@ -265,7 +268,8 @@ async function loadAndRender() {
   });
 
   [
-    ...Objects.getViews()
+    ...Objects.getViews(),
+    ...MYSQL.getViews()
   ].forEach(classObj => {
     if (!classObj.getViewDesc)
       return;
