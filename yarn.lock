@@ -4176,25 +4176,16 @@ object.pick@^1.3.0:
   dependencies:
     isobject "^3.0.1"
 
-objio-mysql-database@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/objio-mysql-database/-/objio-mysql-database-0.0.11.tgz#1c2b7e6f6956675b81adbc7c8b75bb84ab15518a"
+objio-mysql-database@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/objio-mysql-database/-/objio-mysql-database-0.0.12.tgz#041eb79458e40d343afa3a3e7919306d93ec4f3b"
   dependencies:
     mysql "^2.16.0"
-    objio "^0.0.30"
-    objio-object "^0.0.10"
+    objio "^0.0.31"
+    objio-object "^0.0.11"
     react "^16.4.1"
     react-dom "^16.4.1"
-    ts-react-ui "^0.1.10"
-
-objio-object@^0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/objio-object/-/objio-object-0.0.10.tgz#65f2785248bdf9274671c74d46838370e35bdf65"
-  dependencies:
-    objio "^0.0.30"
-    react "^16.4.1"
-    react-dom "^16.4.1"
-    ts-react-ui "^0.1.10"
+    ts-react-ui "^0.1.11"
 
 objio-object@^0.0.11:
   version "0.0.11"
@@ -4205,20 +4196,13 @@ objio-object@^0.0.11:
     react-dom "^16.4.1"
     ts-react-ui "^0.1.11"
 
-objio-sqlite-table@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/objio-sqlite-table/-/objio-sqlite-table-0.0.11.tgz#80d1c2e1ab7436798ff820d6ae34e4ed3338dee5"
+objio-sqlite-table@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/objio-sqlite-table/-/objio-sqlite-table-0.0.12.tgz#2f8d9798df005c1dfa002bbcd0a19c27c9652d00"
   dependencies:
-    objio "^0.0.30"
-    objio-object "^0.0.10"
+    objio "^0.0.31"
+    objio-object "^0.0.11"
     sqlite3 "^4.0.2"
-
-objio@^0.0.30:
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/objio/-/objio-0.0.30.tgz#4405256ad193572405432c3a354c5122784d4887"
-  dependencies:
-    axios "^0.18.0"
-    lodash "^4.17.4"
 
 objio@^0.0.31:
   version "0.0.31"
@@ -5896,7 +5880,7 @@ ts-loader@^4.4.1:
     micromatch "^3.1.4"
     semver "^5.0.1"
 
-ts-react-ui@^0.1.10, ts-react-ui@^0.1.11:
+ts-react-ui@^0.1.11:
   version "0.1.11"
   resolved "https://registry.yarnpkg.com/ts-react-ui/-/ts-react-ui-0.1.11.tgz#630faf8cecf1248eb8309ffdc4a2800280f3c853"
   dependencies:
