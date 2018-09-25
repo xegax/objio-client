@@ -137,39 +137,87 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 }
 
-export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
-  return new Promise((resolve, reject) => {
-    let item: ContItem;
-    const onResult = (okArgs: OKArgs) => {
-      if (okArgs) {
-        let newObj = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
-        newObj.setName(okArgs.name);
+interface DeferedPromise<T> extends Promise<T> {
+  resolve?(res: T): void;
+  reject?(err?: any): void;
+}
 
-        const args: DocHolderArgs = { doc: newObj };
-        if (source) {
-          if (source instanceof FileObject) {
-            newObj.setName(source.getName());
-          } else {
-            newObj.setName(OBJIOItem.getClass(source).TYPE_ID);
-          }
-        }
-
-        root.append(new DocHolder(args))
-        .then(() => resolve(newObj));
-      } else {
-        reject();
-      }
-      item.remove();
-    };
-
-    item = ContainerModel.get().append(
-      <CreateDocWizard
-        source={source}
-        root={root}
-        vf={vf}
-        onOK={okArgs => onResult(okArgs)}
-        onCancel={() => onResult(null)}
-      />
-    );
+function deferred<T>(): DeferedPromise<T> {
+  let resolve = (res: T): void => { throw 'promise not initialized'; };
+  let reject = (err?: any): void => { throw 'promise not initialized'; };
+  let p = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
+
+  const res: DeferedPromise<T> = p;
+  res.resolve = resolve;
+  res.reject = reject;
+
+  return res;
+}
+
+function ExtPromise<T>() {
+  return {
+    ...Promise,
+    deferred: () => deferred<T>()
+  };
+}
+
+/*function DefPromise(): Promise<any> & { resolve(res: any); reject(err: any) } {
+  let resolve = (res: any) => null;
+  let reject = (err: any) => null;
+
+  let p = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return p;
+}*/
+
+
+export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
+  let p = ExtPromise<OBJIOItem>().deferred();
+
+  let dialogCont: ContItem;
+  const onOK = (okArgs: OKArgs) => {
+    if (!okArgs)
+      return;
+
+    let newObj = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
+    newObj.setName(okArgs.name);
+
+    const args: DocHolderArgs = { doc: newObj };
+    if (source) {
+      if (source instanceof FileObject) {
+        newObj.setName(source.getName());
+      } else {
+        newObj.setName(OBJIOItem.getClass(source).TYPE_ID);
+      }
+    }
+
+    root.append(new DocHolder(args))
+    .then(() => {
+      p.resolve(newObj);
+
+      // close dialog
+      dialogCont.remove();
+    });
+  };
+
+  dialogCont = ContainerModel.get().append(
+    <CreateDocWizard
+      source={source}
+      root={root}
+      vf={vf}
+      onOK={okArgs => onOK(okArgs)}
+      onCancel={() => {
+        dialogCont.remove();
+        p.reject();
+      }}
+    />
+  );
+
+  return p;
 }

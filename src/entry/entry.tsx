@@ -41,7 +41,6 @@ import * as MYSQL from 'objio-mysql-database/view';
 import { Database } from 'objio-sqlite-table/client/database';
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
-
 export const AppToaster = Toaster.create({
   position: Position.TOP,
 });
@@ -171,7 +170,7 @@ async function loadAndRender() {
   let mvf = new ViewFactory();
   initDocLayout(mvf);
   
-  let model: DocRoot;
+  let model: OBJIOItem;
   try {
     model = await objio.loadObject<DocRoot>();
   } catch (e) {
@@ -190,8 +189,12 @@ async function loadAndRender() {
   objio.startWatch({req, timeOut: 100})
   .subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
-    if (model.exists(objs))
-      model.updateTree();
+
+    if (model instanceof DocRoot) {
+      if (model.exists(objs))
+        model.updateTree();
+    }
+
     model.holder.notify();
   });
 
@@ -218,6 +221,9 @@ async function loadAndRender() {
   mvf.register({
     classObj: DocHolder,
     view: (props: {model: DocHolder}) => {
+      if (!(model instanceof DocRoot))
+        return null;
+
       const doc = props.model.getDoc();
       return (
         <DocView {...props} root={model} vf={mvf}>
@@ -241,6 +247,9 @@ async function loadAndRender() {
 
           if (obj instanceof DocHolder)
             return view;
+
+          if (!(model instanceof DocRoot))
+            return null;
 
           return (
             <DocView
