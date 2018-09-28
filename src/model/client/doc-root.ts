@@ -5,14 +5,30 @@ import { TreeModel, TreeItem } from 'ts-react-ui/model/tree';
 import { OBJIOItem, OBJIOArray } from 'objio';
 import { CSVFileObject } from 'objio-object/client/csv-file-object';
 import { VideoFileObject } from 'objio-object/client/video-file-object';
+import { createFileObject } from 'objio-object/client';
+import { SendFileArgs } from 'objio-object/client/files-container';
 
 export interface DocTreeItem extends TreeItem {
   obj?: DocHolder | FileObject;
 }
 
+interface UploadItem {
+  file: File;
+  dst?: OBJIOItem;
+}
+
+export interface AppendToUploadArgs {
+  dst?: OBJIOItem;
+  files: Array<File>;
+}
+
 export class DocRoot extends Base {
   protected tree = new TreeModel<DocTreeItem>();
   protected select: OBJIOItem;
+  protected uploadQueue = new Array<UploadItem>();
+  protected uploading: Promise<any>;
+  protected totalFilesToUpload: number = 0;
+  protected currFileProgress: number = 0;
 
   constructor() {
     super();
@@ -40,6 +56,70 @@ export class DocRoot extends Base {
 
       this.setSelect(sel.obj);
     }, 'select');
+  }
+
+  appendToUpload(args: AppendToUploadArgs) {
+    this.totalFilesToUpload += args.files.length;
+    this.uploadQueue.push(...args.files.map(item => ({
+      dst: args.dst,
+      file: item
+    })));
+    this.holder.delayedNotify();
+    this.startUploadNext();
+  }
+
+  getUploadQueue() {
+    return this.uploadQueue.slice();
+  }
+
+  getTotalFilesToUpload(): number {
+    return this.totalFilesToUpload;
+  }
+
+  getCurrFileProgress(): number {
+    return this.currFileProgress;
+  }
+
+  protected startUploadNext() {
+    if (this.uploading || !this.uploadQueue.length)
+      return;
+
+    const item = this.uploadQueue[0];
+    let newFileObj: { sendFile(args: SendFileArgs): Promise<void> };
+
+    let p: Promise<any>;
+    if (!item.dst) {
+      p = this.append(newFileObj = createFileObject({
+        name: item.file.name,
+        size: item.file.size,
+        mime: item.file.type
+      }));
+    } else {
+      newFileObj = item.dst as any;
+      p = Promise.resolve();
+    }
+
+    this.uploading = (
+      p.then(() => {
+        this.holder.delayedNotify();
+        return newFileObj.sendFile({
+          file: item.file,
+          onProgress: value => {
+            this.currFileProgress = value;
+            this.holder.delayedNotify();
+          }
+        });
+      })
+      .then(() => {
+        this.uploadQueue.splice(0, 1);
+        if (this.uploadQueue.length == 0)
+          this.totalFilesToUpload = 0;
+
+        this.uploading = null;
+        this.holder.delayedNotify();
+        this.startUploadNext();
+      })
+    );
   }
 
   getFiles(): Array<FileObject> {
@@ -119,8 +199,10 @@ export class DocRoot extends Base {
         path.push('csv');
       } else if (obj instanceof VideoFileObject) {
         path.push('video');
-      } else if (['jpg', 'png', 'gif'].indexOf(obj.getExt().toLowerCase())) {
-        path.push('images');
+      } else if (['.jpeg', '.jpg', '.png', '.gif'].indexOf(obj.getExt().toLowerCase()) != -1) {
+        path.push('image');
+      } else {
+        path.push('other');
       }
     } else if (obj instanceof DocHolder) {
       path.push('docs');

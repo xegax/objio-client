@@ -4,7 +4,7 @@ import { DocTable } from 'objio-object/client/doc-table';
 import { ColumnAttr, LoadCellsArgs, Condition } from 'objio-object/client/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
-import { cancelable, Cancelable, timer } from 'objio/common/promise';
+import { Cancelable, ExtPromise } from 'objio';
 import { DocLayout } from '../doc-layout';
 import { cn } from '../../../common/common';
 import { CondHolder, CondHolderOwner } from './cond-holder';
@@ -80,7 +80,7 @@ export class CategoryFilterImpl<TCategoryFilterOwner extends CategoryFilterOwner
           this.lastLoadTimer = null;
         }
 
-        this.lastLoadTimer = cancelable(timer(TIME_BETWEEN_REQUEST));
+        this.lastLoadTimer = ExtPromise().cancelable( ExtPromise().timer(TIME_BETWEEN_REQUEST) );
         return this.lastLoadTimer.then(() => {
           this.lastLoadTimer = null;
 

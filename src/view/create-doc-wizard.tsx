@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { OBJIOItem, OBJIOItemClass } from 'objio';
+import { OBJIOItem, ExtPromise } from 'objio';
 import { ViewFactory, FactoryItem } from '../common/view-factory';
 import { List, RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
@@ -136,46 +136,6 @@ export class CreateDocWizard extends React.Component<Props> {
     );
   }
 }
-
-interface DeferedPromise<T> extends Promise<T> {
-  resolve?(res: T): void;
-  reject?(err?: any): void;
-}
-
-function deferred<T>(): DeferedPromise<T> {
-  let resolve = (res: T): void => { throw 'promise not initialized'; };
-  let reject = (err?: any): void => { throw 'promise not initialized'; };
-  let p = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-
-  const res: DeferedPromise<T> = p;
-  res.resolve = resolve;
-  res.reject = reject;
-
-  return res;
-}
-
-function ExtPromise<T>() {
-  return {
-    ...Promise,
-    deferred: () => deferred<T>()
-  };
-}
-
-/*function DefPromise(): Promise<any> & { resolve(res: any); reject(err: any) } {
-  let resolve = (res: any) => null;
-  let reject = (err: any) => null;
-
-  let p = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-
-  return p;
-}*/
-
 
 export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
   let p = ExtPromise<OBJIOItem>().deferred();

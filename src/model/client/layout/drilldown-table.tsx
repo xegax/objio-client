@@ -4,7 +4,7 @@ import { DocTable } from 'objio-object/client/doc-table';
 import { ColumnAttr, LoadCellsArgs, SubtableAttrs, SortPair } from 'objio-object/client/table';
 import { RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs, ListColumn } from 'ts-react-ui/model/list';
-import { cancelable, Cancelable, timer } from 'objio/common/promise';
+import { Cancelable, ExtPromise } from 'objio';
 import { DocLayout } from '../doc-layout';
 import { DataSourceHolderArgs } from '../../server/doc-layout';
 import { ContextMenu, Menu, MenuItem } from '@blueprintjs/core';
@@ -32,7 +32,7 @@ export class DrillDownTable extends Base<DocTable, DocLayout> implements CondHol
           this.lastLoadTimer = null;
         }
 
-        this.lastLoadTimer = cancelable(timer(this.maxTimeBetweenRequests));
+        this.lastLoadTimer = ExtPromise().cancelable( ExtPromise().timer(this.maxTimeBetweenRequests) );
         return this.lastLoadTimer.then(() => {
           this.lastLoadTimer = null;
 
