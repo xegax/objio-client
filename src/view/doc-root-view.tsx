@@ -8,10 +8,9 @@ import { DocRoot } from '../model/client/doc-root';
 import './doc-root.scss';
 import { createDocWizard } from './create-doc-wizard';
 import { ViewFactory } from '../common/view-factory';
-import { FilesDropContainer } from './files-drop-container';
+import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import { FileObject } from 'objio-object/client/file-object';
 import { DocHolder } from '../model/server/doc-holder';
-import { SendFileArgs } from 'objio-object/client/files-container';
 
 const classes = {
   docContView: 'doc-cont-view',
