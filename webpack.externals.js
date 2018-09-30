@@ -3,10 +3,10 @@ const webpack = require('webpack');
 
 var externals = {
   'react': [
-    './node_modules/react/umd/react.development.js'
+    './node_modules/react/cjs/react.development.js'
   ],
   'reactdom': [
-    './node_modules/react-dom/umd/react-dom.development.js'
+    './node_modules/react-dom/cjs/react-dom.production.min.js'
   ],
   'blueprintjs': [
     './node_modules/normalize.css/normalize.css',
