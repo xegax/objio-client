@@ -36,9 +36,11 @@ import { DocView } from '../view/doc-view';
 import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
+
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
-import { Database } from 'objio-sqlite-table/client/database';
+import * as SQLITE3 from 'objio-sqlite-table/view';
+
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
 export const AppToaster = Toaster.create({
@@ -268,16 +270,9 @@ async function loadAndRender() {
     object: () => new DocRoot()
   });
 
-  mvf.register({
-    classObj: Database,
-    view: (props: {model: Database}) => <div>SQLITE3 Database {props.model.holder.getID()}</div>,
-    object: () => new Database(),
-    flags: ['create-wizard'],
-    description: 'SQLITE3 Database'
-  });
-
   [
     ...Objects.getViews(),
+    ...SQLITE3.getViews(),
     ...MYSQL.getViews()
   ].forEach(classObj => {
     if (!classObj.getViewDesc)
