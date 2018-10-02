@@ -5,7 +5,7 @@ import { startDragging } from 'ts-react-ui/common/start-dragging';
 import { isLeftDown } from 'ts-react-ui/common/event-helpers'
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem, Tab, Tabs } from '@blueprintjs/core';
-import { DocConfig } from './doc-config';
+import { ConfigBase } from 'objio-object/view/config';
 import { FileObject } from 'objio-object/client/file-object';
 
 function clamp(v: number, min: number, max: number) {
@@ -556,7 +556,7 @@ export class SpriteSheetView extends React.Component<Props, State> {
   }
 }
 
-export class SpriteConfig extends DocConfig<DocSpriteSheetArgs> {
+export class SpriteConfig extends ConfigBase<DocSpriteSheetArgs> {
   private ref: React.RefObject<HTMLSelectElement> = React.createRef();
 
   getFiles() {

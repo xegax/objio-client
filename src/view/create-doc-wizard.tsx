@@ -7,7 +7,7 @@ import { FitToParent } from 'ts-react-ui/fittoparent';
 import './create-doc-wizard.scss';
 import { ContainerModel, ContItem } from 'ts-react-ui/container';
 import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
-import { DocConfig } from './doc-config';
+import { ConfigBase } from 'objio-object/view/config';
 import { DocRoot } from '../model/client/doc-root';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
 import { FileObject } from 'objio-object/client/file-object';
@@ -40,7 +40,7 @@ interface State {
 
 export class CreateDocWizard extends React.Component<Props> {
   state: Partial<State> = {};
-  ref = React.createRef<DocConfig>();
+  ref = React.createRef<ConfigBase>();
   name = React.createRef<HTMLInputElement>();
 
   componentDidMount() {
