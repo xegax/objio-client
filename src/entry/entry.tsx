@@ -20,23 +20,13 @@ import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
 import { DocTable } from 'objio-object/client/doc-table';
 import { FileObject } from 'objio-object/client/file-object';
-import {
-  DocLayoutView,
-  DocLayout,
-  DataSourceHolder
-} from '../view/doc-layout';
-import { DrillDownTableView, DrillDownTable } from '../view/layout/drilldown-table';
 
 import '../../styles/styles.scss';
-import { LayoutItemViewProps } from '../model/server/doc-layout';
-import { CategoryFilter, CategoryFilterView } from '../view/layout/category-filter';
-import { TagFilter, TagFilterView } from '../view/layout/tag-filter';
-import { SelectDetailsView, SelectDetails } from '../view/layout/select-details';
 import { DocView } from '../view/doc-view';
-import { RangeFilterView, RangeFilter } from '../view/layout/range-filter-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
 
+import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
@@ -48,80 +38,6 @@ export const AppToaster = Toaster.create({
 });
 
 let objio: OBJIO;
-
-function initDocLayout(mvf: ViewFactory) {
-  const vf = DataSourceHolder.getFactory<DocTable, DocLayout>();
-
-  vf.register({
-    classObj: FileObject,
-    object: args => new DataSourceHolder(args),
-    viewType: 'content',
-    view: (props: LayoutItemViewProps<FileObject, FileObject>) => {
-      return mvf.getView({
-        classObj: FileObject,
-        props: { model: props.dataSource, onlyContent: true }
-      });
-    }
-  });
-
-  vf.register({
-    classObj: FileObject,
-    object: args => new DataSourceHolder(args),
-    viewType: 'objInfo',
-    view: (props: LayoutItemViewProps<FileObject, FileObject>) => (
-      <div>
-        <div>extention: {props.dataSource.getExt()}</div>
-        <div>size: {props.dataSource.getSize()}</div>
-        <div>name: {props.dataSource.getName()}</div>
-      </div>
-    )
-  });
-
-  vf.register({
-    classObj: DocTable,
-    object: args => new CategoryFilter(args),
-    viewType: 'category-filter',
-    view: props => (
-      <CategoryFilterView model = {props.model as CategoryFilter}/>
-    )
-  });
-
-  vf.register({
-    classObj: DocTable,
-    object: args => new TagFilter(args),
-    viewType: 'tag-filter',
-    view: props => (
-      <TagFilterView model={props.model as TagFilter}/>
-    )
-  });
-
-  vf.register({
-    classObj: DocTable,
-    object: args => new DrillDownTable(args),
-    viewType: 'drilldown-table',
-    view: props => (
-      <DrillDownTableView model={props.model as DrillDownTable}/>
-    )
-  });
-
-  vf.register({
-    classObj: DocTable,
-    object: args => new SelectDetails(args),
-    viewType: 'select-details',
-    view: props => (
-      <SelectDetailsView model={ props.model as SelectDetails }/>
-    )
-  });
-
-  vf.register({
-    classObj: DocTable,
-    object: args => new RangeFilter(args),
-    viewType: 'range-filter',
-    view: props => (
-      <RangeFilterView model = {props.model as RangeFilter}/>
-    )
-  });
-}
 
 function parseParams(args: string): {[key: string]: string} {
   const res = {};
@@ -170,7 +86,7 @@ async function loadAndRender() {
   });*/
 
   let mvf = new ViewFactory();
-  initDocLayout(mvf);
+  Layout.initDocLayout(mvf as any);
   
   let model: OBJIOItem;
   try {
@@ -208,16 +124,6 @@ async function loadAndRender() {
     sources: [ [ FileObject ] ],
     flags: [ 'create-wizard' ],
     description: 'Sprite sheet object'
-  });
-
-  mvf.register({
-    classObj: DocLayout,
-    view: (props: {model: DocLayout}) => (
-      <DocLayoutView {...props}/>
-    ),
-    object: () => new DocLayout(),
-    flags: [ 'create-wizard' ],
-    description: 'Layout object'
   });
 
   mvf.register({
@@ -271,6 +177,7 @@ async function loadAndRender() {
   });
 
   [
+    ...Layout.getViews(),
     ...Objects.getViews(),
     ...SQLITE3.getViews(),
     ...MYSQL.getViews()

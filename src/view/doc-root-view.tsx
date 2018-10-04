@@ -48,8 +48,9 @@ export class DocRootView extends React.Component<Props> {
       return jsx;
 
     const select = this.props.model.getSelect() == item.obj;
+    const obj = item.obj instanceof DocHolder ? item.obj.getDoc() : item.obj;
     return (
-      <Draggable data={{id: item.obj.holder.getID()}}>
+      <Draggable data={{id: obj.holder.getID()}}>
         <span style={{ color: select ? 'red' : null }}>{jsx}</span>
       </Draggable>
     );

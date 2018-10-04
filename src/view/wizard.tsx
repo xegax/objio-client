@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Dialog, Classes as cs, Button, Intent } from '@blueprintjs/core';
-import { showModal } from './show-modal';
+import { showModal } from 'ts-react-ui/show-modal';
 
 export abstract class WizardContent<P = {}, S = {}> extends React.Component<P, S> {
   abstract getResult(): Object;
