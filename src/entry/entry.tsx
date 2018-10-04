@@ -149,7 +149,7 @@ async function loadAndRender() {
   } catch(e) {
     console.log('localStorage can not be loaded');
   }*/
-  objio = await createOBJIO({factory, store, context: { path: `/data/projects/${args.prj}/` }});
+  objio = await createOBJIO({factory, store, context: { objectsPath: '', filesPath: `/data/projects/${args.prj}/public/` }});
   objio.setErrorHandler(args => {
     let message = args.error.data || args.error.toString();
     AppToaster.show({

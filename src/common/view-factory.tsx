@@ -1,5 +1,5 @@
 import { OBJIOItem, OBJIOItemClass } from 'objio';
-import { Props } from '../view/doc-config';
+import { Props } from 'objio-object/view/config';
 
 export interface FactoryItem< TProps = {}, TArgs = {}, TObject = OBJIOItem> {
   classObj: OBJIOItemClass;

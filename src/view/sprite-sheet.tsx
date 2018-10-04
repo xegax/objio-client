@@ -36,7 +36,7 @@ function getPointOn(event: React.MouseEvent<any>, relateOn?: HTMLElement) {
   };
 }
 
-function getFrameStyle(rect: Rect, model: DocSpriteSheet, ofs?: Point): React.CSSProperties {
+function getFrameStyle(rect: Rect, model: DocSpriteSheet, ofs?: Point) {
   ofs = ofs || {x: 0, y: 0};
   return {
     position: 'relative',
@@ -46,7 +46,7 @@ function getFrameStyle(rect: Rect, model: DocSpriteSheet, ofs?: Point): React.CS
     width: rect.width,
     height: rect.height,
     display: 'inline-block'
-  };
+  } as any;
 }
 
 class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, {idx: number, time: number}> {
@@ -449,17 +449,13 @@ export class SpriteSheetView extends React.Component<Props, State> {
   }
 
   renderFrameInSequence(idx: number, rect: Rect, props: React.HTMLProps<any>, base?: Point): JSX.Element {
-    let basePoint: JSX.Element = null;
-    if (base)
-      basePoint = <img style={{position: 'absolute', left: base.x - 9, top: base.y - 9}} src='/data/image/cross.png'/>;
-
     return (
       <div
         key={idx}
         style={getFrameStyle(rect, this.props.model)}
-        {...props}
+        {...props as any}
       >
-        {basePoint}
+        {base ? <img style={{position: 'absolute', left: base.x - 9, top: base.y - 9}} src='/data/image/cross.png'/> : null}
       </div>
     );
   }
