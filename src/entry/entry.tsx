@@ -238,10 +238,22 @@ async function loadAndRender() {
 loadAndRender();
 
 interface Props {
-  model: Project;
+  model: Project<DocRoot>;
 }
 
 class ProjectView extends React.Component<Props> {
+  subscriber = () => {
+    this.setState({});
+  }
+
+  componentDidMount() {
+    this.props.model.holder.subscribe(this.subscriber);
+  }
+
+  componentWillUnmount() {
+    this.props.model.holder.unsubscribe(this.subscriber);
+  }
+
   render() {
     return (
       <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column'}}>
