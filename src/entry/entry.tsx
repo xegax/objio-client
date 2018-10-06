@@ -18,7 +18,6 @@ import {
 import { ViewFactory, FactoryItem } from '../common/view-factory';
 import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
-import { DocTable } from 'objio-object/client/doc-table';
 import { FileObject } from 'objio-object/client/file-object';
 
 import '../../styles/styles.scss';
@@ -30,6 +29,7 @@ import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
+import { Project } from 'objio/client/project';
 
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
@@ -66,6 +66,32 @@ async function loadAndRender() {
     console.log('localStorage can not be loaded');
   }*/
   objio = await createOBJIO({factory, store, context: { objectsPath: '', filesPath: `/data/projects/${args.prj}/public/` }});
+  
+  /*objio.addObserver({
+    onSave: () => {
+      console.log('saving ' + Date.now());
+      localStorage.setItem('objio', JSON.stringify(store.save()));
+    }
+  });*/
+
+  let mvf = new ViewFactory();
+  Layout.initDocLayout(mvf as any);
+  
+  let model: DocRoot;
+  let prj: Project<DocRoot>;
+  try {
+    prj = await objio.loadObject<Project<DocRoot>>();
+    model = prj.getRoot();
+    if (!model) {
+      model = new DocRoot();
+      await objio.createObject(model);
+      prj.setRoot(model);
+    }
+  } catch (e) {
+    document.body.innerHTML = (e['data'] || e) + '';
+    return;
+  }
+
   objio.setErrorHandler(args => {
     let message = args.error.data || args.error.toString();
     AppToaster.show({
@@ -78,24 +104,6 @@ async function loadAndRender() {
       intent: Intent.DANGER
     });
   });
-  /*objio.addObserver({
-    onSave: () => {
-      console.log('saving ' + Date.now());
-      localStorage.setItem('objio', JSON.stringify(store.save()));
-    }
-  });*/
-
-  let mvf = new ViewFactory();
-  Layout.initDocLayout(mvf as any);
-  
-  let model: OBJIOItem;
-  try {
-    model = await objio.loadObject<DocRoot>();
-  } catch (e) {
-    model = new DocRoot();
-    await objio.createObject(model);
-    model.getHolder().save();
-  }
 
   let obj: OBJIOItem;
   try {
@@ -209,12 +217,6 @@ async function loadAndRender() {
   });
 
   let cont = document.createElement('div');
-  cont.style.position = 'absolute';
-  cont.style.left = '0px';
-  cont.style.top = '0px';
-  cont.style.bottom = '0px';
-  cont.style.right = '0px';
-  cont.style.display = 'flex';
   document.body.appendChild(cont);
   document.body.style.overflow = 'hidden';
 
@@ -225,10 +227,31 @@ async function loadAndRender() {
     );
   } else {
     ReactDOM.render(
-      mvf.getView({ classObj: model.constructor, props: {model}}),
+      <ProjectView model={prj}>
+        {mvf.getView({ classObj: model.constructor, props: {model}})}
+      </ProjectView>,
       cont
     );
   }
 }
 
 loadAndRender();
+
+interface Props {
+  model: Project;
+}
+
+class ProjectView extends React.Component<Props> {
+  render() {
+    return (
+      <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column'}}>
+        <div style={{ position: 'relative', flexGrow: 0, height: 32 }}>
+          users: {this.props.model.getWatchers().join(', ')}
+        </div>
+        <div style={{ display: 'flex', position: 'relative', flexGrow: 1 }}>
+          {this.props.children}
+        </div>
+      </div>
+    );
+  }
+}
