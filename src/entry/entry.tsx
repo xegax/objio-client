@@ -221,6 +221,7 @@ async function loadAndRender() {
   document.body.style.overflow = 'hidden';
 
   if (obj) {
+    cont.className = 'doc-cont-view';
     ReactDOM.render(
       mvf.getView({ classObj: obj.constructor, props: {model: obj}}),
       cont
