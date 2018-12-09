@@ -1,11 +1,7 @@
 import { SERIALIZER, OBJIOItem, OBJIOArray } from 'objio';
-import { Point, Size, Rect, inRect } from '../common/point';
+import { Point, Size, Rect, inRect } from '../../common/point';
 import { FileObject } from 'objio-object/client/file-object';
 import { ObjectBase } from 'objio-object/client/object-base';
-
-export interface DocSpriteSheetArgs {
-  source?: FileObject;
-}
 
 export interface FrameInfo {
   rect: number;
@@ -40,18 +36,9 @@ export class Animation extends OBJIOItem {
 }
 
 export class DocSpriteSheet extends ObjectBase {
-  private file: FileObject;
-  private rects = Array<Rect>();
-  private anim = new OBJIOArray<Animation>([new Animation('default', [])]);
-
-  constructor(args?: DocSpriteSheetArgs) {
-    super();
-
-    if (!args)
-      return;
-
-    this.file = args.source;
-  }
+  protected file: FileObject;
+  protected rects = Array<Rect>();
+  protected anim = new OBJIOArray<Animation>([new Animation('default', [])]);
 
   getImageUrl(): string {
     if (!this.file)
@@ -62,6 +49,18 @@ export class DocSpriteSheet extends ObjectBase {
 
   getRects(): Array<Rect> {
     return this.rects;
+  }
+
+  getRectsCount(): number {
+    return this.rects.length;
+  }
+
+  removeRect(idx: number): boolean {
+    if (!this.rects.splice(idx, 1).length)
+      return false;
+
+    this.holder.delayedNotify();
+    return true;
   }
 
   getAnim(): OBJIOArray<Animation> {

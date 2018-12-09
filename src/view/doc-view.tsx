@@ -2,11 +2,7 @@ import * as React from 'react';
 import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
 import { FileObject } from 'objio-object/client/file-object';
-import { ViewFactory } from '../common/view-factory';
-import { DocRoot } from '../model/client/doc-root';
-import { OBJIOItem } from 'objio';
-import { createDocWizard } from './create-doc-wizard';
-import { ObjectBase } from 'objio-object/server/object-base';
+import { App } from '../model/client/app';
 
 const classes = {
   docView: 'doc-view',
@@ -17,8 +13,7 @@ const classes = {
 };
 
 interface Props {
-  vf: ViewFactory;
-  root: DocRoot;
+  root: App;
   model: DocHolder | FileObject;
 }
 
@@ -52,7 +47,6 @@ export class DocView extends React.Component<Props> {
           onKeyDown={ evt => {
             if (evt.keyCode == 13) {
               obj.setName(evt.currentTarget.value);
-              this.props.root.updateTree();
               this.setState({ edit: false });
             }
           }}
@@ -113,7 +107,7 @@ export class DocView extends React.Component<Props> {
 
   render() {
     return (
-      <div className={classes.docView}>
+      <div className={classes.docView} {...this.props}>
         <div className={classes.header}>
           {this.renderName()}
           {this.renderTools()}

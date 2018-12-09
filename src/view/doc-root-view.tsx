@@ -5,12 +5,13 @@ import { Tree } from 'ts-react-ui/tree';
 import { FitToParent } from 'ts-react-ui/fittoparent';
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { DocRoot } from '../model/client/doc-root';
-import './doc-root.scss';
 import { createDocWizard } from './create-doc-wizard';
-import { ViewFactory } from '../common/view-factory';
+import { ViewFactory } from 'objio-object/common/view-factory';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import { FileObject } from 'objio-object/client/file-object';
 import { DocHolder } from '../model/server/doc-holder';
+
+import './doc-root.scss';
 
 const classes = {
   docContView: 'doc-cont-view',
@@ -80,15 +81,6 @@ export class DocRootView extends React.Component<Props> {
         key='doc-list'
         className={classes.docList}
       >
-        <button
-          onClick={() => {
-            createDocWizard(this.props.model, this.props.vf)
-            .catch(() => {
-              console.log('create cancel');
-            });
-          }}>
-          create
-        </button>
         {this.renderLoadingQueue()}
         <FitToParent wrapToFlex>
           <Tree

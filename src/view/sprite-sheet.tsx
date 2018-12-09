@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { DocSpriteSheet, Animation, FrameInfo, DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
+import {
+  DocSpriteSheet,
+  Animation,
+  FrameInfo,
+  DocSpriteSheetArgs
+} from '../model/client/sprite-sheet';
 import { Rect, CSSRect, cssRectToRect, Point, rectToCSSRect } from '../common/point';
 import { startDragging } from 'ts-react-ui/common/start-dragging';
 import { isLeftDown } from 'ts-react-ui/common/event-helpers'
@@ -49,42 +54,27 @@ function getFrameStyle(rect: Rect, model: DocSpriteSheet, ofs?: Point) {
   } as any;
 }
 
-class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, {idx: number, time: number}> {
-  private play: boolean = true;
-  private timerId: any;
+class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, {time: number}> {
+  private mount: boolean = false;
 
-  constructor(props) {
-    super(props);
+  timer = () => {
+    if (!this.mount)
+      return;
 
-    this.state = {idx: 0, time: 100};
-  }
-
-  nextFrame = () => {
-    if (this.timerId != null) {
-      clearTimeout(this.timerId);
-      this.timerId = null;
+    if (this.props.model.isPlaying()) {
+      this.props.model.setPlayFrame(this.props.model.getPlayFrame() + 1);
     }
 
-    this.setState({idx: this.state.idx + 1});
-    if (this.play)
-      this.timerId = setTimeout(this.nextFrame, this.state.time);
-  }
-
-  togglePlay() {
-    this.play = !this.play;
-    if (this.play) {
-      this.nextFrame();
-    } else {
-      this.setState({});
-    }
+    setTimeout(this.timer, this.props.model.getPlayInterval());
   }
 
   componentDidMount() {
-    this.nextFrame();
+    this.mount = true;
+    this.timer();
   }
 
   componentWillUnmount() {
-    this.play = false;
+    this.mount = false;
   }
 
   onAddSpeed(addTime: number) {
@@ -92,14 +82,14 @@ class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, 
     this.setState({time});
   }
 
-  onNextFrame(add: number) {
-    this.setState({idx: this.state.idx + add});
-    this.play = false;
-  }
-
   render() {
-    const { anim, model } = this.props;
-    const frame = anim.frames[this.state.idx % anim.frames.length];
+    const { model } = this.props;
+    const selectAnim = model.getSelectAnim();
+    if (!selectAnim)
+      return null;
+
+    const playFrame = model.getPlayFrame();
+    const frame = selectAnim.frames[playFrame];
     if (!frame)
       return null;
 
@@ -110,7 +100,7 @@ class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, 
       return null;
 
     // const {baseX, baseY} = frame;
-    const size = anim.getSize(rects);
+    const size = selectAnim.getSize(rects);
     size.width += 10;
     size.height += 10;
 
@@ -120,33 +110,6 @@ class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, 
 
     return (
       <div style={{position: 'relative'}}>
-        <div>
-          <i
-            style={{paddingRight: 2}}
-            className='fa fa-plus'
-            onClick={() => this.onAddSpeed(-50)}
-          />
-          <i
-            style={{paddingRight: 2}}
-            className={cn(this.play && 'fa fa-pause' || 'fa fa-play')}
-            onClick={() => this.togglePlay()}
-          />
-          <i
-            style={{paddingRight: 2}}
-            className='fa fa-minus'
-            onClick={() => this.onAddSpeed(50)}
-          />
-          <i
-            style={{paddingRight: 2}}
-            className='fa fa-arrow-left'
-            onClick={() => this.onNextFrame(-1)}
-          />
-          <i
-            style={{paddingRight: 2}}
-            className='fa fa-arrow-right'
-            onClick={() => this.onNextFrame(1)}
-          />
-        </div>
         <div
           tabIndex={0}
           style={{
@@ -157,11 +120,11 @@ class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, 
             overflowY: 'hidden'
           }}
           onKeyDown={e => {
-            if (e.keyCode == 37) {
+            /*if (e.keyCode == 37) {
               this.onNextFrame(-1);
             } else if (e.keyCode == 39) {
               this.onNextFrame(1);
-            }
+            }*/
           }}
         >
           <div
@@ -175,9 +138,7 @@ class Preview extends React.Component<{anim: Animation, model: DocSpriteSheet}, 
 
 type Mode = 'add-anim';
 interface State {
-  rect?: Rect;
-  select?: number;
-  anim?: number;
+  newRect?: Rect;
   mode?: Mode;
 }
 
@@ -193,14 +154,26 @@ export class SpriteSheetView extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
-    this.state = {anim: 0};
+    this.state = {};
+  }
+
+  subscriber = () => {
+    this.setState({});
+  }
+
+  componentDidMount() {
+    this.props.model.holder.subscribe(this.subscriber);
+  }
+
+  componentWillUnmount() {
+    this.props.model.holder.unsubscribe(this.subscriber);
   }
 
   renderRects() {
     const { model } = this.props;
     let rects = model.getRects().slice();
-    if (this.state.rect)
-      rects.push(this.state.rect);
+    if (this.state.newRect)
+      rects.push(this.state.newRect);
 
     return rects.map((rect, idx) => {
       return this.renderRect(rect, idx);
@@ -224,17 +197,18 @@ export class SpriteSheetView extends React.Component<Props, State> {
         this.setState({});
       },
       onDragEnd: () => {
-        this.props.model.getHolder().save();
+        this.props.model.holder.save();
       }
     })(event.nativeEvent);
   };
 
   renderRect(rect: Rect, idx: number) {
+    const select = rect == this.props.model.getSelectRect();
     return (
       <div
         key={idx}
         onMouseDown={this.onRectMouseDown}
-        className={cn(classes.rect, idx == this.state.select && classes.rectSelect)}
+        className={cn(classes.rect, select && classes.rectSelect)}
         style={{left: rect.x, top: rect.y, width: rect.width, height: rect.height}}
       >
         <div className={cn(classes.corner, classes.ltCorner)} onMouseDown={e => this.resizeRect(e, idx, 'lt')}/>
@@ -259,23 +233,24 @@ export class SpriteSheetView extends React.Component<Props, State> {
       bottom: 0
     };
 
-    this.setState({select: -1});
+    model.setSelectRect(-1);
     startDragging({x: rect.left, y: rect.top, minDist: 2}, {
       onDragStart: event => {
-        this.setState({rect: cssRectToRect(rect)});
+        this.setState({newRect: cssRectToRect(rect)});
       },
       onDragging: event => {
         rect.right = event.x;
         rect.bottom = event.y;
-        this.setState({rect: cssRectToRect(rect)});
+        this.setState({newRect: cssRectToRect(rect)});
       },
       onDragEnd: () => {
         const rc = cssRectToRect(rect);
         if (rc.width && rc.height) {
           model.getRects().push(rc);
-          model.getHolder().save();
+          model.holder.save();
         }
-        this.setState({rect: null, select: model.getRects().length - 1});
+        model.setSelectRect(model.getRects().length - 1);
+        this.setState({newRect: null});
       }
     })(event.nativeEvent);
   }
@@ -286,19 +261,19 @@ export class SpriteSheetView extends React.Component<Props, State> {
 
     const { model } = this.props;
     const select = model.hitTest(getPointOn(event, this.canvas.current));
-    if (select == -1)
+    model.setSelectRect(select);
+    const selectRect = model.getSelectRect();
+    if (!selectRect)
       return;
 
-    const rect = model.getRects()[select];
-    this.setState({ select });
-    startDragging({x: rect.x, y: rect.y, minDist: 2}, {
+    startDragging({x: selectRect.x, y: selectRect.y, minDist: 2}, {
       onDragging: event => {
-        rect.x = event.x;
-        rect.y = event.y;
+        selectRect.x = event.x;
+        selectRect.y = event.y;
         this.setState({});
       },
       onDragEnd: () => {
-        model.getHolder().save();
+        model.holder.save();
       }
     })(event.nativeEvent);
 
@@ -313,40 +288,41 @@ export class SpriteSheetView extends React.Component<Props, State> {
     const { model } = this.props;
 
     const select = model.hitTest(getPointOn(event, this.canvas.current));
-    if (select == -1)
+    model.setSelectRect(select);
+    const selectRect = model.getSelectRect();
+    if (!selectRect)
       return;
 
-    this.setState({select});
-
     const items = [
-      <MenuItem text='remove' key='remove' onClick={() => {
-        model.getRects().splice(this.state.select, 1);
-        this.setState({select: -1});
-        model.getHolder().save();
-      }}/>
+      <MenuItem
+        text='remove'
+        key='remove'
+        onClick={() => {
+          model.removeRect(select);
+          model.holder.save();
+        }}
+      />
     ];
     ContextMenu.show(<Menu>{items}</Menu>, {left: event.clientX, top: event.clientY});
   }
 
   onNextFrame = () => {
-    let select = (Math.max(0, this.state.select) + 1) % this.props.model.getRects().length;
-
-    this.setState({
-      select
-    });
+    let selectIdx = this.props.model.getSelectRectIdx();
+    selectIdx = (Math.max(0, selectIdx) + 1) % this.props.model.getRectsCount();
+    this.props.model.setSelectRect(selectIdx);
   };
 
   onPrevFrame = () => {
-    let select = Math.max(0, this.state.select) - 1;
-    if (select < 0)
-      select = this.props.model.getRects().length - 1;
-    this.setState({ select });
+    let selectIdx = this.props.model.getSelectRectIdx();
+    selectIdx = Math.max(0, selectIdx) - 1;
+    if (selectIdx < 0)
+      selectIdx = this.props.model.getRectsCount() - 1;
+    this.props.model.setSelectRect(selectIdx);
   };
 
   renderPreview() {
-    const select = this.state.select;
     const { model } = this.props;
-    const rect = this.state.rect || model.getRects()[select];
+    const rect = this.state.newRect || model.getSelectRect();
     if (!rect)
       return null;
 
@@ -392,41 +368,6 @@ export class SpriteSheetView extends React.Component<Props, State> {
     );
   }
 
-  renderAnimSelect() {
-    const { model } = this.props;
-
-    const lst = [];
-    const anim = model.getAnim();
-    for (let n = 0; n < anim.getLength(); n++) {
-      lst.push(<option key={n} value={n}>{anim.get(n).name}</option>);
-    }
-
-    if (lst.length == 0) {
-      lst.push(<option key={-1} value={-1}>default</option>);
-    }
-
-    if (this.state.mode != 'add-anim') {
-      return (
-        <div>
-          <select onChange={event => {
-            this.setState({anim: +event.target.value});
-          }}>
-            {lst}
-          </select>
-          <i className='fa fa-plus' onClick={() => this.onAppendNewAnim()}/>
-        </div>
-      );
-    } else {
-      return (
-        <div style={{padding: 3}}>
-          <input defaultValue={'anim-' + anim.getLength()} ref={this.onAnimNameRef}/>
-          <i className='fa fa-check' onClick={() => this.appendNewAnimImpl()}/>
-          <i className='fa fa-ban' onClick={() => this.onCancelNewAnim()}/>
-        </div>
-      );
-    }
-  }
-
   onAppendNewAnim() {
     this.setState({mode: 'add-anim'});
   }
@@ -438,9 +379,9 @@ export class SpriteSheetView extends React.Component<Props, State> {
       return;
 
     let newAnim = new Animation(newName);
-    await anim.getHolder().createObject(newAnim)
+    await anim.holder.createObject(newAnim)
     anim.push( newAnim );
-    anim.getHolder().save();
+    anim.holder.save();
     this.setState({mode: null});
   }
 
@@ -469,27 +410,23 @@ export class SpriteSheetView extends React.Component<Props, State> {
         frame.baseY = e.y;
         this.setState({});
       },
-      onDragEnd: () => this.getCurrAnim().getHolder().save()
+      onDragEnd: () => this.getCurrAnim().holder.save()
     })(e.nativeEvent);
   }
 
   getCurrAnim(): Animation {
     const { model } = this.props;
-    let { anim } = this.state;
-    if (anim >= model.getAnim().getLength())
-      anim = 0;
-
-    return model.getAnim().get(anim);
+    return model.getSelectAnim();
   }
 
   renderAnimTab() {
     const { model } = this.props;
-    let { anim } = this.state;
-    if (anim >= model.getAnim().getLength())
-      anim = 0;
 
     const rects = model.getRects();
-    const currAnim = model.getAnim().get(anim);
+    const currAnim = model.getSelectAnim();
+    if (!currAnim)
+      return null;
+
     const animRects = currAnim.frames.map((f, i) => {
       const frInfo = currAnim.frames[i] || {baseX: 0, baseY: 0, rect: 0};
 
@@ -497,7 +434,7 @@ export class SpriteSheetView extends React.Component<Props, State> {
         onDoubleClick: e => {
           currAnim.frames.splice(i, 1);
           this.setState({});
-          currAnim.getHolder().save();
+          currAnim.holder.save();
         },
         onMouseDown: e => this.dragBase(e, frInfo)
       }, {
@@ -514,7 +451,7 @@ export class SpriteSheetView extends React.Component<Props, State> {
           onDoubleClick={e => {
             currAnim.frames.push({rect: i, baseX: 0, baseY: 0});
             this.setState({});
-            currAnim.getHolder().save();
+            currAnim.holder.save();
           }}
         />
       );
@@ -522,7 +459,6 @@ export class SpriteSheetView extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        {this.renderAnimSelect()}
         {<Preview model={this.props.model} anim={currAnim}/>}
         <div style={{whiteSpace: 'nowrap', overflow: 'auto', minHeight: 50}}>
           {animRects}

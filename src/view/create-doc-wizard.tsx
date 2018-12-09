@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { OBJIOItem, ExtPromise } from 'objio';
-import { ViewFactory, FactoryItem } from '../common/view-factory';
+import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 import { List, RenderListModel } from 'ts-react-ui/list';
 import { RenderArgs } from 'ts-react-ui/model/list';
 import { FitToParent } from 'ts-react-ui/fittoparent';
-import './create-doc-wizard.scss';
 import { ContainerModel, ContItem } from 'ts-react-ui/container';
 import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
 import { ConfigBase } from 'objio-object/view/config';
@@ -12,6 +11,9 @@ import { DocRoot } from '../model/client/doc-root';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
 import { FileObject } from 'objio-object/client/file-object';
 import { ObjectBase } from 'objio-object/client/object-base';
+import { App } from '../model/client/app';
+
+import './create-doc-wizard.scss';
 
 const classes = {
   wizard: 'create-doc-wizard',
@@ -27,7 +29,7 @@ interface OKArgs {
 
 interface Props {
   source: ObjectBase;
-  root: DocRoot;
+  root: App;
   vf: ViewFactory;
   onOK(args: OKArgs);
   onCancel();
@@ -90,10 +92,7 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 
   getRootObjects = (): Array<ObjectBase> => {
-    return [
-      ...this.props.root.getFiles(),
-      ...this.props.root.getDocs().map(holder => holder.getDoc())
-    ];
+    return this.props.root.getObjectsBase();
   }
 
   render() {
@@ -137,8 +136,8 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 }
 
-export function createDocWizard(root: DocRoot, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
-  let p = ExtPromise<OBJIOItem>().deferred();
+export function createDocWizard(root: App, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
+  const p = ExtPromise<OBJIOItem>().deferred();
 
   let dialogCont: ContItem;
   const onOK = (okArgs: OKArgs) => {

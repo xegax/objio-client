@@ -1,6 +1,6 @@
 import { OBJIOFactory } from 'objio';
 import { DocRoot } from './doc-root';
-import { Animation, DocSpriteSheet } from '../doc-sprite-sheet';
+import { Animation, DocSpriteSheet } from './sprite-sheet';
 import * as Objects from 'objio-object/server';
 import { DocVideo } from './doc-video';
 import { DocHolder } from './doc-holder';

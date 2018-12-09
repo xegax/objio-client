@@ -1,13 +1,14 @@
 import { OBJIOFactory } from 'objio';
 import { DocRoot } from './doc-root';
-import { DocSpriteSheet, Animation } from '../doc-sprite-sheet';
+import { DocSpriteSheet, Animation } from './sprite-sheet';
 import * as Objects from 'objio-object/client';
 import { DocHolder } from './doc-holder';
 import { DocVideo } from './doc-video';
 import * as SQLITE3 from 'objio-sqlite-table/client';
 import * as MYSQL from 'objio-mysql-database/client';
 import * as Layout from 'objio-layout/client';
-import * as OBJIO from 'objio/client';
+import * as OBJIO from 'objio/object/client';
+import { App } from './app';
 
 export {
   DocHolder,
@@ -32,4 +33,5 @@ export function registerObjects(fact: OBJIOFactory) {
   fact.registerItem(Animation);
 
   fact.registerItem(DocVideo);
+  fact.registerItem(App);
 }

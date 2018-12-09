@@ -15,21 +15,23 @@ import {
   DocHolder,
   DocSpriteSheet
 } from '../model/client/register-objects';
-import { ViewFactory, FactoryItem } from '../common/view-factory';
+import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
 import { FileObject } from 'objio-object/client/file-object';
 
 import '../../styles/styles.scss';
+import 'ts-react-ui/_base.scss';
 import { DocView } from '../view/doc-view';
 import { DocRootView, DocRoot } from '../view/doc-root-view';
-import { DocSpriteSheetArgs } from '../model/doc-sprite-sheet';
+import { DocSpriteSheetArgs } from '../model/client/sprite-sheet';
 
 import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
-import { Project } from 'objio/client/project';
+import { Project } from 'objio/object/client/project';
+import { App, AppView } from '../view/app-view';
 
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
@@ -126,62 +128,61 @@ async function loadAndRender() {
 
   mvf.register({
     classObj: DocSpriteSheet,
-    object: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
+    createObject: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
     view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
     config: props => <SpriteConfig {...props}/>,
     sources: [ [ FileObject ] ],
-    flags: [ 'create-wizard' ],
+    flags:  ['create-wizard'],
     description: 'Sprite sheet object'
   });
 
   mvf.register({
     classObj: DocHolder,
-    view: (props: {model: DocHolder}) => {
-      if (!(model instanceof DocRoot))
-        return null;
-
+    view: (props: {model: DocHolder, root: App}) => {
       const doc = props.model.getDoc();
       return (
-        <DocView {...props} root={model} vf={mvf}>
+        <DocView {...props}>
           {mvf.getView({classObj: doc.constructor, props: {model: doc}})}
         </DocView>
       );
     },
-    object: () => new DocHolder()
+    createObject: () => new DocHolder()
   });
 
   mvf.register({
-    classObj: DocRoot,
-    view: (props: {model: DocRoot}) => (
-      <DocRootView
-        vf={mvf}
-        getView={(obj: DocHolder | FileObject) => {
-          let view = React.cloneElement(
-            mvf.getView({classObj: obj.constructor, props: { model: obj }}),
-            { key: obj.holder.getID() }
-          );
+    classObj: App,
+    view: (props: {model: App}) => {
+      return (
+        <AppView
+          model={props.model}
+          vf={mvf}
+          renderContent={(obj: DocHolder | FileObject) => {
+            const objView = mvf.getView({
+              classObj: obj.constructor,
+              props: {
+                model: obj,
+                key: obj.holder.getID(),
+                root: props.model
+              }
+            });
 
-          if (obj instanceof DocHolder)
-            return view;
-
-          if (!(model instanceof DocRoot))
-            return null;
-
-          return (
-            <DocView
-              model={obj}
-              root={model}
-              vf={mvf}
-              key={obj.holder.getID()}
-            >
-              {view}
-            </DocView>
-          );
-        }}
-        {...props}
-      />
-    ),
-    object: () => new DocRoot()
+            if (obj instanceof DocHolder)
+              return objView;
+  
+            return (
+              <DocView
+                model={obj}
+                root={props.model}
+                key={obj.holder.getID()}
+              >
+                {objView}
+              </DocView>
+            );
+          }}
+        />
+      );
+    },
+    createObject: null
   });
 
   [
@@ -198,7 +199,7 @@ async function loadAndRender() {
       const factItem: FactoryItem = {
         classObj,
         view: viewItem.view,
-        object: args => classObj.create(args)
+        createObject: args => classObj.create(args)
       };
 
       if (viewDesc.config)
@@ -210,7 +211,7 @@ async function loadAndRender() {
       if (viewDesc.sources)
         factItem.sources = viewDesc.sources;
 
-      factItem.flags = viewDesc.flags as Set<string>;
+      factItem.flags = viewDesc.flags;
       factItem.description = viewDesc.desc;
       mvf.register(factItem);
     });
@@ -257,12 +258,14 @@ class ProjectView extends React.Component<Props> {
 
   render() {
     return (
-      <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column'}}>
-        <div style={{ position: 'relative', flexGrow: 0, height: 32 }}>
-          users: {this.props.model.getWatchers().join(', ')}
-        </div>
-        <div style={{ display: 'flex', position: 'relative', flexGrow: 1 }}>
-          {this.props.children}
+      <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex'}}>
+        <div style={{position: 'relative', display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
+          <div style={{ flexGrow: 0, height: 32 }}>
+            users: {this.props.model.getWatchers().join(', ')}
+          </div>
+          <div style={{ display: 'flex', flexGrow: 1 }}>
+            {this.props.children}
+          </div>
         </div>
       </div>
     );
