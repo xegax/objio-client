@@ -1,5 +1,5 @@
 import { OBJIOItem, SERIALIZER } from 'objio';
-import { ObjectBase } from 'objio-object/server/object-base';
+import { ObjectBase } from 'objio-object/base/object-base';
 
 export interface DocHolderArgs<T extends ObjectBase = ObjectBase> {
   doc: T;
