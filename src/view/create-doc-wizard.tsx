@@ -1,19 +1,22 @@
 import * as React from 'react';
 import { OBJIOItem, ExtPromise } from 'objio';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
-import { List, RenderListModel } from 'ts-react-ui/list';
-import { RenderArgs } from 'ts-react-ui/model/list';
-import { FitToParent } from 'ts-react-ui/fittoparent';
+import { ListView } from 'ts-react-ui/list-view';
 import { ContainerModel, ContItem } from 'ts-react-ui/container';
 import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
 import { ConfigBase } from 'objio-object/view/config';
-import { DocRoot } from '../model/client/doc-root';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
 import { FileObject } from 'objio-object/client/file-object';
 import { ObjectBase } from 'objio-object/client/object-base';
 import { App } from '../model/client/app';
+import { PropSheet, PropsGroup, TextPropItem } from 'ts-react-ui/prop-sheet';
 
 import './create-doc-wizard.scss';
+
+interface Item {
+  value: string;
+  factItem: FactoryItem;
+}
 
 const classes = {
   wizard: 'create-doc-wizard',
@@ -36,21 +39,16 @@ interface Props {
 }
 
 interface State {
-  list: RenderListModel;
   item: FactoryItem;
 }
 
 export class CreateDocWizard extends React.Component<Props> {
   state: Partial<State> = {};
   ref = React.createRef<ConfigBase>();
-  name = React.createRef<HTMLInputElement>();
+  newObjectName: string;
 
-  componentDidMount() {
-    const { vf } = this.props;
-    let items = vf.getItems();
-    /* if (source)
-      items = vf.findBySource( OBJIOItem.getClass(source) );
-    */
+  getItemsToCreate(): Array<Item> {
+    let items = this.props.vf.getItems();
 
     items = items.filter(item => (item.flags as Set<string>).has('create-wizard'));
     
@@ -64,31 +62,47 @@ export class CreateDocWizard extends React.Component<Props> {
       }));
     });
 
-    const list = new RenderListModel( items.length );
-    list.setHandler({
-      loadItems: (from, count) => {
-        return items.slice(from, from + count);
-      }
-    });
+    return items.map(item => {
+      return {
+        value: item.description,
+        factItem: item
+      };
+    }).sort((a, b) => a.value.localeCompare(b.value));
+  }
 
-    list.setColumns([{
-      name: 'object name',
-      render: (args: RenderArgs<FactoryItem>) => {
-        return <div>{args.item.description}</div>;
-      }
-    }]);
-    list.setHeader(false);
-    list.subscribe(() => {
-      if (list.getSelCount()) {
-        const items = list.getItems(list.getSelRow(), 1);
-        this.setState({item: items[0]});
-      } else {
-        this.setState({item: null});
-      }
-    }, 'select-row');
-    list.setSelRow(0);
+  renderConfig(item: FactoryItem) {
+    if (!item)
+      return null;
 
-    this.setState({list});
+    let config: JSX.Element = null;
+    if (item.config) {
+      config = item.config({
+        objects: this.getRootObjects,
+        source: this.props.source
+      });
+      config = React.cloneElement(config, {key: item.classObj.TYPE_ID, ref: this.ref});
+    }
+
+    this.newObjectName = `new ${item.description || item.classObj.TYPE_ID}`;
+    return (
+      <div className={classes.objectParams} key={item.classObj.TYPE_ID}>
+        <PropSheet>
+          <PropsGroup label='common'>
+            <TextPropItem
+              label='name'
+              value={this.newObjectName}
+              onEnter={value => {
+                this.newObjectName = value;
+              }}
+            />
+          </PropsGroup>
+          { config }
+        </PropSheet>
+      </div>
+    );
+  }
+
+  componentDidMount() {
   }
 
   getRootObjects = (): Array<ObjectBase> => {
@@ -98,21 +112,19 @@ export class CreateDocWizard extends React.Component<Props> {
   render() {
     const item = this.state.item;
     return (
-      <Dialog isOpen={true} isCloseButtonShown={false} title='create new document' style={{width: 600}}>
+      <Dialog isOpen={true} isCloseButtonShown={false} title='create new' style={{width: 600}}>
         <div className={cs.DIALOG_BODY}>
           <div className={classes.wizard}>
             <div className={classes.objects}>
-              <FitToParent wrapToFlex>
-                <List model={this.state.list}/>
-              </FitToParent>
+              <ListView
+                values={this.getItemsToCreate()}
+                style={{flexGrow: 1}}
+                onSelect={(item: Item) => {
+                  this.setState({ item: item.factItem });
+                }}
+              />
             </div>
-            <div className={classes.objectParams} key={item && item.classObj.TYPE_ID}>
-              { item && <div>name: <input ref={this.name} defaultValue={`new ${item.description || item.classObj.TYPE_ID}`}/></div> }
-              { item && item.config && React.cloneElement(item.config({
-                  objects: this.getRootObjects,
-                  source: this.props.source
-                }), {key: item.classObj.TYPE_ID, ref: this.ref}) || null }
-            </div>
+            {this.renderConfig(this.state.item)}
           </div>
         </div>
         <div className={cs.DIALOG_FOOTER}>
@@ -124,7 +136,7 @@ export class CreateDocWizard extends React.Component<Props> {
                 this.props.onOK({
                   item,
                   args: this.ref && this.ref.current && this.ref.current.getConfig() || {},
-                  name: this.name.current.value
+                  name: this.newObjectName
                 });
               }}
             />

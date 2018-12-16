@@ -23,7 +23,6 @@ import { FileObject } from 'objio-object/client/file-object';
 import '../../styles/styles.scss';
 import 'ts-react-ui/_base.scss';
 import { DocView } from '../view/doc-view';
-import { DocRootView, DocRoot } from '../view/doc-root-view';
 import { DocSpriteSheetArgs } from '../model/client/sprite-sheet';
 
 import * as Layout from 'objio-layout/view';
@@ -79,13 +78,13 @@ async function loadAndRender() {
   let mvf = new ViewFactory();
   Layout.initDocLayout(mvf as any);
   
-  let model: DocRoot;
-  let prj: Project<DocRoot>;
+  let model: App;
+  let prj: Project<App>;
   try {
-    prj = await objio.loadObject<Project<DocRoot>>();
+    prj = await objio.loadObject<Project<App>>();
     model = prj.getRoot();
     if (!model) {
-      model = new DocRoot();
+      model = new App();
       await objio.createObject(model);
       prj.setRoot(model);
     }
@@ -118,10 +117,10 @@ async function loadAndRender() {
   .subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
 
-    if (model instanceof DocRoot) {
+    /*if (model instanceof App) {
       if (model.exists(objs))
         model.updateTree();
-    }
+    }*/
 
     model.holder.notify();
   });
@@ -240,7 +239,7 @@ async function loadAndRender() {
 loadAndRender();
 
 interface Props {
-  model: Project<DocRoot>;
+  model: Project<App>;
 }
 
 class ProjectView extends React.Component<Props> {

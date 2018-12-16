@@ -1,5 +1,4 @@
 import { OBJIOFactory } from 'objio';
-import { DocRoot } from './doc-root';
 import { DocSpriteSheet, Animation } from './sprite-sheet';
 import * as Objects from 'objio-object/client';
 import { DocHolder } from './doc-holder';
@@ -27,7 +26,6 @@ export function registerObjects(fact: OBJIOFactory) {
   });
 
   fact.registerItem(DocHolder);
-  fact.registerItem(DocRoot);
   fact.registerItem(DocHolder);
   fact.registerItem(DocSpriteSheet);
   fact.registerItem(Animation);
