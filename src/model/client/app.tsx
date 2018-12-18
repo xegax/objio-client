@@ -8,6 +8,8 @@ import { SendFileArgs } from 'objio-object/client/files-container';
 import { createFileObject } from 'objio-object/client';
 export { DocRootBase as DocRoot };
 import { Draggable } from 'ts-react-ui/drag-and-drop';
+import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
+import { Icon } from 'ts-react-ui/icon';
 
 export function getObjectBase(obj: DocHolder | FileObject): ObjectBase {
   if (obj instanceof DocHolder)
@@ -53,9 +55,9 @@ export class App extends DocRootBase {
     });
   }
 
-  private updateObjList() {
+  updateObjList(force?: boolean) {
     const objs = [...this.docs.getArray(), ...this.files.getArray()];
-    if (objs.length == this.objectVers.length) {
+    if (force != true && objs.length == this.objectVers.length) {
       if (!this.objectVers.some((id, idx) => {
         return getObjectBase(objs[idx]).holder.getVersion() != id;
       }))
@@ -64,10 +66,17 @@ export class App extends DocRootBase {
 
     this.objects = objs.map(obj => {
       const base = getObjectBase(obj);
+      const viewable = base.constructor as any as OBJIOItemClassViewable;
+      let icon: JSX.Element;
+      if (viewable.getViewDesc) {
+        icon = ({...viewable.getViewDesc()}.icons || {}).item;
+      }
+
       return {
         value: base.holder.getID(),
         render: (
           <Draggable data={{id: base.holder.getID()}} type='layout'>
+            {icon || <Icon src='unknown-type.png'/>}
             <span>{base.getName()}</span>
           </Draggable>
         ),

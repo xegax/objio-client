@@ -10,6 +10,7 @@ import { DocHolder } from '../model/server/doc-holder';
 import { createDocWizard } from './create-doc-wizard';
 import { ViewFactory } from 'objio-object/common/view-factory';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
+import './_app.scss';
 
 export { App };
 
@@ -31,6 +32,7 @@ export class AppView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.props.model.updateObjList(true);
     this.props.model.holder.subscribe(this.subscriber);
   }
 
@@ -105,7 +107,7 @@ export class AppView extends React.Component<Props, State> {
     return (
       <PropSheet>
         <FilesDropContainer onDropFiles={this.onDropToList}>
-          <PropsGroup label='object list' itemWrap={false} defaultHeight={200}>
+          <PropsGroup label='object list' itemWrap={false} defaultHeight={200} className='object-list-group'>
             <ListView
               value={select ? {value: objBase.holder.getID()} : null}
               values={this.props.model.getObjects()}
