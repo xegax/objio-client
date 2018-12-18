@@ -3,7 +3,7 @@ node_modules
 .tscache
 src/**/*.js.map
 src/**/*.js
-data
+data/projects
 env.conf
 nginx/temp/**/*
 nginx/logs/**/*
