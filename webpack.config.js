@@ -23,7 +23,8 @@ module.exports = [
     externals: {
       'react': 'react',
       'react-dom': 'reactdom',
-      '@blueprintjs/core': 'blueprintjs'
+      '@blueprintjs/core': 'blueprintjs',
+      'ts-react-ui/typings': 'react'
     },
     module: {
       rules: [

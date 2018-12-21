@@ -10,6 +10,8 @@ export { DocRootBase as DocRoot };
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
 import { Icon } from 'ts-react-ui/icon';
+import 'ts-react-ui/typings';
+import * as UnknownTypeIcon from '../../images/unknown-type.png';
 
 export function getObjectBase(obj: DocHolder | FileObject): ObjectBase {
   if (obj instanceof DocHolder)
@@ -76,7 +78,7 @@ export class App extends DocRootBase {
         value: base.holder.getID(),
         render: (
           <Draggable data={{id: base.holder.getID()}} type='layout'>
-            {icon || <Icon src='unknown-type.png'/>}
+            {icon || <Icon src={UnknownTypeIcon}/>}
             <span>{base.getName()}</span>
           </Draggable>
         ),
