@@ -11,7 +11,7 @@ import { isLeftDown } from 'ts-react-ui/common/event-helpers'
 import { cn } from '../common/common';
 import { Menu, ContextMenu, MenuItem, Tab, Tabs } from '@blueprintjs/core';
 import { ConfigBase } from 'objio-object/view/config';
-import { FileObject } from 'objio-object/client/file-object';
+import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(v, max));

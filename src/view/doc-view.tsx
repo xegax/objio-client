@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
 import { FileObject } from 'objio-object/client/file-object';
-import { App } from '../model/client/app';
+import { App, getObjectBase } from '../model/client/app';
 
 const classes = {
   docView: 'doc-view',
@@ -105,6 +105,21 @@ export class DocView extends React.Component<Props> {
     );
   }
 
+  renderProgress() {
+    const model = this.props.model;
+    const base = getObjectBase(model);
+    if (!base.isStatusInProgess())
+      return null;
+
+    let p = Math.round(base.getProgress() * 100);
+    return (
+      <div style={{position: 'relative'}}>
+        <div style={{backgroundColor: '#abccdc', position: 'absolute', top: 0, bottom: 0, width: p + '%'}}/>
+        <div style={{position: 'relative', textAlign: 'center'}}>in progress ({p} %) </div>
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className={classes.docView} {...this.props}>
@@ -112,6 +127,7 @@ export class DocView extends React.Component<Props> {
           {this.renderName()}
           {this.renderTools()}
         </div>
+        {this.renderProgress()}
         <div className={classes.content}>
           {this.props.children}
         </div>

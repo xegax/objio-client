@@ -5,7 +5,7 @@ import { App, getObjectBase } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem, DropDownPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase } from 'objio-object/client/object-base';
-import { FileObject } from 'objio-object/client/file-object';
+import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { DocHolder } from '../model/server/doc-holder';
 import { createDocWizard } from './create-doc-wizard';
 import { ViewFactory } from 'objio-object/common/view-factory';
@@ -161,7 +161,7 @@ export class AppView extends React.Component<Props, State> {
     this.props.model.appendToUpload({ files, dst: fileObj || doc });
   }
 
-  renderDoc(select: OBJIOItem) {
+  renderDoc(select: FileObject | DocHolder) {
     if (!select)
       return null;
 

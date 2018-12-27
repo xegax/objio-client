@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DocRoot as DocRootBase } from '../server/doc-root';
-import { FileObject } from 'objio-object/client/file-object';
+import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { OBJIOItem, OBJIOArray } from 'objio';
 import { ObjectBase } from 'objio-object/client/object-base';
 import { DocHolder } from './doc-holder';
