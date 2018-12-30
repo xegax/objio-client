@@ -259,7 +259,7 @@ class ProjectView extends React.Component<Props> {
     return (
       <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex'}}>
         <div style={{position: 'relative', display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
-          <div style={{ flexGrow: 0, height: 32 }}>
+          <div style={{ flexGrow: 0, minHeight: 32 }}>
             users: {this.props.model.getWatchers().join(', ')}
           </div>
           <div style={{ display: 'flex', flexGrow: 1 }}>

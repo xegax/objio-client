@@ -131,7 +131,8 @@ export class App extends DocRootBase {
       getObjectBase(this.select).holder.unsubscribe(this.selectObjectSubscriber);
 
     this.select = select;
-    getObjectBase(this.select).holder.subscribe(this.selectObjectSubscriber);
+    if (this.select)
+      getObjectBase(this.select).holder.subscribe(this.selectObjectSubscriber);
     this.holder.delayedNotify();
   }
 

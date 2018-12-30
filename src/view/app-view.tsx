@@ -124,6 +124,7 @@ export class AppView extends React.Component<Props, State> {
           {file && <PropItem label='original name' value={file.getOriginName()}/>}
           {file && <PropItem label='ext' value={file.getExt()}/>}
         </PropsGroup>}
+        {select && objBase.getObjPropGroups()}
       </PropSheet>
     );
   }
