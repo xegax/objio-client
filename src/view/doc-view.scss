@@ -1,4 +1,5 @@
 .doc-view {
+  position: relative; // file-drop-container
   flex-grow: 1;
   display: flex;
   flex-direction: column;

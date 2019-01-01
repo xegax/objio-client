@@ -68,6 +68,7 @@ export class App extends DocRootBase {
 
     this.objects = objs.map(obj => {
       const base = getObjectBase(obj);
+      const name = base.getName();
       const viewable = base.constructor as any as OBJIOItemClassViewable;
       let icon: JSX.Element;
       if (viewable.getViewDesc) {
@@ -76,10 +77,11 @@ export class App extends DocRootBase {
 
       return {
         value: base.holder.getID(),
+        title: name,
         render: (
           <Draggable data={{id: base.holder.getID()}} type='layout'>
             {icon || <Icon src={UnknownTypeIcon}/>}
-            <span>{base.getName()}</span>
+            <span>{name}</span>
           </Draggable>
         ),
         object: obj
