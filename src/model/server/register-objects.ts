@@ -1,8 +1,6 @@
 import { OBJIOFactory } from 'objio';
 import { DocRoot } from './doc-root';
-import { Animation, DocSpriteSheet } from './sprite-sheet';
 import * as Objects from 'objio-object/server';
-import { DocVideo } from './doc-video';
 import { DocHolder } from './doc-holder';
 import * as Layout from 'objio-layout/server';
 import * as MYSQL from 'objio-mysql-database/server';
@@ -19,8 +17,5 @@ export function registerObjects(fact: OBJIOFactory) {
   });
 
   fact.registerItem(DocHolder);
-  fact.registerItem(Animation);
   fact.registerItem(DocRoot);
-  fact.registerItem(DocSpriteSheet);
-  fact.registerItem(DocVideo);
 }

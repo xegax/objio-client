@@ -12,18 +12,16 @@ import {
 } from 'objio';
 import {
   registerObjects,
-  DocHolder,
-  DocSpriteSheet
+  DocHolder
 } from '../model/client/register-objects';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
-import { SpriteSheetView, SpriteConfig } from '../view/sprite-sheet';
 
 import { FileObject } from 'objio-object/client/file-object';
 
 import '../../styles/styles.scss';
 import 'ts-react-ui/_base.scss';
+import 'objio-object/styles/all.scss';
 import { DocView } from '../view/doc-view';
-import { DocSpriteSheetArgs } from '../model/client/sprite-sheet';
 
 import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
@@ -117,22 +115,7 @@ async function loadAndRender() {
   .subscribe((objs: Array<OBJIOItem>) => {
     objs = objs || [];
 
-    /*if (model instanceof App) {
-      if (model.exists(objs))
-        model.updateTree();
-    }*/
-
     model.holder.notify();
-  });
-
-  mvf.register({
-    classObj: DocSpriteSheet,
-    createObject: (args: DocSpriteSheetArgs) => new DocSpriteSheet(args),
-    view: (props: {model: DocSpriteSheet}) => <SpriteSheetView key={props.model.holder.getID()} {...props} />,
-    config: props => <SpriteConfig {...props}/>,
-    sources: [ [ FileObject ] ],
-    flags:  ['create-wizard'],
-    description: 'Sprite sheet object'
   });
 
   mvf.register({
