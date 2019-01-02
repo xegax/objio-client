@@ -10,6 +10,9 @@ import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { ObjectBase } from 'objio-object/client/object-base';
 import { App } from '../model/client/app';
 import { PropSheet, PropsGroup, TextPropItem } from 'ts-react-ui/prop-sheet';
+import { Icon } from 'ts-react-ui/icon';
+import { OBJIOItemClassViewable } from 'objio-object/view/config';
+import * as UnknownTypeIcon from '../images/unknown-type.png';
 
 import './create-doc-wizard.scss';
 
@@ -63,8 +66,21 @@ export class CreateDocWizard extends React.Component<Props> {
     });
 
     return items.map(item => {
+      const viewable = item.classObj as OBJIOItemClassViewable;
+      let icon: JSX.Element;
+      if (viewable.getViewDesc) {
+        icon = ({...viewable.getViewDesc()}.icons || {}).item;
+      }
+
+      const name = item.description;
       return {
-        value: item.description,
+        value: name,
+        render: () => (
+          <div className='horz-panel-1' style={{display: 'flex', alignItems: 'center'}}>
+            {icon || <Icon src={UnknownTypeIcon}/>}
+            <span>{name}</span>
+          </div>
+        ),
         factItem: item
       };
     }).sort((a, b) => a.value.localeCompare(b.value));
