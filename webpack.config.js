@@ -14,6 +14,7 @@ module.exports = [
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js", ".scss"],
+
       modules: [
         'styles',
         path.resolve('./src'),
@@ -24,7 +25,8 @@ module.exports = [
       'react': 'react',
       'react-dom': 'reactdom',
       '@blueprintjs/core': 'blueprintjs',
-      'ts-react-ui/typings': 'react'
+      'ts-react-ui/typings': 'react',
+      'bluebird': 'bluebird'
     },
     module: {
       rules: [
@@ -38,14 +40,17 @@ module.exports = [
           test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
           loader: 'url-loader',
           options: {
-			name: '[name].[ext]',
-			outputPath: '../build',
+            name: '[name].[ext]',
+            outputPath: '../build',
             limit: 10000
           }
         }
       ]
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Promise: 'bluebird'
+      }),
     ],
     devtool: 'source-map'
   }

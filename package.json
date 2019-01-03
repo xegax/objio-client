@@ -47,14 +47,15 @@
     "tslint": "^3.15.1"
   },
   "dependencies": {
-    "objio-layout": "^0.0.36",
+    "bluebird": "^3.5.3",
     "objio": "^0.0.36",
+    "objio-layout": "^0.0.36",
+    "objio-mysql-database": "^0.0.36",
     "objio-object": "^0.0.36",
     "objio-sqlite-table": "^0.0.36",
-    "objio-mysql-database": "^0.0.36",
-    "ts-react-ui": "^0.1.36",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "react-transition-group": "^2.3.1"
+    "react-transition-group": "^2.3.1",
+    "ts-react-ui": "^0.1.36"
   }
 }

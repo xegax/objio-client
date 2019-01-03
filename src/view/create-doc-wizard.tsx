@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { OBJIOItem, ExtPromise } from 'objio';
+import { OBJIOItem } from 'objio';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 import { ListView } from 'ts-react-ui/list-view';
 import { ContainerModel, ContItem } from 'ts-react-ui/container';
@@ -165,7 +165,7 @@ export class CreateDocWizard extends React.Component<Props> {
 }
 
 export function createDocWizard(root: App, vf: ViewFactory, source?: ObjectBase): Promise<OBJIOItem> {
-  const p = ExtPromise<OBJIOItem>().deferred();
+  const p = Promise.defer<OBJIOItem>();
 
   let dialogCont: ContItem;
   const onOK = (okArgs: OKArgs) => {
@@ -201,10 +201,10 @@ export function createDocWizard(root: App, vf: ViewFactory, source?: ObjectBase)
       onOK={okArgs => onOK(okArgs)}
       onCancel={() => {
         dialogCont.remove();
-        p.reject();
+        p.reject(new Error('cancel'));
       }}
     />
   );
 
-  return p;
+  return p.promise;
 }

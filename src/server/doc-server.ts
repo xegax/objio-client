@@ -1,7 +1,10 @@
 import { createFactory, OBJIOFactory } from 'objio';
 import { createOBJIOServer } from 'objio/server';
 import { registerObjects } from '../model/server/register-objects';
+import * as Bluebird from 'bluebird';
 
+Bluebird.config({ cancellation: true });
+global.Promise = Bluebird;
 
 async function runDocServer() {
   const factory: OBJIOFactory = await createFactory();

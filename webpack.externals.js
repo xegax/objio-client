@@ -13,6 +13,9 @@ var externals = {
     './node_modules/@blueprintjs/core/lib/css/blueprint.css',
     './node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css',
     './node_modules/@blueprintjs/core/dist/core.bundle.js'
+  ],
+  'bluebird': [
+    './node_modules/bluebird/js/browser/bluebird.min.js'
   ]
 };
 

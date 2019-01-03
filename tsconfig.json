@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "amd",
     "target": "es5",
-    "lib": ["dom", "es6"],
+    "lib": ["es5", "es2015.iterable", "es2015.core", "es2015.collection", "dom"],
     "sourceMap": true,
     "jsx": "react",
     "moduleResolution": "node"
