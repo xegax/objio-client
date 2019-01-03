@@ -4180,46 +4180,48 @@ object.pick@^1.3.0:
   dependencies:
     isobject "^3.0.1"
 
-objio-layout@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/objio-layout/-/objio-layout-0.0.36.tgz#1eab2521eb135010e3617b846c2b1116be1c4092"
+objio-layout@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/objio-layout/-/objio-layout-0.0.37.tgz#ceeb1fb8cb1b27899504044e4821b883d9bc0210"
   dependencies:
-    objio "^0.0.36"
-    objio-object "^0.0.36"
+    objio "^0.0.37"
+    objio-object "^0.0.37"
+    ts-react-ui "^0.1.37"
 
-objio-mysql-database@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/objio-mysql-database/-/objio-mysql-database-0.0.36.tgz#7961aa7e1ef3c9fba69a78923ffffb638176b4a2"
+objio-mysql-database@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/objio-mysql-database/-/objio-mysql-database-0.0.37.tgz#bf5a1353b3eac1bc2d3d21efcd4b70caf0fd69a6"
   dependencies:
     mysql "^2.16.0"
-    objio "^0.0.36"
-    objio-object "^0.0.36"
+    objio "^0.0.37"
+    objio-object "^0.0.37"
     react "^16.4.1"
     react-dom "^16.4.1"
-    ts-react-ui "^0.1.36"
+    ts-react-ui "^0.1.37"
 
-objio-object@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/objio-object/-/objio-object-0.0.36.tgz#6269804189c8689597d7867faf9a7b82f907ed1f"
+objio-object@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/objio-object/-/objio-object-0.0.37.tgz#397739ded542b0b318c444dcbb69389475c900dd"
   dependencies:
-    objio "^0.0.36"
+    objio "^0.0.37"
     react "^16.4.1"
     react-dom "^16.4.1"
-    ts-react-ui "^0.1.36"
+    ts-react-ui "^0.1.37"
 
-objio-sqlite-table@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/objio-sqlite-table/-/objio-sqlite-table-0.0.36.tgz#f1c913e608bfa3ffc271ebaf588ec44ecc3cd702"
+objio-sqlite-table@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/objio-sqlite-table/-/objio-sqlite-table-0.0.37.tgz#dcff0c3a916a07a0b67709af1d6c40fd518af89a"
   dependencies:
-    objio "^0.0.36"
-    objio-object "^0.0.36"
+    objio "^0.0.37"
+    objio-object "^0.0.37"
     sqlite3 "^4.0.2"
 
-objio@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/objio/-/objio-0.0.36.tgz#dac367be93f50f057ae0abc3c86f32068aedb6ee"
+objio@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/objio/-/objio-0.0.37.tgz#f339f9fce5c70ab33c2f514a6dda2f6e7b667b72"
   dependencies:
     axios "^0.18.0"
+    bluebird "^3.5.3"
     lodash "^4.17.4"
 
 once@^1.3.0, once@^1.3.1, once@^1.4.0:
@@ -5891,12 +5893,12 @@ ts-loader@^4.4.1:
     micromatch "^3.1.4"
     semver "^5.0.1"
 
-ts-react-ui@^0.1.36:
-  version "0.1.36"
-  resolved "https://registry.yarnpkg.com/ts-react-ui/-/ts-react-ui-0.1.36.tgz#43ef11e2759b3bbadb940bb042297fc7d52db288"
+ts-react-ui@^0.1.37:
+  version "0.1.37"
+  resolved "https://registry.yarnpkg.com/ts-react-ui/-/ts-react-ui-0.1.37.tgz#42d7d98989979d23788f33bffe110e9d75d71cf3"
   dependencies:
     font-awesome "^4.7.0"
-    objio "^0.0.36"
+    objio "^0.0.37"
     react "^16.4.1"
     react-dom "^16.4.1"
 
