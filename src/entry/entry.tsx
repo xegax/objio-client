@@ -27,7 +27,7 @@ import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
-import { Project } from 'objio/object/client/project';
+import { Project } from 'objio/project/client/project';
 import { App, AppView } from '../view/app-view';
 
 import { Toaster, Position, Intent } from '@blueprintjs/core';
@@ -38,7 +38,7 @@ export const AppToaster = Toaster.create({
 
 let objio: OBJIO;
 
-function parseParams(args: string): {[key: string]: string} {
+function parseParams(args: string): { [key: string]: string } {
   const res = {};
   args.split('&').forEach(item => {
     const pair = item.split('=');
@@ -49,14 +49,14 @@ function parseParams(args: string): {[key: string]: string} {
 
 async function loadAndRender() {
   const p = window.location.search.split('?')[1] || '';
-  const args: {prj?: string, objId?: string} = parseParams(p);
+  const args: { prj?: string, objId?: string } = parseParams(p);
 
   let factory = await createFactory();
   registerObjects(factory);
 
   args.prj = args.prj || 'n1';
-  const rootReq = createRequestor({urlBase: '/handler', params: { prj: args.prj }});
-  const req = new AuthRequestor({req: rootReq, showLogin});
+  const rootReq = createRequestor({ urlBase: '/handler', params: { prj: args.prj } });
+  const req = new AuthRequestor({ req: rootReq, showLogin });
   const store = new OBJIORemoteStore({ req });
   /*let store = await createLocalStore(factory);
   try {
@@ -64,8 +64,8 @@ async function loadAndRender() {
   } catch(e) {
     console.log('localStorage can not be loaded');
   }*/
-  objio = await createOBJIO({factory, store, context: { objectsPath: '', filesPath: `/data/projects/${args.prj}/public/` }});
-  
+  objio = await createOBJIO({ factory, store, context: { objectsPath: '', filesPath: `/data/projects/${args.prj}/public/` } });
+
   /*objio.addObserver({
     onSave: () => {
       console.log('saving ' + Date.now());
@@ -75,17 +75,14 @@ async function loadAndRender() {
 
   let mvf = new ViewFactory();
   Layout.initDocLayout(mvf as any);
-  
+
   let model: App;
-  let prj: Project<App>;
+  let prj: Project;
   try {
-    prj = await objio.loadObject<Project<App>>();
-    model = prj.getRoot();
-    if (!model) {
-      model = new App();
-      await objio.createObject(model);
-      prj.setRoot(model);
-    }
+    prj = await objio.loadObject<Project>();
+    model = prj.getObjects().get(0) as App;
+    if (!model)
+      await prj.appendObject(new App());
   } catch (e) {
     document.body.innerHTML = (e['data'] || e) + '';
     return;
@@ -111,60 +108,64 @@ async function loadAndRender() {
   } catch (e) {
   }
 
-  objio.startWatch({req, timeOut: 100})
-  .subscribe((objs: Array<OBJIOItem>) => {
-    objs = objs || [];
+  objio.startWatch({ req, timeOut: 100 })
+    .subscribe((objs: Array<OBJIOItem>) => {
+      objs = objs || [];
 
-    model.holder.notify();
-  });
+      model.holder.notify();
+    });
 
-  mvf.register({
+  Objects.registerViews({
     classObj: DocHolder,
-    view: (props: {model: DocHolder, root: App}) => {
-      const doc = props.model.getDoc();
-      return (
-        <DocView {...props}>
-          {mvf.getView({classObj: doc.constructor, props: {model: doc}})}
-        </DocView>
-      );
-    },
-    createObject: () => new DocHolder()
+    views: [{
+      view: (props: { model: DocHolder, root: App }) => {
+        const doc = props.model.getDoc();
+        return (
+          <DocView {...props}>
+            {mvf.getView({ classObj: doc.constructor, props: { model: doc } })}
+          </DocView>
+        );
+      }
+    }]
   });
 
-  mvf.register({
+  Objects.registerViews({
     classObj: App,
-    view: (props: {model: App}) => {
-      return (
-        <AppView
-          model={props.model}
-          vf={mvf}
-          renderContent={(obj: DocHolder | FileObject) => {
-            const objView = mvf.getView({
-              classObj: obj.constructor,
-              props: {
-                model: obj,
-                key: obj.holder.getID(),
-                root: props.model
-              }
-            });
+    views: [
+      {
+        view: (props: { model: App }) => {
+          return (
+            <AppView
+              model={props.model}
+              vf={mvf}
+              renderContent={(obj: DocHolder | FileObject) => {
+                const objView = mvf.getView({
+                  classObj: obj.constructor,
+                  props: {
+                    model: obj,
+                    key: obj.holder.getID(),
+                    root: props.model
+                  }
+                });
 
-            if (obj instanceof DocHolder)
-              return objView;
-  
-            return (
-              <DocView
-                model={obj}
-                root={props.model}
-                key={obj.holder.getID()}
-              >
-                {objView}
-              </DocView>
-            );
-          }}
-        />
-      );
-    },
-    createObject: null
+                if (obj instanceof DocHolder)
+                  return objView;
+
+                return (
+                  <DocView
+                    model={obj}
+                    root={props.model}
+                    key={obj.holder.getID()}
+                  >
+                    {objView}
+                  </DocView>
+                );
+              }}
+            />
+          );
+        }
+      }
+    ]
   });
 
   [
@@ -206,50 +207,18 @@ async function loadAndRender() {
   if (obj) {
     cont.className = 'doc-cont-view';
     ReactDOM.render(
-      mvf.getView({ classObj: obj.constructor, props: {model: obj}}),
+      mvf.getView({ classObj: obj.constructor, props: { model: obj } }),
       cont
     );
   } else {
     ReactDOM.render(
-      <ProjectView model={prj}>
-        {mvf.getView({ classObj: model.constructor, props: {model}})}
-      </ProjectView>,
+      mvf.getView({
+        classObj: prj.constructor,
+        props: { model: prj }
+      }),
       cont
     );
   }
 }
 
 loadAndRender();
-
-interface Props {
-  model: Project<App>;
-}
-
-class ProjectView extends React.Component<Props> {
-  subscriber = () => {
-    this.setState({});
-  }
-
-  componentDidMount() {
-    this.props.model.holder.subscribe(this.subscriber);
-  }
-
-  componentWillUnmount() {
-    this.props.model.holder.unsubscribe(this.subscriber);
-  }
-
-  render() {
-    return (
-      <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, display: 'flex'}}>
-        <div style={{position: 'relative', display: 'flex', flexGrow: 1, flexDirection: 'column'}}>
-          <div style={{ flexGrow: 0, minHeight: 32 }}>
-            users: {this.props.model.getWatchers().join(', ')}
-          </div>
-          <div style={{ display: 'flex', flexGrow: 1 }}>
-            {this.props.children}
-          </div>
-        </div>
-      </div>
-    );
-  }
-}

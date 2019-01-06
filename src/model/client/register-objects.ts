@@ -4,7 +4,7 @@ import { DocHolder } from './doc-holder';
 import * as SQLITE3 from 'objio-sqlite-table/client';
 import * as MYSQL from 'objio-mysql-database/client';
 import * as Layout from 'objio-layout/client';
-import * as OBJIO from 'objio/object/client';
+import * as OBJIO from 'objio/project/client';
 import { App } from './app';
 
 export {
