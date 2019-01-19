@@ -7,7 +7,7 @@ import { Dialog, Button, Intent, Classes as cs } from '@blueprintjs/core';
 import { ConfigBase } from 'objio-object/view/config';
 import { DocHolder, DocHolderArgs } from '../model/client/doc-holder';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
-import { ObjectBase } from 'objio-object/client/object-base';
+import { ObjectBase } from 'objio-object/base/object-base';
 import { App } from '../model/client/app';
 import { PropSheet, PropsGroup, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { Icon } from 'ts-react-ui/icon';

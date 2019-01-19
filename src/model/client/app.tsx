@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DocRoot as DocRootBase } from '../server/doc-root';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { OBJIOItem, OBJIOArray } from 'objio';
-import { ObjectBase } from 'objio-object/client/object-base';
+import { ObjectBase } from 'objio-object/base/object-base';
 import { DocHolder } from './doc-holder';
 import { SendFileArgs } from 'objio-object/client/files-container';
 import { createFileObject } from 'objio-object/client';

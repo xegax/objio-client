@@ -32,6 +32,8 @@ import { App, AppView } from '../view/app-view';
 
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
+Promise.config({ cancellation: true });
+
 export const AppToaster = Toaster.create({
   position: Position.TOP,
 });
@@ -169,6 +171,7 @@ async function loadAndRender() {
   });
 
   [
+    DocHolder,
     ...Layout.getViews(),
     ...Objects.getViews(),
     ...SQLITE3.getViews(),

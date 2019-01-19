@@ -1,21 +1,21 @@
-import { OBJIOItem, SERIALIZER } from 'objio';
+import { SERIALIZER } from 'objio';
 import { ObjectBase } from 'objio-object/base/object-base';
 
-export interface DocHolderArgs<T extends ObjectBase = ObjectBase> {
-  doc: T;
+export interface DocHolderArgs {
+  doc: ObjectBase;
 }
 
-export class DocHolder<T extends ObjectBase = ObjectBase> extends OBJIOItem {
-  protected doc: T;
+export class DocHolder extends ObjectBase {
+  protected doc: ObjectBase;
 
-  constructor(args?: DocHolderArgs<T>) {
+  constructor(args?: DocHolderArgs) {
     super();
 
     if (args)
       this.doc = args.doc;
   }
 
-  getDoc(): T {
+  getDoc(): ObjectBase {
     return this.doc;
   }
 

@@ -4,7 +4,7 @@ import { ListView, Item } from 'ts-react-ui/list-view';
 import { App, getObjectBase } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem, DropDownPropItem } from 'ts-react-ui/prop-sheet';
-import { ObjectBase } from 'objio-object/client/object-base';
+import { ObjectBase } from 'objio-object/base/object-base';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { DocHolder } from '../model/server/doc-holder';
 import { createDocWizard } from './create-doc-wizard';
@@ -119,7 +119,7 @@ export class AppView extends React.Component<Props, State> {
         {select && <PropsGroup label='object'>
           <PropItem label='id' value={select.holder.getID()}/>
           <PropItem label='version' value={select.holder.getVersion()}/>
-          {objBase && <TextPropItem label='name' value={objBase.getName()} onChanged={value => objBase.setName(value)}/>}
+          {objBase && <TextPropItem label='name' value={objBase.getName()} onEnter={value => objBase.setName(value)}/>}
           {file && <PropItem label='size' value={file.getSize()}/>}
           {file && <PropItem label='original name' value={file.getOriginName()}/>}
           {file && <PropItem label='ext' value={file.getExt()}/>}
