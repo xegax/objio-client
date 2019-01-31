@@ -116,7 +116,7 @@ export class AppView extends React.Component<Props, State> {
           </PropsGroup>
         </FilesDropContainer>
         {this.renderUploadQueue()}
-        {select && <PropsGroup label='object'>
+        {select && <PropsGroup label='object' defaultOpen={false}>
           <PropItem label='id' value={select.holder.getID()}/>
           <PropItem label='version' value={select.holder.getVersion()}/>
           {objBase && <TextPropItem label='name' value={objBase.getName()} onEnter={value => objBase.setName(value)}/>}
