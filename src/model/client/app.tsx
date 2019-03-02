@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DocRoot as DocRootBase } from '../server/doc-root';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { OBJIOItem, OBJIOArray } from 'objio';
-import { ObjectBase } from 'objio-object/base/object-base';
+import { ObjectBase, ObjectsFolder } from 'objio-object/base/object-base';
 import { DocHolder } from './doc-holder';
 import { SendFileArgs } from 'objio-object/client/files-container';
 import { createFileObject } from 'objio-object/client';
@@ -10,8 +10,10 @@ export { DocRootBase as DocRoot };
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
 import { Icon } from 'ts-react-ui/icon';
+import { CheckIcon } from 'ts-react-ui/checkicon';
 import 'ts-react-ui/typings';
 import * as UnknownTypeIcon from '../../images/unknown-type.png';
+import { ListView } from 'ts-react-ui/list-view';
 
 export function getObjectBase(obj: DocHolder | FileObject): ObjectBase {
   if (obj instanceof DocHolder)
@@ -44,6 +46,7 @@ export class App extends DocRootBase {
   protected uploading: Promise<any>;
   protected totalFilesToUpload: number = 0;
   protected currFileProgress: number = 0;
+  protected openObjects: {[objId: string]: boolean} = {};
 
   constructor() {
     super();
@@ -57,17 +60,45 @@ export class App extends DocRootBase {
     });
   }
 
+  renderChildren(obj: ObjectBase): JSX.Element {
+    const children = obj.getChildren();
+    if (!this.openObjects[obj.holder.getID()] || children.length != 1)
+      return null;
+
+    return (
+      <ListView
+        maxHeight={200}
+        values={children[0].objects.map(item => {
+          return { value: item.holder.getID(), label: item.getName() };
+        })}
+      />
+    );
+  }
+
   updateObjList(force?: boolean) {
-    const objs = [...this.docs.getArray(), ...this.files.getArray()];
+    const objs = [...this.docs.getArray(), ...this.files.getArray()].map(obj => ({ obj, root: true }));
+    Object.keys(this.openObjects).forEach(id => {
+      if (!this.openObjects[id])
+        return;
+
+      let idx = objs.findIndex(obj => obj.obj.holder.getID() == id);
+      const obj = objs[idx].obj;
+      if (!obj)
+        return;
+
+      let children = obj.getChildren()[0].objects.map(obj => ({ root: false, obj })) as any;
+      objs.splice(idx + 1, 0, ...children);
+    });
+  
     if (force != true && objs.length == this.objectVers.length) {
       if (!this.objectVers.some((id, idx) => {
-        return getObjectBase(objs[idx]).holder.getVersion() != id;
+        return getObjectBase(objs[idx].obj).holder.getVersion() != id;
       }))
         return;
     }
 
     this.objects = objs.map(obj => {
-      const base = getObjectBase(obj);
+      const base = getObjectBase(obj.obj);
       const name = base.getName();
       const viewable = base.constructor as any as OBJIOItemClassViewable;
       let icon: JSX.Element;
@@ -75,19 +106,39 @@ export class App extends DocRootBase {
         icon = ({...viewable.getViewDesc()}.icons || {}).item;
       }
 
+      const children = base.getChildren();
+      const openFolder = (
+        <CheckIcon
+          hidden={children.length == 0}
+          value
+          faIcon={!this.openObjects[base.holder.getID()] ? 'fa fa-plus' : 'fa fa-minus'}
+          onChange={() => {
+            this.openObjects[base.holder.getID()] = !this.openObjects[base.holder.getID()];
+            this.updateObjList(true);
+          }}
+        />
+      );
+ 
       return {
         value: base.holder.getID(),
         title: name,
         render: (
-          <Draggable data={{id: base.holder.getID()}} type='layout'>
-            {icon || <Icon src={UnknownTypeIcon}/>}
-            <span>{name}</span>
-          </Draggable>
+          <>
+            <Draggable data={{id: base.holder.getID()}} type='layout'>
+              <div className='horz-panel-1' style={{display: 'flex', alignItems: 'center'}}>
+                {openFolder}
+                <span style={obj.root ? {display: 'none'} : {}}></span>
+                {icon || <Icon src={UnknownTypeIcon}/>}
+                <span>{name}</span>
+              </div>
+            </Draggable>
+          </>
         ),
-        object: obj
+        object: obj.obj
       };
     });
-    this.objectVers = objs.map(obj => getObjectBase(obj).holder.getVersion());
+
+    this.objectVers = objs.map(obj => getObjectBase(obj.obj).holder.getVersion());
     this.holder.delayedNotify();
   }
 
