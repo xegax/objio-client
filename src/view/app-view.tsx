@@ -107,7 +107,13 @@ export class AppView extends React.Component<Props, State> {
     return (
       <PropSheet>
         <FilesDropContainer onDropFiles={this.onDropToList}>
-          <PropsGroup label='object list' itemWrap={false} defaultHeight={200} className='object-list-group'>
+          <PropsGroup
+            label='object list'
+            itemWrap={false}
+            defaultHeight={200}
+            className='object-list-group'
+            scrollbars={false}
+          >
             <ListView
               value={select ? {value: objBase.holder.getID()} : null}
               values={this.props.model.getObjects()}
