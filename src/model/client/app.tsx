@@ -112,7 +112,8 @@ export class App extends DocRootBase {
           hidden={children.length == 0}
           value
           faIcon={!this.openObjects[base.holder.getID()] ? 'fa fa-plus' : 'fa fa-minus'}
-          onChange={() => {
+          onClick={e => {
+            e.stopPropagation();
             this.openObjects[base.holder.getID()] = !this.openObjects[base.holder.getID()];
             this.updateObjList(true);
           }}
