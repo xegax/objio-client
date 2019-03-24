@@ -174,7 +174,7 @@ export class AppView extends React.Component<Props, State> {
   render() {
     const select = this.props.model.getSelect();
     return (
-      <AppCompLayout defaultSelect='explorer'>
+      <AppCompLayout defaultSelect='explorer' className='abs-fit'>
         <AppComponent id='add' onSelect={this.onAdd} faIcon='fa fa-plus'/>
         <AppComponent id='explorer' faIcon='fa fa-search' style={{ width: '100%', display: 'flex' }}>
           {this.renderSelectObjectInfo()}
