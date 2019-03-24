@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { OBJIOItem } from 'objio';
+import { OBJIOItem, OBJIOItemClass } from 'objio';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 import { ListView } from 'ts-react-ui/list-view';
 import { ContainerModel, ContItem } from 'ts-react-ui/container';
@@ -15,6 +15,7 @@ import { OBJIOItemClassViewable } from 'objio-object/view/config';
 import * as UnknownTypeIcon from '../images/unknown-type.png';
 
 import './create-doc-wizard.scss';
+import { DocHolderBase } from '../model/base/doc-holder';
 
 interface Item {
   value: string;
@@ -45,24 +46,47 @@ interface State {
   item: FactoryItem;
 }
 
+function isInstanceOf(base: Object, tgtClass: Object) {
+  do {
+    if (base == tgtClass)
+      return true;
+
+    tgtClass = tgtClass['__proto__'];
+  } while (tgtClass);
+
+  return false;
+}
+
 export class CreateDocWizard extends React.Component<Props> {
   state: Partial<State> = {};
   ref = React.createRef<ConfigBase>();
   newObjectName: string;
 
+  getTypesMap(items?: Array<FactoryItem>) {
+    const typeMap: {[type: string]: OBJIOItemClass} = {};
+    (items || this.props.vf.getItems()).forEach(item => {
+      typeMap[item.classObj.TYPE_ID] = item.classObj;
+    });
+
+    return typeMap;
+  }
+
   getItemsToCreate(): Array<Item> {
     let items = this.props.vf.getItems();
+    const typeMap = this.getTypesMap(items);
 
     items = items.filter(item => (item.flags as Set<string>).has('create-wizard'));
     
-    const sources = this.getRootObjects();
+    const sources = this.getRootObjects().map(holder => typeMap[holder.getObjType()]);
     items = items.filter(item => {
       if (!item.sources || item.sources.length == 0)
         return true;
 
-      return item.sources.some(bunch => bunch.every( (source: any) => {
-        return sources.some(obj => obj instanceof source);
-      }));
+      return item.sources.some(bunch => {
+        return bunch.every((baseSource: any) => {
+          return sources.some(obj => isInstanceOf(baseSource, obj));
+        });
+      });
     });
 
     return items.map(item => {
@@ -121,8 +145,15 @@ export class CreateDocWizard extends React.Component<Props> {
   componentDidMount() {
   }
 
-  getRootObjects = (): Array<ObjectBase> => {
-    return this.props.root.getObjects();
+  getRootObjects = (filter?: Array<OBJIOItemClass>): Array<ObjectBase> => {
+    let objs = this.props.root.getObjects();
+    if (!filter || filter.length == 0)
+      return objs;
+
+    const typeMap = this.getTypesMap();
+    return objs.filter(obj => {
+      return filter.some(base => isInstanceOf(base, typeMap[obj.getObjType()] ))
+    });
   }
 
   render() {
@@ -172,24 +203,46 @@ export function createDocWizard(root: App, vf: ViewFactory, source?: ObjectBase)
     if (!okArgs)
       return;
 
-    let newObj = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
-    newObj.setName(okArgs.name);
+    let toLoad = Array<{obj: DocHolderBase, key: string}>();
+    Object.keys(okArgs.args)
+    .forEach(k => {
+      const obj = okArgs.args[k];
+      if (!(obj instanceof DocHolderBase))
+        return;
 
-    const args: DocHolderArgs = { doc: newObj };
-    if (source) {
-      if (source instanceof FileObject) {
-        newObj.setName(source.getName());
-      } else {
-        newObj.setName(OBJIOItem.getClass(source).TYPE_ID);
+      if (!obj.isLoaded())
+        toLoad.push({ obj, key: k });
+      else
+        okArgs[k] = obj.get();
+    });
+    
+    let load = toLoad.length ? Promise.all(toLoad.map(item => item.obj.load()))
+    .then(arr => {
+      arr.forEach((obj, i) => {
+        okArgs.args[ toLoad[i].key ] = obj;
+      });
+    }) : Promise.resolve();
+
+    load.then(() => {
+      let newObj = okArgs.item.classObj.create({source, ...okArgs.args}) as ObjectBase;
+      newObj.setName(okArgs.name);
+
+      const args: DocHolderArgs = { doc: newObj };
+      if (source) {
+        if (source instanceof FileObject) {
+          newObj.setName(source.getName());
+        } else {
+          newObj.setName(OBJIOItem.getClass(source).TYPE_ID);
+        }
       }
-    }
 
-    root.append(new DocHolder(args))
-    .then(() => {
-      p.resolve(newObj);
+      root.append(new DocHolder(args))
+      .then(() => {
+        p.resolve(newObj);
 
-      // close dialog
-      dialogCont.remove();
+        // close dialog
+        dialogCont.remove();
+      });
     });
   };
 

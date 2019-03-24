@@ -11,6 +11,7 @@ export class DocHolderBase extends ObjectBase {
   protected loadTask: Promise<ObjectBase>;
   protected childNum: number = 0;
   protected objType: string = '';
+  protected subscribers = Array<(() => void)>();
 
   constructor(args?: DocHolderArgs) {
     super();
@@ -20,8 +21,22 @@ export class DocHolderBase extends ObjectBase {
       this.name = this.doc.getName();
       this.objType = OBJIOItem.getClass(args.doc).TYPE_ID;
     }
+
+    this.holder.subscribe(this.notifySubscibers);
   }
 
+  private notifySubscibers = () => {
+    this.subscribers.forEach(s => s());
+  }
+
+  subscribe(cb: () => void) {
+    if (this.subscribers.indexOf(cb) == -1)
+      this.subscribers.push(cb);
+  }
+
+  unsubscribe(cb: () => void) {
+    this.subscribers.splice(this.subscribers.indexOf(cb), 1);
+  }
 
   getObjType(): string {
     if (!this.get())
@@ -66,6 +81,7 @@ export class DocHolderBase extends ObjectBase {
   private onObjLoaded = (obj: ObjectBase) => {
     this.loadTask = null;
     this.doc = obj;
+    obj.holder.subscribe(this.notifySubscibers);
 
     this.doc.holder.addEventHandler({
       onObjChange: () => {
