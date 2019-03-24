@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { AppCompLayout, AppComponent, AppContent } from 'ts-react-ui/app-comp-layout';
 import { ListView, Item } from 'ts-react-ui/list-view';
-import { App, getObjectBase } from '../model/client/app';
+import { App, ObjTypeMap } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem, DropDownPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase } from 'objio-object/base/object-base';
@@ -12,7 +12,7 @@ import { ViewFactory } from 'objio-object/common/view-factory';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import './_app.scss';
 
-export { App };
+export { App, ObjTypeMap };
 
 interface Props {
   model: App;
@@ -32,7 +32,6 @@ export class AppView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.model.updateObjList(true);
     this.props.model.holder.subscribe(this.subscriber);
   }
 
@@ -41,7 +40,7 @@ export class AppView extends React.Component<Props, State> {
   }
 
   onSelect = (item: Item) => {
-    const objects = this.props.model.getObjects();
+    const objects = this.props.model.getObjectsToRender();
     const select = objects.find(obj => obj.value == item.value);
     this.props.model.setSelect(select ? select.object : null);
   }
@@ -102,7 +101,7 @@ export class AppView extends React.Component<Props, State> {
   renderSelectObjectInfo() {
     const select = this.props.model.getSelect();
 
-    const objBase: ObjectBase = getObjectBase(select);
+    const objBase: ObjectBase = select;
     const file: FileObject = select instanceof FileObject ? select : null;
     return (
       <PropSheet>
@@ -115,8 +114,8 @@ export class AppView extends React.Component<Props, State> {
             scrollbars={false}
           >
             <ListView
-              value={select ? {value: objBase.holder.getID()} : null}
-              values={this.props.model.getObjects()}
+              value={select ? {value: select.getID()} : null}
+              values={this.props.model.getObjectsToRender()}
               onSelect={this.onSelect}
             />
           </PropsGroup>
@@ -136,12 +135,9 @@ export class AppView extends React.Component<Props, State> {
   }
 
   renderSelectObjectComponents() {
-    const select = this.props.model.getSelect() as FileObject | DocHolder;
+    const select = this.props.model.getSelect();
     if (!select)
       return null;
-
-    if (select instanceof DocHolder)
-      return select.getDoc().getAppComponents();
 
     return select.getAppComponents();
   }
@@ -156,19 +152,15 @@ export class AppView extends React.Component<Props, State> {
 
   onDragToDoc = (files: Array<File>): boolean => {
     const select = this.props.model.getSelect();
-    const doc: OBJIOItem = select instanceof DocHolder ? select.getDoc() : null;
-    const fileObj: FileObject = select instanceof FileObject ? select : null;
-    return select && (fileObj && fileObj.sendFile != null || doc && 'sendFile' in doc);
+    return select && select.sendFile != null;
   }
 
   onDropToDoc = (files: Array<File>) => {
-    const select = this.props.model.getSelect();
-    const doc: OBJIOItem = select instanceof DocHolder ? select.getDoc() : null;
-    const fileObj: FileObject = select instanceof FileObject ? select : null;
-    this.props.model.appendToUpload({ files, dst: fileObj || doc });
+    const dst = this.props.model.getSelect();
+    this.props.model.appendToUpload({ files, dst });
   }
 
-  renderDoc(select: FileObject | DocHolder) {
+  renderDoc(select: ObjectBase) {
     if (!select)
       return null;
 

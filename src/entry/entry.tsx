@@ -16,8 +16,6 @@ import {
 } from '../model/client/register-objects';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 
-import { FileObject } from 'objio-object/client/file-object';
-
 import '../../styles/styles.scss';
 import 'ts-react-ui/_base.scss';
 import 'objio-object/styles/all.scss';
@@ -28,7 +26,7 @@ import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
 import { Project } from 'objio/project/client/project';
-import { App, AppView } from '../view/app-view';
+import { App, AppView, ObjTypeMap } from '../view/app-view';
 
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
@@ -76,6 +74,7 @@ async function loadAndRender() {
   });*/
 
   let mvf = new ViewFactory();
+  // mvf.getItems().findIndex(item => item.classObj)
   Layout.initDocLayout(mvf as any);
 
   let model: App;
@@ -121,10 +120,11 @@ async function loadAndRender() {
     classObj: DocHolder,
     views: [{
       view: (props: { model: DocHolder, root: App }) => {
-        const doc = props.model.getDoc();
+        const doc = props.model.get();
+        const content = !doc ? <div>object not loaded yet</div> : mvf.getView({ classObj: doc.constructor, props: { model: doc } });
         return (
           <DocView {...props}>
-            {mvf.getView({ classObj: doc.constructor, props: { model: doc } })}
+            {content}
           </DocView>
         );
       }
@@ -140,7 +140,7 @@ async function loadAndRender() {
             <AppView
               model={props.model}
               vf={mvf}
-              renderContent={(obj: DocHolder | FileObject) => {
+              renderContent={(obj: DocHolder) => {
                 const objView = mvf.getView({
                   classObj: obj.constructor,
                   props: {
@@ -150,18 +150,7 @@ async function loadAndRender() {
                   }
                 });
 
-                if (obj instanceof DocHolder)
-                  return objView;
-
-                return (
-                  <DocView
-                    model={obj}
-                    root={props.model}
-                    key={obj.holder.getID()}
-                  >
-                    {objView}
-                  </DocView>
-                );
+                return objView;
               }}
             />
           );
@@ -170,6 +159,7 @@ async function loadAndRender() {
     ]
   });
 
+  const typeMap: ObjTypeMap = {};
   [
     DocHolder,
     ...Layout.getViews(),
@@ -177,6 +167,7 @@ async function loadAndRender() {
     ...SQLITE3.getViews(),
     ...MYSQL.getViews()
   ].forEach(classObj => {
+    typeMap[classObj.TYPE_ID] = classObj;
     if (!classObj.getViewDesc)
       return;
 
@@ -202,6 +193,8 @@ async function loadAndRender() {
       mvf.register(factItem);
     });
   });
+
+  model.setTypeMap(typeMap);
 
   let cont = document.createElement('div');
   document.body.appendChild(cont);

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
-import { FileObject } from 'objio-object/client/file-object';
-import { App, getObjectBase } from '../model/client/app';
+import { App } from '../model/client/app';
 
 const classes = {
   docView: 'doc-view',
@@ -14,7 +13,7 @@ const classes = {
 
 interface Props {
   root: App;
-  model: DocHolder | FileObject;
+  model: DocHolder;
 }
 
 interface State {
@@ -37,9 +36,7 @@ export class DocView extends React.Component<Props> {
   }
 
   renderName(): JSX.Element {
-    const model = this.props.model;
-    let obj = model instanceof DocHolder ? model.getDoc() : model;
-
+    const obj = this.props.model;
     if (this.state.edit)
       return (
         <input
@@ -107,7 +104,7 @@ export class DocView extends React.Component<Props> {
 
   renderProgress() {
     const model = this.props.model;
-    const base = getObjectBase(model);
+    const base = model;
     if (!base.isStatusInProgess())
       return null;
 

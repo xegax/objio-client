@@ -1,8 +1,6 @@
-import { DocHolder as Base, DocHolderArgs } from '../server/doc-holder';
+import { DocHolderBase, DocHolderArgs } from '../base/doc-holder';
 
-export {
-  DocHolderArgs
-}
+export { DocHolderArgs };
 
-export class DocHolder extends Base {
+export class DocHolder extends DocHolderBase {
 }

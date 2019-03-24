@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { DocRoot as DocRootBase } from '../server/doc-root';
+import { DocRootBase } from '../base/doc-root';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { OBJIOItem, OBJIOArray } from 'objio';
 import { ObjectBase, ObjectsFolder } from 'objio-object/base/object-base';
-import { DocHolder } from './doc-holder';
+import { DocHolderBase } from '../base/doc-holder';
 import { SendFileArgs } from 'objio-object/client/files-container';
 import { createFileObject } from 'objio-object/client';
-export { DocRootBase as DocRoot };
+import { DocHolder } from './doc-holder';
+
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
 import { Icon } from 'ts-react-ui/icon';
@@ -15,38 +16,37 @@ import 'ts-react-ui/typings';
 import * as UnknownTypeIcon from '../../images/unknown-type.png';
 import { ListView } from 'ts-react-ui/list-view';
 
-export function getObjectBase(obj: DocHolder | FileObject): ObjectBase {
-  if (obj instanceof DocHolder)
-    return obj.getDoc();
-
-  return obj;
-}
-
 interface ObjItem {
   value: string;
+  version: string;
   render: JSX.Element;
-  object: FileObject | DocHolder;
+  object: ObjectBase;
 }
 
 interface UploadItem {
   file: File;
-  dst?: OBJIOItem;
+  dst?: ObjectBase;
 }
 
 export interface AppendToUploadArgs {
-  dst?: OBJIOItem;
+  dst?: ObjectBase;
   files: Array<File>;
 }
 
+export interface ObjTypeMap {
+  [type: string]: OBJIOItemClassViewable;
+}
+
 export class App extends DocRootBase {
-  private select: FileObject | DocHolder;
-  private objects = Array<ObjItem>();
-  private objectVers = Array<string>();
+  private select: ObjectBase;
+  private objectsToRender = Array<ObjItem>();
+  
   protected uploadQueue = new Array<UploadItem>();
   protected uploading: Promise<any>;
   protected totalFilesToUpload: number = 0;
   protected currFileProgress: number = 0;
   protected openObjects: {[objId: string]: boolean} = {};
+  protected objTypeMap: ObjTypeMap = {};
 
   constructor() {
     super();
@@ -58,6 +58,11 @@ export class App extends DocRootBase {
         return Promise.resolve();
       }
     });
+  }
+
+  setTypeMap(map: ObjTypeMap) {
+    this.objTypeMap = map;
+    this.updateObjList(true);
   }
 
   renderChildren(obj: ObjectBase): JSX.Element {
@@ -75,57 +80,71 @@ export class App extends DocRootBase {
     );
   }
 
-  updateObjList(force?: boolean) {
-    const objs = [...this.docs.getArray(), ...this.files.getArray()].map(obj => ({ obj, root: true }));
+  private updateObjList(force?: boolean) {
+    const objs: Array<{ ref: ObjectBase, root: boolean}> = this.getObjects().map(holder => ({ ref: holder, root: true }));
+
     Object.keys(this.openObjects).forEach(id => {
       if (!this.openObjects[id])
         return;
 
-      let idx = objs.findIndex(obj => obj.obj.holder.getID() == id);
-      const obj = objs[idx].obj;
-      if (!obj)
+      let idx = objs.findIndex(obj => obj.ref.holder.getID() == id);
+      const obj = objs[idx].ref;
+      if (!obj || !obj.getChildNum())
         return;
 
-      let children = obj.getChildren()[0].objects.map(obj => ({ root: false, obj })) as any;
-      objs.splice(idx + 1, 0, ...children);
+      const children = obj.getChildren();
+      if (!children.length)
+        return;
+
+      const lst = children[0].objects.map(obj => ({ root: false, ref: obj }));
+      objs.splice(idx + 1, 0, ...lst);
     });
   
-    if (force != true && objs.length == this.objectVers.length) {
-      if (!this.objectVers.some((id, idx) => {
-        return getObjectBase(objs[idx].obj).holder.getVersion() != id;
-      }))
+    if (force != true && objs.length == this.objectsToRender.length) {
+      if (!this.objectsToRender.some(item => item.object.getVersion() != item.version))
         return;
     }
 
-    this.objects = objs.map(obj => {
-      const base = getObjectBase(obj.obj);
+    this.objectsToRender = objs.map(obj => {
+      const base = obj.ref;
       const name = base.getName();
-      const viewable = base.constructor as any as OBJIOItemClassViewable;
+
+      const viewable = this.objTypeMap[base.getObjType()];
       let icon: JSX.Element;
-      if (viewable.getViewDesc) {
+      if (viewable && viewable.getViewDesc) {
         icon = ({...viewable.getViewDesc()}.icons || {}).item;
       }
 
-      const children = base.getChildren();
       const openFolder = (
         <CheckIcon
-          hidden={children.length == 0}
+          hidden={base.getChildNum() == 0}
           value
           faIcon={!this.openObjects[base.holder.getID()] ? 'fa fa-plus' : 'fa fa-minus'}
           onClick={e => {
             e.stopPropagation();
             this.openObjects[base.holder.getID()] = !this.openObjects[base.holder.getID()];
-            this.updateObjList(true);
+            if (base instanceof DocHolderBase && !base.isLoaded())
+              base.load().then(() => this.updateObjList(true));
+            else
+              this.updateObjList(true);
           }}
         />
       );
  
       return {
-        value: base.holder.getID(),
+        value: base.getID(),
         title: name,
+        version: base.getVersion(),
         render: (
           <>
-            <Draggable data={{id: base.holder.getID()}} type='layout'>
+            <Draggable
+              data={{id: base.getID()}}
+              type='layout'
+              onDragStart={() => {
+                if (base instanceof DocHolderBase)
+                  base.load();
+              }}
+            >
               <div className='horz-panel-1' style={{display: 'flex', alignItems: 'center'}}>
                 {openFolder}
                 <span style={obj.root ? {display: 'none'} : {}}></span>
@@ -135,32 +154,21 @@ export class App extends DocRootBase {
             </Draggable>
           </>
         ),
-        object: obj.obj
+        object: obj.ref
       };
     });
 
-    this.objectVers = objs.map(obj => getObjectBase(obj.obj).holder.getVersion());
+    // this.objectVers = objs.map(obj => getObjectBase(obj.obj).holder.getVersion());
     this.holder.delayedNotify();
   }
 
-  getObjectsBase(): Array<ObjectBase> {
-    return [
-      ...this.files.getArray(),
-      ...this.docs.getArray().map(holder => holder.getDoc())
-    ];
-  }
-
-  append(obj: FileObject | DocHolder): Promise<void> {
+  append(obj: DocHolderBase): Promise<void> {
     return (
       this.holder.createObject(obj)
       .then(() => {
-        if (obj instanceof FileObject) {
-          this.files.push(obj);
-          this.files.holder.save();
-        } else if (obj instanceof DocHolder) {
-          this.docs.push(obj);
-          this.docs.holder.save();
-        }
+        this.objects.push(obj);
+        this.objects.holder.save();
+
         this.holder.save();
         this.holder.delayedNotify();
         this.setSelect(obj);
@@ -168,25 +176,36 @@ export class App extends DocRootBase {
     );
   }
 
-  getObjects(): Array<ObjItem> {
+  getObjectsToRender(): Array<ObjItem> {
     this.updateObjList();
-    return this.objects;
+    return this.objectsToRender;
   }
 
   selectObjectSubscriber = () => {
     this.holder.notify();
   }
 
-  setSelect(select: FileObject | DocHolder) {
+  setSelect(select: ObjectBase) {
     if (this.select == select)
       return;
 
-    if (this.select)
-      getObjectBase(this.select).holder.unsubscribe(this.selectObjectSubscriber);
+    if (this.select) {
+      this.select.unsubscribe(this.selectObjectSubscriber);
+    }
 
     this.select = select;
-    if (this.select)
-      getObjectBase(this.select).holder.subscribe(this.selectObjectSubscriber);
+    if (select instanceof DocHolderBase && !select.isLoaded()) {
+      select.load().then(() => {
+        this.updateObjList(true);
+        select.holder.delayedNotify();
+        this.holder.delayedNotify();
+      });
+    }
+
+    if (this.select) {
+      this.select.subscribe(this.selectObjectSubscriber);
+    }
+
     this.holder.delayedNotify();
   }
 
@@ -204,21 +223,14 @@ export class App extends DocRootBase {
     this.startUploadNext();
   }
 
-  remove(obj: OBJIOItem): void {
-    const srcs = [this.files, this.docs];
-    srcs.some((lst: OBJIOArray<OBJIOItem>) => {
-      const idx = lst.find(item => item == obj);
-      if (idx == -1)
-        return false;
-
-      lst.remove(idx);
-      lst.holder.save();
-      return true;
-    });
-
-    if (obj == this.getSelect())
-      this.setSelect(null);
-
+  remove(obj: DocHolderBase): void {
+    const idx = this.objects.find(holder => holder == obj);
+    if (idx != -1) {
+      this.objects.remove(idx);
+      this.objects.holder.save();
+      if (obj == this.select)
+        this.setSelect(null);
+    }
     this.holder.delayedNotify();
   }
 
@@ -239,24 +251,25 @@ export class App extends DocRootBase {
       return;
 
     const item = this.uploadQueue[0];
-    let newFileObj: { sendFile(args: SendFileArgs): Promise<void> };
+    let doc: ObjectBase;
 
     let p: Promise<any>;
     if (!item.dst) {
-      p = this.append(newFileObj = createFileObject({
+      doc = createFileObject({
         name: item.file.name,
         size: item.file.size,
         mime: item.file.type
-      }));
+      });
+      p = this.append(new DocHolder({ doc }));
     } else {
-      newFileObj = item.dst as any;
+      doc = item.dst;
       p = Promise.resolve();
     }
 
     this.uploading = (
       p.then(() => {
         this.holder.delayedNotify();
-        return newFileObj.sendFile({
+        return doc.sendFile({
           file: item.file,
           onProgress: value => {
             this.currFileProgress = value;

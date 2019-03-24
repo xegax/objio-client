@@ -122,7 +122,7 @@ export class CreateDocWizard extends React.Component<Props> {
   }
 
   getRootObjects = (): Array<ObjectBase> => {
-    return this.props.root.getObjectsBase();
+    return this.props.root.getObjects();
   }
 
   render() {
