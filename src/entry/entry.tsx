@@ -8,7 +8,8 @@ import {
   createFactory,
   createOBJIO,
   OBJIORemoteStore,
-  OBJIO
+  OBJIO,
+  OBJIOItemClass
 } from 'objio';
 import {
   registerObjects,
@@ -20,14 +21,12 @@ import '../../styles/styles.scss';
 import 'ts-react-ui/_base.scss';
 import 'objio-object/styles/all.scss';
 import { DocView } from '../view/doc-view';
-
 import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
 import * as SQLITE3 from 'objio-sqlite-table/view';
 import { Project } from 'objio/project/client/project';
 import { App, AppView, ObjTypeMap } from '../view/app-view';
-
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 
 Promise.config({ cancellation: true });
@@ -121,7 +120,17 @@ async function loadAndRender() {
     views: [{
       view: (props: { model: DocHolder, root: App }) => {
         const doc = props.model.get();
-        const content = !doc ? <div>object not loaded yet</div> : mvf.getView({ classObj: doc.constructor, props: { model: doc } });
+        const content = !doc ? (
+          <div>object not loaded yet</div>
+        ) : (
+          mvf.getView({
+            classObj: doc.constructor,
+            props: {
+              model: doc,
+              objects: props.root.filterObjects
+            }
+          })
+        );
         return (
           <DocView {...props}>
             {content}
@@ -131,6 +140,12 @@ async function loadAndRender() {
     }]
   });
 
+  const objectsToCreate = [
+    ...Objects.getObjectsToCreate(),
+    ...SQLITE3.getObjectsToCreate(),
+    ...MYSQL.getObjectsToCreate()
+  ];
+
   Objects.registerViews({
     classObj: App,
     views: [
@@ -138,8 +153,8 @@ async function loadAndRender() {
         view: (props: { model: App }) => {
           return (
             <AppView
+              objects={objectsToCreate}
               model={props.model}
-              vf={mvf}
               renderContent={(obj: DocHolder) => {
                 const objView = mvf.getView({
                   classObj: obj.constructor,

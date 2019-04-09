@@ -1,5 +1,5 @@
 import { SERIALIZER, OBJIOItem } from 'objio';
-import { ObjectBase, SendFileArgs } from 'objio-object/base/object-base';
+import { ObjectBase, SendFileArgs, ObjProps } from 'objio-object/base/object-base';
 
 export interface DocHolderArgs {
   doc: ObjectBase;
@@ -155,11 +155,11 @@ export class DocHolderBase extends ObjectBase {
     return this.doc.getAppComponents();    
   }
 
-  getObjPropGroups() {
+  getObjPropGroups(props: ObjProps) {
     if (!this.get())
-      return super.getObjPropGroups();
+      return super.getObjPropGroups(props);
 
-    return this.doc.getObjPropGroups();
+    return this.doc.getObjPropGroups(props);
   }
 
   sendFile(args: SendFileArgs): Promise<any> {

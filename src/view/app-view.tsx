@@ -2,21 +2,21 @@ import * as React from 'react';
 import { AppCompLayout, AppComponent, AppContent } from 'ts-react-ui/app-comp-layout';
 import { ListView, Item } from 'ts-react-ui/list-view';
 import { App, ObjTypeMap } from '../model/client/app';
-import { OBJIOItem } from 'objio';
-import { PropSheet, PropsGroup, PropItem, TextPropItem, DropDownPropItem } from 'ts-react-ui/prop-sheet';
-import { ObjectBase } from 'objio-object/base/object-base';
+import { OBJIOItem, OBJIOItemClass } from 'objio';
+import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
+import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
-import { DocHolder } from '../model/server/doc-holder';
+import { DocHolder } from '../model/client/doc-holder';
 import { createDocWizard } from './create-doc-wizard';
-import { ViewFactory } from 'objio-object/common/view-factory';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
+import { ObjectToCreate } from 'objio-object/common/interfaces';
 import './_app.scss';
 
 export { App, ObjTypeMap };
 
 interface Props {
   model: App;
-  vf: ViewFactory;
+  objects: Array<ObjectToCreate>;
   renderContent(obj: OBJIOItem): JSX.Element;
 }
 
@@ -129,9 +129,15 @@ export class AppView extends React.Component<Props, State> {
           {file && <PropItem label='original name' value={file.getOriginName()}/>}
           {file && <PropItem label='ext' value={file.getExt()}/>}
         </PropsGroup>}
-        {select && objBase.getObjPropGroups()}
+        {select && objBase.getObjPropGroups( this.getObjProps() )}
       </PropSheet>
     );
+  }
+
+  getObjProps(): ObjProps {
+    return {
+      objects: this.props.model.filterObjects
+    };
   }
 
   renderSelectObjectComponents() {
@@ -143,7 +149,10 @@ export class AppView extends React.Component<Props, State> {
   }
 
   onAdd = () => {
-    createDocWizard(this.props.model, this.props.vf)
+    createDocWizard(this.props.objects)
+    .then(obj => {
+      this.props.model.append( new DocHolder({ doc: obj }) );
+    })
     .catch(() => {
       console.log('create cancel');
     });

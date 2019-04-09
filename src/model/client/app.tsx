@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DocRootBase } from '../base/doc-root';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
-import { OBJIOItem, OBJIOArray } from 'objio';
+import { OBJIOItemClass } from 'objio';
 import { ObjectBase, ObjectsFolder } from 'objio-object/base/object-base';
 import { DocHolderBase } from '../base/doc-holder';
 import { SendFileArgs } from 'objio-object/client/files-container';
@@ -232,6 +232,16 @@ export class App extends DocRootBase {
         this.setSelect(null);
     }
     this.holder.delayedNotify();
+  }
+
+  filterObjects = (filter?: Array<OBJIOItemClass>) => {
+    return this.getObjects().filter(holder => {
+      if (!filter || filter.length == 0)
+        return true;
+
+      const classObj: OBJIOItemClass = this.objTypeMap[holder.getObjType()];
+      return filter.indexOf( classObj ) != -1;
+    });
   }
 
   getUploadQueue() {

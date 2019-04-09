@@ -1,4 +1,4 @@
-import { OBJIOFactory } from 'objio';
+import { OBJIOFactory, OBJIOItemClass } from 'objio';
 import * as Objects from 'objio-object/client';
 import { DocHolder } from './doc-holder';
 import * as SQLITE3 from 'objio-sqlite-table/client';
