@@ -18,6 +18,7 @@ export class DocHolderBase extends ObjectBase {
 
     if (args) {
       this.doc = args.doc;
+      this.onObjLoadedOrCreated(this.doc);
       this.name = this.doc.getName();
       this.objType = OBJIOItem.getClass(args.doc).TYPE_ID;
     }
@@ -78,7 +79,7 @@ export class DocHolderBase extends ObjectBase {
     return this.doc.isStatusInProgess();
   }
 
-  private onObjLoaded = (obj: ObjectBase) => {
+  private onObjLoadedOrCreated = (obj: ObjectBase) => {
     this.loadTask = null;
     this.doc = obj;
     obj.holder.subscribe(this.notifySubscibers);
@@ -104,7 +105,7 @@ export class DocHolderBase extends ObjectBase {
 
     if (!this.loadTask) (
       this.loadTask = this.holder.getObject<ObjectBase>(this.doc as any)
-      .then(this.onObjLoaded)
+      .then(this.onObjLoadedOrCreated)
       .catch(() => {
         this.loadTask = null;
         return null;

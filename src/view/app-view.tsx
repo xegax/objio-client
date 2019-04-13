@@ -104,7 +104,7 @@ export class AppView extends React.Component<Props, State> {
     const objBase: ObjectBase = select;
     const file: FileObject = select instanceof FileObject ? select : null;
     return (
-      <PropSheet>
+      <PropSheet fitToAbs>
         <FilesDropContainer onDropFiles={this.onDropToList}>
           <PropsGroup
             label='object list'
