@@ -65,21 +65,6 @@ export class App extends DocRootBase {
     this.updateObjList(true);
   }
 
-  renderChildren(obj: ObjectBase): JSX.Element {
-    const children = obj.getChildren();
-    if (!this.openObjects[obj.holder.getID()] || children.length != 1)
-      return null;
-
-    return (
-      <ListView
-        maxHeight={200}
-        values={children[0].objects.map(item => {
-          return { value: item.holder.getID(), label: item.getName() };
-        })}
-      />
-    );
-  }
-
   private updateObjList(force?: boolean) {
     const objs: Array<{ ref: ObjectBase, root: boolean}> = this.getObjects().map(holder => ({ ref: holder, root: true }));
 
