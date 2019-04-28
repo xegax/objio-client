@@ -281,6 +281,13 @@ export class App extends DocRootBase {
         this.holder.delayedNotify();
         this.startUploadNext();
       })
+      .catch(err => {
+        this.uploadQueue = [];
+        this.totalFilesToUpload = 0;
+        this.uploading = null;
+        this.holder.delayedNotify();
+        return Promise.reject(err);
+      })
     );
   }
 }
