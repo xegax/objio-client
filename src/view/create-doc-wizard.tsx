@@ -80,7 +80,7 @@ export class CreateDocWizard extends React.Component<Props, State> {
 
     return (
       <div className={classes.objectParams} key={this.state.object.name}>
-        <PropSheet>
+        <PropSheet fitToAbs>
           <PropsGroup label='general'>
             <TextPropItem
               label='name'

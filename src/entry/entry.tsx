@@ -209,7 +209,8 @@ async function loadAndRender() {
     });
   });
 
-  model.setTypeMap(typeMap);
+  if (model['setTypeMap'])
+    model.setTypeMap(typeMap);
 
   let cont = document.createElement('div');
   document.body.appendChild(cont);
