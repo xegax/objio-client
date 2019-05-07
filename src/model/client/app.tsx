@@ -25,11 +25,12 @@ interface ObjItem {
 
 interface UploadItem {
   file: File;
-  dst?: ObjectBase;
+  dstObj?: ObjectBase;
+  dstData?: any;
 }
 
 export interface AppendToUploadArgs {
-  dst?: ObjectBase;
+  dstObj?: ObjectBase;
   files: Array<File>;
 }
 
@@ -200,10 +201,20 @@ export class App extends DocRootBase {
 
   appendToUpload(args: AppendToUploadArgs) {
     this.totalFilesToUpload += args.files.length;
-    this.uploadQueue.push(...args.files.map(item => ({
-      dst: args.dst,
-      file: item
-    })));
+
+    const newItems: Array<UploadItem> = args.files.map(item => {
+      const uitem: UploadItem = {
+        dstObj: args.dstObj,
+        file: item
+      };
+      if (uitem.dstObj)
+        uitem.dstData = uitem.dstObj.getFileDropDest();
+
+      return uitem;
+    });
+
+    this.uploadQueue.push(...newItems);
+
     this.holder.delayedNotify();
     this.startUploadNext();
   }
@@ -249,7 +260,7 @@ export class App extends DocRootBase {
     let doc: ObjectBase;
 
     let p: Promise<any>;
-    if (!item.dst) {
+    if (!item.dstObj) {
       doc = createFileObject({
         name: item.file.name,
         size: item.file.size,
@@ -257,7 +268,7 @@ export class App extends DocRootBase {
       });
       p = this.append(new DocHolder({ doc }));
     } else {
-      doc = item.dst;
+      doc = item.dstObj;
       p = Promise.resolve();
     }
 
@@ -266,6 +277,7 @@ export class App extends DocRootBase {
         this.holder.delayedNotify();
         return doc.sendFile({
           file: item.file,
+          dest: item.dstData,
           onProgress: value => {
             this.currFileProgress = value;
             this.holder.delayedNotify();

@@ -163,12 +163,20 @@ export class DocHolderBase extends ObjectBase {
     return this.doc.getObjPropGroups(props);
   }
 
+  getFileDropDest() {
+    if (!this.get())
+      return Promise.reject('object not loaded yet');
+
+    return this.doc.getFileDropDest();
+  }
+
   sendFile(args: SendFileArgs): Promise<any> {
     if (!this.get())
       return Promise.reject('object not loaded yet');
 
     return this.doc.sendFile(args);
   }
+
 
   static TYPE_ID = 'DocHolder';
   static SERIALIZE: SERIALIZER = () => ({

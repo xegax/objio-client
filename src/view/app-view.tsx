@@ -164,7 +164,7 @@ export class AppView extends React.Component<Props, State> {
 
   onDropToDoc = (files: Array<File>) => {
     const dst = this.props.model.getSelect();
-    this.props.model.appendToUpload({ files, dst });
+    this.props.model.appendToUpload({ files, dstObj: dst });
   }
 
   renderDoc(select: ObjectBase) {
