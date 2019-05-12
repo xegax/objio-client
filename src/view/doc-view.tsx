@@ -76,26 +76,8 @@ export class DocView extends React.Component<Props> {
       />
     );
 
-    // let depends = this.props.vf.findBySource(OBJIOItem.getClass(this.props.model));
-    const create = null; /*depends.length ? (
-      <i
-        style={{marginLeft: 10}}
-        title='create'
-        className='fa fa-plus'
-        onClick={() => {
-          const model = this.props.model;
-          const obj: ObjectBase | FileObject = model instanceof DocHolder ? model.getDoc() : model;
-          createDocWizard(this.props.root, this.props.vf, obj)
-          .catch(e => {
-            console.log('cancel');
-          });
-        }}
-      />
-    ) : null;*/;
-
     return (
       <div className={classes.tools}>
-        {create}
         {link}
         {remove}
       </div>

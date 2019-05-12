@@ -134,7 +134,8 @@ export class AppView extends React.Component<Props, State> {
 
   getObjProps(): ObjProps {
     return {
-      objects: this.props.model.filterObjects
+      objects: this.props.model.filterObjects,
+      append: obj => this.props.model.append(new DocHolder({ doc: obj }))
     };
   }
 

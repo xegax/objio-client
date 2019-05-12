@@ -127,7 +127,8 @@ async function loadAndRender() {
             classObj: doc.constructor,
             props: {
               model: doc,
-              objects: props.root.filterObjects
+              objects: props.root.filterObjects,
+              append: obj => props.root.append(new DocHolder({ doc: obj }))
             }
           })
         );
