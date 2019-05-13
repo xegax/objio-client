@@ -63,7 +63,7 @@ export class DocView extends React.Component<Props> {
         style={{marginLeft: 10, marginRight: 10}}
         title='delete'
         className='fa fa-trash-o'
-        onClick={() => this.props.root.remove(this.props.model)}
+        onClick={() => this.props.root.remove({ obj: this.props.model, confirm: true })}
       />
     );
 

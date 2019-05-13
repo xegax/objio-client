@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { DocRootBase } from '../base/doc-root';
-import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { OBJIOItemClass } from 'objio';
-import { ObjectBase, ObjectsFolder } from 'objio-object/base/object-base';
+import { ObjectBase } from 'objio-object/base/object-base';
 import { DocHolderBase } from '../base/doc-holder';
-import { SendFileArgs } from 'objio-object/client/files-container';
 import { createFileObject } from 'objio-object/client';
 import { DocHolder } from './doc-holder';
 
@@ -14,7 +12,23 @@ import { Icon } from 'ts-react-ui/icon';
 import { CheckIcon } from 'ts-react-ui/checkicon';
 import 'ts-react-ui/typings';
 import * as UnknownTypeIcon from '../../images/unknown-type.png';
-import { ListView } from 'ts-react-ui/list-view';
+import { confirm, Action } from 'ts-react-ui/prompt';
+import { ContextMenu, Menu, MenuItem } from 'ts-react-ui/blueprint';
+
+const DeleteAll: Action = {
+  text: 'Delete all',
+  onAction: () => {}
+};
+
+const DeleteOnlyObject: Action = {
+  text: 'Delete object only',
+  onAction: () => {}
+};
+
+const Cancel: Action = {
+  text: 'Cancel',
+  onAction: () => {}
+};
 
 interface ObjItem {
   value: string;
@@ -131,7 +145,29 @@ export class App extends DocRootBase {
                   base.load();
               }}
             >
-              <div className='horz-panel-1' style={{display: 'flex', alignItems: 'center'}}>
+              <div
+                className='horz-panel-1'
+                style={{display: 'flex', alignItems: 'center'}}
+                onContextMenu={evt => {
+                  if (!obj.root)
+                    return;
+
+                  evt.preventDefault();
+                  evt.stopPropagation();
+
+                  ContextMenu.show(
+                    <Menu>
+                      <MenuItem
+                        text={`Remove "${obj.ref.getName()}"`}
+                        onClick={() => {
+                          this.remove({ obj: obj.ref as DocHolderBase, confirm: true });
+                        }}
+                      />
+                    </Menu>,
+                    { left: evt.pageX, top: evt.pageY }
+                  );
+                }}
+              >
                 {openFolder}
                 <span style={obj.root ? {display: 'none'} : {}}></span>
                 {icon || <Icon src={UnknownTypeIcon}/>}
@@ -219,15 +255,36 @@ export class App extends DocRootBase {
     this.startUploadNext();
   }
 
-  remove(obj: DocHolderBase): void {
-    const idx = this.objects.find(holder => holder == obj);
-    if (idx != -1) {
-      this.objects.remove(idx);
-      this.objects.holder.save();
-      if (obj == this.select)
+  remove(args: { obj: DocHolderBase, removeContent?: boolean, confirm?: boolean }): Promise<boolean> {
+    if (!args.confirm)
+      return Promise.resolve(this.removeImpl({ obj: args.obj, removeContent: args.removeContent }));
+    
+    return (
+      confirm({ text: `Are you sure to delete "${args.obj.getName()}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
+      .then(a => {
+        if (a == Cancel)
+          return;
+
+        return this.removeImpl({ obj: args.obj, removeContent: a == DeleteAll });
+      })
+    );
+  }
+
+  private removeImpl(args: { obj: DocHolderBase, removeContent?: boolean }): boolean {
+    const idx = this.objects.find(holder => holder == args.obj);
+    if (idx == -1)
+      return false;
+
+    this.objects.remove(idx);
+    if (args.removeContent && args.obj.get())
+      args.obj.removeContent();
+
+    this.objects.holder.save();
+    if (args.obj == this.select)
         this.setSelect(null);
-    }
+
     this.holder.delayedNotify();
+    return true;
   }
 
   filterObjects = (filter?: Array<OBJIOItemClass>) => {

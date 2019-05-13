@@ -1,5 +1,6 @@
 import { SERIALIZER, OBJIOItem } from 'objio';
 import { ObjectBase, SendFileArgs, ObjProps } from 'objio-object/base/object-base';
+import { FileObjectBase } from 'objio-object/base/file-object';
 
 export interface DocHolderArgs {
   doc: ObjectBase;
@@ -177,6 +178,15 @@ export class DocHolderBase extends ObjectBase {
     return this.doc.sendFile(args);
   }
 
+  removeContent() {
+    if (!this.get())
+      return Promise.reject('object not loaded yet');
+
+    if (this.doc instanceof FileObjectBase)
+      this.doc.removeContent();
+
+    return Promise.resolve();
+  }
 
   static TYPE_ID = 'DocHolder';
   static SERIALIZE: SERIALIZER = () => ({
