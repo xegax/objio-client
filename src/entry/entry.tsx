@@ -81,8 +81,10 @@ async function loadAndRender() {
   try {
     prj = await objio.loadObject<Project>();
     model = prj.getObjects().get(0) as App;
-    if (!model)
-      await prj.appendObject(new App());
+    if (!model) {
+      model = new App();
+      await prj.appendObject(model);
+    }
   } catch (e) {
     document.body.innerHTML = (e['data'] || e) + '';
     return;

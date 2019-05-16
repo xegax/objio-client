@@ -49,14 +49,14 @@
   },
   "dependencies": {
     "bluebird": "^3.5.3",
-    "objio": "^0.0.38",
-    "objio-layout": "^0.0.38",
-    "objio-mysql-database": "^0.0.38",
-    "objio-object": "^0.0.38",
-    "objio-sqlite-table": "^0.0.38",
+    "objio": "^0.0.40",
+    "objio-layout": "^0.0.40",
+    "objio-mysql-database": "^0.0.40",
+    "objio-object": "^0.0.40",
+    "objio-sqlite-table": "^0.0.40",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-transition-group": "^2.3.1",
-    "ts-react-ui": "^0.1.38"
+    "ts-react-ui": "^0.1.40"
   }
 }
