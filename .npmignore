@@ -1,6 +1,16 @@
 node_modules
 src
 data
+nginx/logs/*
+nginx/temp/*
 .git
 .vscode
 env.conf
+karma.conf.js
+karma-entry.js
+webpack.config.js
+webpack.externals.js
+webpack.server.js
+tsconfig.json
+tsconfig-srv.json
+tslint.json
