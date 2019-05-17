@@ -28,7 +28,7 @@
       "type": "node",
       "request": "launch",
       "name": "doc server",
-      "program": "${workspaceRoot}/src/server/doc-server.js",
+      "program": "${workspaceRoot}/server/server.js",
       "cwd": "${workspaceRoot}",
       "env": {
         "FFMPEG": "c:\\bin\\ffmpeg-4.0.1-win64-shared\\bin\\ffmpeg.exe"

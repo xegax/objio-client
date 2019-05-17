@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const outputDir = './client';
+
 var externals = {
   'react': [
     './node_modules/react/cjs/react.development.js'
@@ -24,7 +26,8 @@ module.exports = [
     mode: 'development',
     entry: externals,
     output: {
-      path: path.resolve('./build'),
+      path: path.resolve(outputDir),
+      publicPath: '/',
       filename: '[name].js',
       library: '[name]'
     },

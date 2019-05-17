@@ -1,4 +1,5 @@
-build
+client
+server
 node_modules
 .tscache
 src/**/*.js.map

@@ -1,20 +1,22 @@
 const path = require('path');
 const webpack = require('webpack');
+const htmlWebpackPlugin = require('html-webpack-plugin');
+
+const outputDir = 'client';
 
 module.exports = [
   {
     mode: 'development',
     entry: {
-      'entry': ['./src/entry/entry.tsx']
+      'client': ['./src/entry/entry.tsx']
     },
     output: {
-      path: path.resolve('./build'),
+      path: path.resolve(`./${outputDir}`),
       filename: '[name].js',
       library: '[name]'
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js", ".scss"],
-
       modules: [
         'styles',
         path.resolve('./src'),
@@ -41,7 +43,7 @@ module.exports = [
           loader: 'url-loader',
           options: {
             name: '[name].[ext]',
-            outputPath: '../build',
+            outputPath: `../${outputDir}`,
             limit: 10000
           }
         }
@@ -51,6 +53,14 @@ module.exports = [
       new webpack.ProvidePlugin({
         Promise: 'bluebird'
       }),
+      new htmlWebpackPlugin({
+        template: 'html/index.html',
+        filename: 'index.html',
+        inject: false,
+        hashStr: Date.now().toString(16),
+        headerJS: [ 'react.js', 'reactdom.js', 'bluebird.js', 'blueprintjs.js' ],
+        bodyJS: [ 'client.js' ]
+      })
     ],
     devtool: 'source-map'
   }

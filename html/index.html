@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+<%=htmlWebpackPlugin.options.headerJS.map(script => `    <script src='${script}?${htmlWebpackPlugin.options.hashStr}'></script>`).join('\n')%>
+</head>
+<body>
+<%=htmlWebpackPlugin.options.bodyJS.map(script => `    <script src='${script}?${htmlWebpackPlugin.options.hashStr}'></script>`)%>
+</body>
+</html>
