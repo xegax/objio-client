@@ -146,7 +146,8 @@ async function loadAndRender() {
   const objectsToCreate = [
     ...Objects.getObjectsToCreate(),
     ...SQLITE3.getObjectsToCreate(),
-    ...MYSQL.getObjectsToCreate()
+    ...MYSQL.getObjectsToCreate(),
+    ...Layout.getObjectsToCreate()
   ];
 
   Objects.registerViews({
