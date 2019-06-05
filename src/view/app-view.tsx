@@ -2,7 +2,7 @@ import * as React from 'react';
 import { AppCompLayout, AppComponent, AppContent } from 'ts-react-ui/app-comp-layout';
 import { ListView, Item } from 'ts-react-ui/list-view';
 import { App, ObjTypeMap } from '../model/client/app';
-import { OBJIOItem, OBJIOItemClass } from 'objio';
+import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
@@ -42,7 +42,7 @@ export class AppView extends React.Component<Props, State> {
   onSelect = (item: Item) => {
     const objects = this.props.model.getObjectsToRender();
     const select = objects.find(obj => obj.value == item.value);
-    this.props.model.setSelect(select ? select.object : null);
+    App.setSelectById(select ? select.object.getID() : null);
   }
   
   onDropToList = (files: Array<File>) => {

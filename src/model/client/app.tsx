@@ -14,6 +14,7 @@ import 'ts-react-ui/typings';
 import * as UnknownTypeIcon from '../../images/unknown-type.png';
 import { confirm, Action } from 'ts-react-ui/prompt';
 import { ContextMenu, Menu, MenuItem } from 'ts-react-ui/blueprint';
+import { HashState } from 'ts-react-ui/hash-state';
 
 const DeleteAll: Action = {
   text: 'Delete all',
@@ -52,6 +53,10 @@ export interface ObjTypeMap {
   [type: string]: OBJIOItemClassViewable;
 }
 
+interface AppState {
+  objId: string;
+}
+
 export class App extends DocRootBase {
   private select: ObjectBase;
   private objectsToRender = Array<ObjItem>();
@@ -62,6 +67,7 @@ export class App extends DocRootBase {
   protected currFileProgress: number = 0;
   protected openObjects: {[objId: string]: boolean} = {};
   protected objTypeMap: ObjTypeMap = {};
+  protected static hashState = new HashState<AppState>();
 
   constructor() {
     super();
@@ -70,10 +76,21 @@ export class App extends DocRootBase {
       onObjChange: () => this.updateObjList(),
       onLoad: () => {
         this.updateObjList();
+        this.onHashChanged();
         return Promise.resolve();
       }
     });
+
+    App.hashState.subscribe(this.onHashChanged);
   }
+
+  static setSelectById(objId: string) {
+    App.hashState.pushState({ objId });
+  }
+
+  protected onHashChanged = () => {
+    this.setSelectById(App.hashState.getString('objId'));
+  };
 
   setTypeMap(map: ObjTypeMap) {
     this.objTypeMap = map;
@@ -193,7 +210,7 @@ export class App extends DocRootBase {
 
         this.holder.save();
         this.holder.delayedNotify();
-        this.setSelect(obj);
+        App.setSelectById(obj.getID());
       })
     );
   }
@@ -206,8 +223,18 @@ export class App extends DocRootBase {
   selectObjectSubscriber = () => {
     this.holder.notify();
   }
+  
+  protected setSelectById(objId: string): void {
+    if (!objId)
+      return this.setSelect(null);
 
-  setSelect(select: ObjectBase) {
+    const objToSel = this.objects.find(obj => {
+      return obj.holder.getID() == objId || obj.getID() == objId;
+    });
+    this.setSelect(this.objects.get(objToSel));
+  }
+
+  protected setSelect(select: ObjectBase) {
     if (this.select == select)
       return;
 
@@ -281,7 +308,7 @@ export class App extends DocRootBase {
 
     this.objects.holder.save();
     if (args.obj == this.select)
-        this.setSelect(null);
+        this.setSelectById(null);
 
     this.holder.delayedNotify();
     return true;
