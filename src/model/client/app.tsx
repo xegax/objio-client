@@ -287,7 +287,7 @@ export class App extends DocRootBase {
       return Promise.resolve(this.removeImpl({ obj: args.obj, removeContent: args.removeContent }));
     
     return (
-      confirm({ text: `Are you sure to delete "${args.obj.getName()}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
+      confirm({ body: `Are you sure to delete "${args.obj.getName()}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
       .then(a => {
         if (a == Cancel)
           return;
