@@ -7,7 +7,8 @@ export interface DocHolderArgs {
 }
 
 export class DocHolderBase extends ObjectBase {
-  protected doc: ObjectBase;
+  protected doc: string;
+  protected docRef: ObjectBase;
   protected name: string;
   protected loadTask: Promise<ObjectBase>;
   protected childNum: number = 0;
@@ -18,9 +19,10 @@ export class DocHolderBase extends ObjectBase {
     super();
 
     if (args) {
-      this.doc = args.doc;
-      this.onObjLoadedOrCreated(this.doc);
-      this.name = this.doc.getName();
+      this.docRef = args.doc;
+      this.doc = args.doc as any;
+      this.onObjLoadedOrCreated(this.docRef);
+      this.name = this.docRef.getName();
       this.objType = OBJIOItem.getClass(args.doc).TYPE_ID;
     }
 
@@ -44,11 +46,11 @@ export class DocHolderBase extends ObjectBase {
     if (!this.get())
       return this.objType;
 
-    return this.doc.getObjType();
+    return this.docRef.getObjType();
   }
 
   isLoaded(): boolean {
-    return this.doc instanceof ObjectBase;
+    return this.docRef instanceof ObjectBase;
   }
 
   isLoadInProgress(): boolean {
@@ -59,7 +61,7 @@ export class DocHolderBase extends ObjectBase {
     if (!this.get())
       return 0;
 
-    return this.doc.getProgress();
+    return this.docRef.getProgress();
   }
 
   getChildNum() {
@@ -70,29 +72,29 @@ export class DocHolderBase extends ObjectBase {
     if (!this.get())
       return [];
 
-    return this.doc.getChildren();
+    return this.docRef.getChildren();
   }
 
   isStatusInProgess() {
     if (!this.get())
       return false;
 
-    return this.doc.isStatusInProgess();
+    return this.docRef.isStatusInProgess();
   }
 
   private onObjLoadedOrCreated = (obj: ObjectBase) => {
     this.loadTask = null;
-    this.doc = obj;
+    this.docRef = obj;
     obj.holder.subscribe(this.notifySubscibers);
 
-    this.doc.holder.addEventHandler({
+    this.docRef.holder.addEventHandler({
       onObjChange: () => {
         const folders = this.getChildren();
         if (!folders || !folders.length)
           return;
 
         this.childNum = folders[0].objects.length;
-        this.objType = OBJIOItem.getClass(this.doc).TYPE_ID;
+        this.objType = OBJIOItem.getClass(this.docRef).TYPE_ID;
         this.holder.save();
         this.holder.delayedNotify();
       }
@@ -102,10 +104,10 @@ export class DocHolderBase extends ObjectBase {
 
   load(): Promise<ObjectBase> {
     if (this.isLoaded())
-      return Promise.resolve(this.doc);
+      return Promise.resolve(this.docRef);
 
     if (!this.loadTask) (
-      this.loadTask = this.holder.getObject<ObjectBase>(this.doc as any)
+      this.loadTask = this.holder.getObject<ObjectBase>(this.doc)
       .then(this.onObjLoadedOrCreated)
       .catch(() => {
         this.loadTask = null;
@@ -120,21 +122,21 @@ export class DocHolderBase extends ObjectBase {
     if (!this.isLoaded())
       return null;
 
-    return this.doc;
+    return this.docRef;
   }
 
   getID(): string {
     if (!this.isLoaded())
-      return this.doc as any;
+      return this.doc;
 
-    return this.doc.holder.getID();
+    return this.docRef.holder.getID();
   }
 
   getName(): string {
     if (!this.isLoaded())
       return this.name || '';
 
-    return this.doc.getName();
+    return this.docRef.getName();
   }
 
   setName(name: string) {
@@ -154,36 +156,36 @@ export class DocHolderBase extends ObjectBase {
     if (!this.get())
       return super.getAppComponents();
 
-    return this.doc.getAppComponents();    
+    return this.docRef.getAppComponents();    
   }
 
   getObjPropGroups(props: ObjProps) {
     if (!this.get())
       return super.getObjPropGroups(props);
 
-    return this.doc.getObjPropGroups(props);
+    return this.docRef.getObjPropGroups(props);
   }
 
   getFileDropDest() {
     if (!this.get())
       return Promise.reject('object not loaded yet');
 
-    return this.doc.getFileDropDest();
+    return this.docRef.getFileDropDest();
   }
 
   sendFile(args: SendFileArgs): Promise<any> {
     if (!this.get())
       return Promise.reject('object not loaded yet');
 
-    return this.doc.sendFile(args);
+    return this.docRef.sendFile(args);
   }
 
   removeContent() {
     if (!this.get())
       return Promise.reject('object not loaded yet');
 
-    if (this.doc instanceof FileObjectBase)
-      this.doc.removeContent();
+    if (this.docRef instanceof FileObjectBase)
+      this.docRef.removeContent();
 
     return Promise.resolve();
   }
