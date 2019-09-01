@@ -78,7 +78,7 @@ export class AppView extends React.Component<Props, State> {
         itemWrap={false}
         defaultHeight={200}
         label={`uploading ${uploadQueue.length} files`}
-        faIcon='fa fa-spinner fa-spin'
+        // faIcon='fa fa-spinner fa-spin'
       >
         <ListView
           values={uploadQueue.map((file, i) => {
