@@ -107,7 +107,7 @@ export class AppView extends React.Component<Props, State> {
       <PropSheet fitToAbs>
         <FilesDropContainer onDropFiles={this.onDropToList}>
           <PropsGroup
-            label='object list'
+            label='Objects'
             defaultHeight={200}
             className='object-list-group'
           >
@@ -119,7 +119,7 @@ export class AppView extends React.Component<Props, State> {
           </PropsGroup>
         </FilesDropContainer>
         {this.renderUploadQueue()}
-        {select && <PropsGroup label='object' defaultOpen={false}>
+        {select && <PropsGroup label='Object' defaultOpen={false}>
           <PropItem label='id' value={select.holder.getID()}/>
           <PropItem label='version' value={select.holder.getVersion()}/>
           {objBase && <TextPropItem label='name' value={objBase.getName()} onEnter={value => objBase.setName(value)}/>}
@@ -144,7 +144,19 @@ export class AppView extends React.Component<Props, State> {
     if (!select)
       return null;
 
-    return select.getAppComponents();
+    const arr = select.getAppComponents();
+    arr.push(...select.getObjTabs().map((tab, i) => {
+      const key = 'tab-' + i;
+      return (
+        <AppComponent key={key} id={key} faIcon={tab.icon} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+          <PropSheet fitToAbs>
+            {tab.render(this.getObjProps())}
+          </PropSheet>
+        </AppComponent>
+      );
+    }));
+
+    return arr;
   }
 
   onAdd = () => {

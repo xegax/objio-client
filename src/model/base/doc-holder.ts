@@ -166,6 +166,13 @@ export class DocHolderBase extends ObjectBase {
     return this.docRef.getObjPropGroups(props);
   }
 
+  getObjTabs() {
+    if (!this.get())
+      return super.getObjTabs();
+
+    return this.docRef.getObjTabs();
+  }
+
   getFileDropDest() {
     if (!this.get())
       return Promise.reject('object not loaded yet');
