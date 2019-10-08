@@ -15,6 +15,11 @@ import * as UnknownTypeIcon from '../../images/unknown-type.png';
 import { confirm, Action } from 'ts-react-ui/prompt';
 import { ContextMenu, Menu, MenuItem } from 'ts-react-ui/blueprint';
 import { HashState } from 'ts-react-ui/hash-state';
+import { TreeItem } from 'ts-react-ui/tree/tree';
+
+export interface TreeItemExt extends TreeItem {
+  obj: ObjectBase;
+}
 
 const DeleteAll: Action = {
   text: 'Delete all',
@@ -30,13 +35,6 @@ const Cancel: Action = {
   text: 'Cancel',
   onAction: () => {}
 };
-
-interface ObjItem {
-  value: string;
-  version: string;
-  render: JSX.Element;
-  object: ObjectBase;
-}
 
 interface UploadItem {
   file: File;
@@ -58,8 +56,10 @@ interface AppState {
 }
 
 export class App extends DocRootBase {
-  private select: ObjectBase;
-  private objectsToRender = Array<ObjItem>();
+  private select = Array<ObjectBase>();
+  private path = Array<string>();
+  // private objectsToRender = Array<ObjItem>();
+  protected objTree = Array<TreeItemExt>();
   
   protected uploadQueue = new Array<UploadItem>();
   protected uploading: Promise<any>;
@@ -73,9 +73,9 @@ export class App extends DocRootBase {
     super();
 
     this.holder.addEventHandler({
-      onObjChange: () => this.updateObjList(),
+      onObjChange: () => this.updateObjTree(),
       onLoad: () => {
-        this.updateObjList();
+        this.updateObjTree();
         this.onHashChanged();
         return Promise.resolve();
       }
@@ -94,26 +94,60 @@ export class App extends DocRootBase {
 
   setTypeMap(map: ObjTypeMap) {
     this.objTypeMap = map;
-    this.updateObjList(true);
+    // this.updateObjList(true);
   }
 
-  private updateObjList(force?: boolean) {
-    const objs: Array<{ ref: ObjectBase, root: boolean}> = this.getObjects().map(holder => ({ ref: holder, root: true }));
+  private loadObjChildren = (item: TreeItem): Promise<Array<TreeItemExt>> => {
+    return (
+      this.holder.getObject(item.value)
+      .then((obj: ObjectBase) => {
+        const children = obj.getChildren();
+        if (children && children[0]) {
+          return children[0].objects.map(obj => ({
+            value: obj.getID(),
+            obj,
+            render: this.renderTreeItem
+          }));
+        }
+
+        return [];
+      })
+    );
+  }
+
+  private renderTreeItem = (item: TreeItemExt) => {
+    return item.obj.getName();
+  };
+
+  private updateObjTree() {
+    this.objTree = this.getObjects().map(holder => {
+      return {
+        value: holder.getID(),
+        obj: holder,
+        render: this.renderTreeItem,
+        children: holder.getChildNum() ? this.loadObjChildren : undefined
+      };
+    });
+    this.holder.delayedNotify();
+  }
+
+  /*private updateObjList(force?: boolean) {
+    const objs: Array<{ ref: ObjectBase, parent: ObjectBase }> = this.getObjects().map(holder => ({ ref: holder, parent: null }));
 
     Object.keys(this.openObjects).forEach(id => {
       if (!this.openObjects[id])
         return;
 
       let idx = objs.findIndex(obj => obj.ref.holder.getID() == id);
-      const obj = objs[idx].ref;
-      if (!obj || !obj.getChildNum())
+      const parent = objs[idx].ref;
+      if (!parent || !parent.getChildNum())
         return;
 
-      const children = obj.getChildren();
+      const children = parent.getChildren();
       if (!children.length)
         return;
 
-      const lst = children[0].objects.map(obj => ({ root: false, ref: obj }));
+      const lst = children[0].objects.map(obj => ({ parent, ref: obj }));
       objs.splice(idx + 1, 0, ...lst);
     });
   
@@ -166,7 +200,7 @@ export class App extends DocRootBase {
                 className='horz-panel-1'
                 style={{display: 'flex', alignItems: 'center'}}
                 onContextMenu={evt => {
-                  if (!obj.root)
+                  if (obj.parent)
                     return;
 
                   evt.preventDefault();
@@ -186,20 +220,21 @@ export class App extends DocRootBase {
                 }}
               >
                 {openFolder}
-                <span style={obj.root ? {display: 'none'} : {}}></span>
+                <span style={!obj.parent ? {display: 'none'} : {}}></span>
                 {icon || <Icon src={UnknownTypeIcon}/>}
                 <span>{name}</span>
               </div>
             </Draggable>
           </>
         ),
-        object: obj.ref
+        object: obj.ref,
+        parent: obj.parent
       };
     });
 
     // this.objectVers = objs.map(obj => getObjectBase(obj.obj).holder.getVersion());
     this.holder.delayedNotify();
-  }
+  }*/
 
   append(obj: DocHolderBase): Promise<void> {
     return (
@@ -215,9 +250,8 @@ export class App extends DocRootBase {
     );
   }
 
-  getObjectsToRender(): Array<ObjItem> {
-    this.updateObjList();
-    return this.objectsToRender;
+  getObjTree() {
+    return this.objTree;
   }
 
   selectObjectSubscriber = () => {
@@ -228,38 +262,55 @@ export class App extends DocRootBase {
     if (!objId)
       return this.setSelect(null);
 
-    const objToSel = this.objects.find(obj => {
-      return obj.holder.getID() == objId || obj.getID() == objId;
-    });
-    this.setSelect(this.objects.get(objToSel));
-  }
-
-  protected setSelect(select: ObjectBase) {
-    if (this.select == select)
+    const objIdArr = objId.split(',');
+    const objToSelIdx = this.objects.find(obj => obj.getID() == objIdArr[0]);
+    if (objToSelIdx == -1)
       return;
 
-    if (this.select) {
-      this.select.unsubscribe(this.selectObjectSubscriber);
+    let holder: DocHolderBase = this.objects.get(objToSelIdx);
+    const selectAll = () => {
+      return holder.getChildren().some(c => {
+        const child = c.objects.find(obj => obj.getID() == objIdArr[1]);
+        if (!child)
+          return false;
+
+        this.setSelect([ holder, child ]);
+        return true;
+      });
+    };
+
+    if (!holder.isLoaded()) {
+      holder.load().then(() => {
+        if (!selectAll())
+          this.setSelect([ holder ]);
+      });
+    } else {
+      if (!selectAll())
+        this.setSelect([ holder ]);
+    }
+  }
+
+  protected setSelect(select: Array<ObjectBase>) {
+    if (this.select[0]) {
+      this.select[0].unsubscribe(this.selectObjectSubscriber);
     }
 
     this.select = select;
-    if (select instanceof DocHolderBase && !select.isLoaded()) {
-      select.load().then(() => {
-        this.updateObjList(true);
-        select.holder.delayedNotify();
-        this.holder.delayedNotify();
-      });
-    }
+    this.path = select.map(obj => obj.getID());
 
-    if (this.select) {
-      this.select.subscribe(this.selectObjectSubscriber);
+    if (this.select[0]) {
+      this.select[0].subscribe(this.selectObjectSubscriber);
     }
 
     this.holder.delayedNotify();
   }
 
   getSelect() {
-    return this.select;
+    return this.select.slice().reverse()[0];
+  }
+
+  getSelectPath() {
+    return this.path;
   }
 
   appendToUpload(args: AppendToUploadArgs) {
@@ -307,8 +358,8 @@ export class App extends DocRootBase {
       args.obj.removeContent();
 
     this.objects.holder.save();
-    if (args.obj == this.select)
-        this.setSelectById(null);
+    if (args.obj == this.select[0])
+        this.setSelectById('');
 
     this.holder.delayedNotify();
     return true;

@@ -39,13 +39,21 @@ module.exports = [
           test: /\.scss$/,
           use: [ 'style-loader', 'css-loader', 'sass-loader' ]
         }, {
-          test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
+          test: /\.(png|jpg|gif|eot|ttf|woff|woff2)$/,
           loader: 'url-loader',
           options: {
             name: '[name].[ext]',
             outputPath: `../${outputDir}`,
             limit: 10000
           }
+        }, {
+          test: /\.svg$/,
+          include: /node_modules/,
+          loader: 'url-loader'
+        }, {
+          test: /\.svg$/,
+          exclude: /node_modules/,
+          loader: 'svg-inline-loader'
         }
       ]
     },

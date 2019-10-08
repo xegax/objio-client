@@ -11,6 +11,7 @@ import { createDocWizard } from './create-doc-wizard';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import { ObjectToCreate } from 'objio-object/common/interfaces';
 import './_app.scss';
+import { Tree, TreeItem } from 'ts-react-ui/tree/tree';
 
 export { App, ObjTypeMap };
 
@@ -39,10 +40,17 @@ export class AppView extends React.Component<Props, State> {
     this.props.model.holder.unsubscribe(this.subscriber);
   }
 
-  onSelect = (item: Item) => {
-    const objects = this.props.model.getObjectsToRender();
-    const select = objects.find(obj => obj.value == item.value);
-    App.setSelectById(select ? select.object.getID() : null);
+  onSelect = (path: Array<TreeItem>) => {
+    App.setSelectById(path.map(p => p.value).join(','));
+    /*const objects = this.props.model.getObjectsToRender();
+
+    if (!item.parent) {
+      const select = objects.find(obj => obj.value == item.value);
+      App.setSelectById(select ? select.object.getID() : null);
+    } else {
+      const select = objects.find(obj => obj.value == item.parent);
+      App.setSelectById([ item.parent ]);
+    }*/
   }
   
   onDropToList = (files: Array<File>) => {
@@ -109,19 +117,20 @@ export class AppView extends React.Component<Props, State> {
           <PropsGroup
             label='Objects'
             defaultHeight={200}
-            className='object-list-group'
+            padding={false}
           >
-            <ListView
-              value={select ? {value: select.getID()} : null}
-              values={this.props.model.getObjectsToRender()}
+            <Tree
+              style={{ flexGrow: 1 }}
+              select={this.props.model.getSelectPath()}
+              values={this.props.model.getObjTree()}
               onSelect={this.onSelect}
             />
           </PropsGroup>
         </FilesDropContainer>
         {this.renderUploadQueue()}
         {select && <PropsGroup label='Object' defaultOpen={false}>
-          <PropItem label='id' value={select.holder.getID()}/>
-          <PropItem label='version' value={select.holder.getVersion()}/>
+          <PropItem label='id' value={select.getID()}/>
+          <PropItem label='version' value={select.getVersion()}/>
           {objBase && <TextPropItem label='name' value={objBase.getName()} onEnter={value => objBase.setName(value)}/>}
           {file && <PropItem label='size' value={file.getSize()}/>}
           {file && <PropItem label='original name' value={file.getOriginName()}/>}
