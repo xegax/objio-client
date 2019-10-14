@@ -90,10 +90,15 @@ export class DocHolderBase extends ObjectBase {
     this.docRef.holder.addEventHandler({
       onObjChange: () => {
         const folders = this.getChildren();
-        if (!folders || !folders.length)
+
+        let newChildNum = 0;
+        if (folders && folders.length)
+          newChildNum = folders.length;
+
+        if (newChildNum == this.childNum)
           return;
 
-        this.childNum = folders[0].objects.length;
+        this.childNum = newChildNum;
         this.objType = OBJIOItem.getClass(this.docRef).TYPE_ID;
         this.holder.save();
         this.holder.delayedNotify();
