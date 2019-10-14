@@ -82,7 +82,7 @@ export class DocHolderBase extends ObjectBase {
     return this.docRef.isStatusInProgess();
   }
 
-  private onObjLoadedOrCreated = (obj: ObjectBase) => {
+  private onObjLoadedOrCreated = (obj: ObjectBase): ObjectBase => {
     this.loadTask = null;
     this.docRef = obj;
     obj.holder.subscribe(this.notifySubscibers);
@@ -99,7 +99,7 @@ export class DocHolderBase extends ObjectBase {
         this.holder.delayedNotify();
       }
     });
-    return this.doc;
+    return obj;
   }
 
   load(): Promise<ObjectBase> {
@@ -130,6 +130,13 @@ export class DocHolderBase extends ObjectBase {
       return this.doc;
 
     return this.docRef.holder.getID();
+  }
+
+  getVersion() {
+    if (!this.isLoaded())
+      return this.holder.getVersion();
+
+    return this.docRef.holder.getVersion();
   }
 
   getName(): string {

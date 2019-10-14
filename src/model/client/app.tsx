@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { DocRootBase } from '../base/doc-root';
+import { DocRootClient } from '../base/doc-root';
 import { OBJIOItemClass } from 'objio';
 import { ObjectBase } from 'objio-object/base/object-base';
 import { DocHolderBase } from '../base/doc-holder';
 import { createFileObject } from 'objio-object/client';
-import { DocHolder } from './doc-holder';
 
 import { Draggable } from 'ts-react-ui/drag-and-drop';
 import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
@@ -19,6 +18,8 @@ import { TreeItem } from 'ts-react-ui/tree/tree';
 
 export interface TreeItemExt extends TreeItem {
   obj: ObjectBase;
+  version: string;
+  deleteable: boolean;
 }
 
 const DeleteAll: Action = {
@@ -55,7 +56,7 @@ interface AppState {
   objId: string;
 }
 
-export class App extends DocRootBase {
+export class App extends DocRootClient {
   private select = Array<ObjectBase>();
   private path = Array<string>();
   // private objectsToRender = Array<ObjItem>();
@@ -73,15 +74,24 @@ export class App extends DocRootBase {
     super();
 
     this.holder.addEventHandler({
-      onObjChange: () => this.updateObjTree(),
       onLoad: () => {
-        this.updateObjTree();
-        this.onHashChanged();
+        this.onLoad();
         return Promise.resolve();
       }
     });
 
     App.hashState.subscribe(this.onHashChanged);
+  }
+
+  protected onLoad() {
+    this.updateObjTree();
+    this.objects.holder.addEventHandler({
+      onObjChange: () => {
+        this.updateObjTree();
+        this.onHashChanged();
+      }
+    });
+    this.onHashChanged();
   }
 
   static setSelectById(objId: string) {
@@ -94,36 +104,87 @@ export class App extends DocRootBase {
 
   setTypeMap(map: ObjTypeMap) {
     this.objTypeMap = map;
-    // this.updateObjList(true);
+    this.updateObjTree();
+  }
+
+  private getObjChildren = (obj: ObjectBase) => {
+    const children = obj.getChildren();
+    if (!children || !children[0])
+      return undefined;
+
+    return children[0].objects.map(obj => ({
+        value: obj.getID(),
+        icon: this.getObjIcon(obj),
+        title: obj.getName(),
+        obj,
+        version: obj.holder.getVersion(),
+        render: this.renderTreeItem,
+        deleteable: false
+      })
+    );
   }
 
   private loadObjChildren = (item: TreeItem): Promise<Array<TreeItemExt>> => {
     return (
       this.holder.getObject(item.value)
-      .then((obj: ObjectBase) => {
-        const children = obj.getChildren();
-        if (children && children[0]) {
-          return children[0].objects.map(obj => ({
-            value: obj.getID(),
-            obj,
-            render: this.renderTreeItem
-          }));
-        }
-
-        return [];
-      })
+      .then(this.getObjChildren)
     );
   }
 
   private renderTreeItem = (item: TreeItemExt) => {
-    return item.obj.getName();
+    return (
+      <span
+        onContextMenu={evt => {
+          if (!item.deleteable)
+            return;
+
+          evt.preventDefault();
+          evt.stopPropagation();
+
+          ContextMenu.show(
+            <Menu>
+              <MenuItem
+                text={`Remove "${item.obj.getName()}"`}
+                onClick={() => {
+                  this.remove({ obj: item.obj });
+                }}
+              />
+            </Menu>,
+            { left: evt.pageX, top: evt.pageY }
+          );
+        }}
+      >
+      {item.obj.getName()}
+      </span>
+    );
   };
 
+  private getObjIcon(holder: ObjectBase) {
+    const viewable = this.objTypeMap[holder.getObjType()];
+    let icon: JSX.Element;
+    if (viewable && viewable.getViewDesc) {
+      icon = ({...viewable.getViewDesc()}.icons || {}).item;
+    }
+    return icon;
+  }
+
   private updateObjTree() {
-    this.objTree = this.getObjects().map(holder => {
+    this.objTree = this.getObjects()
+    .slice()
+    .sort((a, b) => {
+      if (a.getObjType() == b.getObjType())
+        return a.getName().localeCompare(b.getName());
+
+      return a.getObjType().localeCompare(b.getObjType());
+    })
+    .map(holder => {
       return {
         value: holder.getID(),
+        icon: this.getObjIcon(holder),
         obj: holder,
+        version: holder.getVersion(),
+        deleteable: true,
+        title: holder.getName(),
         render: this.renderTreeItem,
         children: holder.getChildNum() ? this.loadObjChildren : undefined
       };
@@ -131,126 +192,31 @@ export class App extends DocRootBase {
     this.holder.delayedNotify();
   }
 
-  /*private updateObjList(force?: boolean) {
-    const objs: Array<{ ref: ObjectBase, parent: ObjectBase }> = this.getObjects().map(holder => ({ ref: holder, parent: null }));
-
-    Object.keys(this.openObjects).forEach(id => {
-      if (!this.openObjects[id])
-        return;
-
-      let idx = objs.findIndex(obj => obj.ref.holder.getID() == id);
-      const parent = objs[idx].ref;
-      if (!parent || !parent.getChildNum())
-        return;
-
-      const children = parent.getChildren();
-      if (!children.length)
-        return;
-
-      const lst = children[0].objects.map(obj => ({ parent, ref: obj }));
-      objs.splice(idx + 1, 0, ...lst);
-    });
-  
-    if (force != true && objs.length == this.objectsToRender.length) {
-      if (!this.objectsToRender.some(item => item.object.getVersion() != item.version))
-        return;
-    }
-
-    this.objectsToRender = objs.map(obj => {
-      const base = obj.ref;
-      const name = base.getName();
-
-      const viewable = this.objTypeMap[base.getObjType()];
-      let icon: JSX.Element;
-      if (viewable && viewable.getViewDesc) {
-        icon = ({...viewable.getViewDesc()}.icons || {}).item;
-      }
-
-      const openFolder = (
-        <CheckIcon
-          hidden={base.getChildNum() == 0}
-          value
-          faIcon={!this.openObjects[base.holder.getID()] ? 'fa fa-plus' : 'fa fa-minus'}
-          onClick={e => {
-            e.stopPropagation();
-            this.openObjects[base.holder.getID()] = !this.openObjects[base.holder.getID()];
-            if (base instanceof DocHolderBase && !base.isLoaded())
-              base.load().then(() => this.updateObjList(true));
-            else
-              this.updateObjList(true);
-          }}
-        />
-      );
- 
-      return {
-        value: base.getID(),
-        title: name,
-        version: base.getVersion(),
-        render: (
-          <>
-            <Draggable
-              data={{id: base.getID()}}
-              type='layout'
-              onDragStart={() => {
-                if (base instanceof DocHolderBase)
-                  base.load();
-              }}
-            >
-              <div
-                className='horz-panel-1'
-                style={{display: 'flex', alignItems: 'center'}}
-                onContextMenu={evt => {
-                  if (obj.parent)
-                    return;
-
-                  evt.preventDefault();
-                  evt.stopPropagation();
-
-                  ContextMenu.show(
-                    <Menu>
-                      <MenuItem
-                        text={`Remove "${obj.ref.getName()}"`}
-                        onClick={() => {
-                          this.remove({ obj: obj.ref as DocHolderBase, confirm: true });
-                        }}
-                      />
-                    </Menu>,
-                    { left: evt.pageX, top: evt.pageY }
-                  );
-                }}
-              >
-                {openFolder}
-                <span style={!obj.parent ? {display: 'none'} : {}}></span>
-                {icon || <Icon src={UnknownTypeIcon}/>}
-                <span>{name}</span>
-              </div>
-            </Draggable>
-          </>
-        ),
-        object: obj.ref,
-        parent: obj.parent
-      };
-    });
-
-    // this.objectVers = objs.map(obj => getObjectBase(obj.obj).holder.getVersion());
-    this.holder.delayedNotify();
-  }*/
-
-  append(obj: DocHolderBase): Promise<void> {
+  append(obj: ObjectBase): Promise<void> {
     return (
       this.holder.createObject(obj)
-      .then(() => {
-        this.objects.push(obj);
-        this.objects.holder.save();
-
-        this.holder.save();
-        this.holder.delayedNotify();
-        App.setSelectById(obj.getID());
-      })
+      .then(() => this.appendObj(obj.getID()))
+      .then(() => App.setSelectById(obj.getID()))
     );
   }
 
   getObjTree() {
+    const sel = this.getSelect();
+    if (sel) {
+      let change = 0;
+      for (let n = 0; n < this.objTree.length; n++) {
+        const item = this.objTree[n];
+        if (item.obj.getID() == sel.getID() || item.version != item.obj.getVersion()) {
+          item.version = item.obj.getVersion();
+          item.children = this.getObjChildren(item.obj);
+          change++;
+        }
+      }
+
+      if (change)
+        this.objTree = this.objTree.slice();
+    }
+
     return this.objTree;
   }
 
@@ -260,7 +226,7 @@ export class App extends DocRootBase {
   
   protected setSelectById(objId: string): void {
     if (!objId)
-      return this.setSelect(null);
+      return this.setSelect([]);
 
     const objIdArr = objId.split(',');
     const objToSelIdx = this.objects.find(obj => obj.getID() == objIdArr[0]);
@@ -305,8 +271,8 @@ export class App extends DocRootBase {
     this.holder.delayedNotify();
   }
 
-  getSelect() {
-    return this.select.slice().reverse()[0];
+  getSelect(): ObjectBase {
+    return this.select[ this.select.length - 1 ];
   }
 
   getSelectPath() {
@@ -333,36 +299,16 @@ export class App extends DocRootBase {
     this.startUploadNext();
   }
 
-  remove(args: { obj: DocHolderBase, removeContent?: boolean, confirm?: boolean }): Promise<boolean> {
-    if (!args.confirm)
-      return Promise.resolve(this.removeImpl({ obj: args.obj, removeContent: args.removeContent }));
-    
+  remove(args: { obj: ObjectBase, removeContent?: boolean }): Promise<boolean> {
     return (
       confirm({ body: `Are you sure to delete "${args.obj.getName()}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
       .then(a => {
         if (a == Cancel)
           return;
 
-        return this.removeImpl({ obj: args.obj, removeContent: a == DeleteAll });
+        return this.removeObj({ id: args.obj.getID(), content: a == DeleteAll });
       })
     );
-  }
-
-  private removeImpl(args: { obj: DocHolderBase, removeContent?: boolean }): boolean {
-    const idx = this.objects.find(holder => holder == args.obj);
-    if (idx == -1)
-      return false;
-
-    this.objects.remove(idx);
-    if (args.removeContent && args.obj.get())
-      args.obj.removeContent();
-
-    this.objects.holder.save();
-    if (args.obj == this.select[0])
-        this.setSelectById('');
-
-    this.holder.delayedNotify();
-    return true;
   }
 
   filterObjects = (filter?: Array<OBJIOItemClass>) => {
@@ -401,7 +347,7 @@ export class App extends DocRootBase {
         size: item.file.size,
         mime: item.file.type
       });
-      p = this.append(new DocHolder({ doc }));
+      p = this.append(doc);
     } else {
       doc = item.dstObj;
       p = Promise.resolve();
