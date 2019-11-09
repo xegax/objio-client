@@ -8,19 +8,16 @@ import {
   createFactory,
   createOBJIO,
   OBJIORemoteStore,
-  OBJIO,
-  OBJIOItemClass
+  OBJIO
 } from 'objio';
 import {
-  registerObjects,
-  DocHolder
+  registerObjects
 } from '../model/client/register-objects';
 import { ViewFactory, FactoryItem } from 'objio-object/common/view-factory';
 
 import '../../styles/styles.scss';
 import 'ts-react-ui/_base.scss';
 import 'objio-object/styles/all.scss';
-import { DocView } from '../view/doc-view';
 import * as Layout from 'objio-layout/view';
 import * as Objects from 'objio-object/view';
 import * as MYSQL from 'objio-mysql-database/view';
@@ -28,6 +25,7 @@ import * as SQLITE3 from 'objio-sqlite-table/view';
 import { Project } from 'objio/project/client/project';
 import { App, AppView, ObjTypeMap } from '../view/app-view';
 import { Toaster, Position, Intent } from '@blueprintjs/core';
+import { ObjectBase } from 'objio-object/view/config';
 
 Promise.config({ cancellation: true });
 
@@ -117,32 +115,6 @@ async function loadAndRender() {
       model.holder.notify();
     });
 
-  Objects.registerViews({
-    classObj: DocHolder,
-    views: [{
-      view: (props: { model: DocHolder, root: App }) => {
-        const doc = props.model.get();
-        const content = !doc ? (
-          <div>object not loaded yet</div>
-        ) : (
-          mvf.getView({
-            classObj: doc.constructor,
-            props: {
-              model: doc,
-              objects: props.root.filterObjects,
-              append: obj => props.root.append(new DocHolder({ doc: obj }))
-            }
-          })
-        );
-        return (
-          <DocView {...props}>
-            {content}
-          </DocView>
-        );
-      }
-    }]
-  });
-
   const objectsToCreate = [
     ...Objects.getObjectsToCreate(),
     ...SQLITE3.getObjectsToCreate(),
@@ -159,7 +131,7 @@ async function loadAndRender() {
             <AppView
               objects={objectsToCreate}
               model={props.model}
-              renderContent={(obj: DocHolder) => {
+              renderContent={(obj: ObjectBase) => {
                 const objView = mvf.getView({
                   classObj: obj.constructor,
                   props: {
@@ -180,7 +152,6 @@ async function loadAndRender() {
 
   const typeMap: ObjTypeMap = {};
   [
-    DocHolder,
     ...Layout.getViews(),
     ...Objects.getViews(),
     ...SQLITE3.getViews(),

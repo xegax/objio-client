@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { AppCompLayout, AppComponent, AppContent } from 'ts-react-ui/app-comp-layout';
-import { ListView, Item } from 'ts-react-ui/list-view';
-import { App, ObjTypeMap } from '../model/client/app';
+import { ListView } from 'ts-react-ui/list-view';
+import { App, ObjTypeMap, TreeItemExt, normalizeObjId } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
-import { DocHolder } from '../model/client/doc-holder';
 import { createDocWizard } from './create-doc-wizard';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import { ObjectToCreate } from 'objio-object/common/interfaces';
 import './_app.scss';
-import { Tree, TreeItem } from 'ts-react-ui/tree/tree';
-
+import { Tree, TreeItem, DragAndDrop } from 'ts-react-ui/tree/tree';
+import { getPath } from 'ts-react-ui/tree/item-helpers';
+import { DocView } from './doc-view';
+import { Progress } from 'ts-react-ui/progress';
 export { App, ObjTypeMap };
 
 interface Props {
@@ -40,17 +41,8 @@ export class AppView extends React.Component<Props, State> {
     this.props.model.holder.unsubscribe(this.subscriber);
   }
 
-  onSelect = (path: Array<TreeItem>) => {
-    App.setSelectById(path.map(p => p.value).join(','));
-    /*const objects = this.props.model.getObjectsToRender();
-
-    if (!item.parent) {
-      const select = objects.find(obj => obj.value == item.value);
-      App.setSelectById(select ? select.object.getID() : null);
-    } else {
-      const select = objects.find(obj => obj.value == item.parent);
-      App.setSelectById([ item.parent ]);
-    }*/
+  onSelect = (path: Array<Array<TreeItem>>) => {
+    App.setSelectByPath(path[0].map(p => p.value).join('-'));
   }
   
   onDropToList = (files: Array<File>) => {
@@ -106,6 +98,21 @@ export class AppView extends React.Component<Props, State> {
     );
   }
 
+  private onDragAndDrop = (args: DragAndDrop) => {
+    const srcFolder = args.drag.map(item => !normalizeObjId(item.value) ? item : null).filter(v => v) as Array<TreeItemExt>;
+    const objIds = args.drag.map(treeItem => normalizeObjId(treeItem.value)).filter(v => v);
+    const path = getPath(args.drop as TreeItemExt).map(item => item.value).slice(1);  // remove 'root' from path
+
+    if (srcFolder.length) {
+      this.props.model.moveFolder({ src: getPath(srcFolder[0]).map(item => item.value).slice(1), dst: path });
+    } else if (objIds.length) {
+      this.props.model.moveObjsToFolder({
+        objIds,
+        path
+      });
+    }
+  };
+
   renderSelectObjectInfo() {
     const select = this.props.model.getSelect();
 
@@ -124,6 +131,7 @@ export class AppView extends React.Component<Props, State> {
               select={this.props.model.getSelectPath()}
               values={this.props.model.getObjTree()}
               onSelect={this.onSelect}
+              onDragAndDrop={this.onDragAndDrop}
             />
           </PropsGroup>
         </FilesDropContainer>
@@ -144,7 +152,7 @@ export class AppView extends React.Component<Props, State> {
   getObjProps(): ObjProps {
     return {
       objects: this.props.model.filterObjects,
-      append: obj => this.props.model.append(new DocHolder({ doc: obj }))
+      append: obj => this.props.model.append( obj )
     };
   }
 
@@ -171,7 +179,7 @@ export class AppView extends React.Component<Props, State> {
   onAdd = () => {
     createDocWizard(this.props.objects)
     .then(obj => {
-      this.props.model.append( new DocHolder({ doc: obj }) );
+      this.props.model.append( obj );
     })
     .catch(() => {
       console.log('create cancel');
@@ -190,12 +198,23 @@ export class AppView extends React.Component<Props, State> {
   }
 
   renderDoc(select: ObjectBase) {
+    if (this.props.model.isObjLoading()) {
+      return (
+       <Progress/>
+     );
+   }
+
     if (!select)
       return null;
 
     return (
-      <FilesDropContainer onDropFiles={this.onDropToDoc} onStartDrag={this.onDragToDoc}>
-        {this.props.renderContent(select)}
+      <FilesDropContainer
+        onDropFiles={this.onDropToDoc}
+        onStartDrag={this.onDragToDoc}
+      >
+        <DocView model={select} root={this.props.model}>
+          {this.props.renderContent(select)}
+        </DocView>
       </FilesDropContainer>
     );
   }

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { DocHolder } from '../model/client/doc-holder';
 import './doc-view.scss';
 import { App } from '../model/client/app';
+import { ObjectBase } from 'objio-object/base/object-base';
 
 const classes = {
   docView: 'doc-view',
@@ -13,7 +13,7 @@ const classes = {
 
 interface Props {
   root: App;
-  model: DocHolder;
+  model: ObjectBase;
 }
 
 interface State {
@@ -58,14 +58,14 @@ export class DocView extends React.Component<Props> {
   }
 
   renderTools() {
-    const remove = (
+    /*const remove = (
       <i
         style={{marginLeft: 10, marginRight: 10}}
         title='delete'
         className='fa fa-trash-o'
         onClick={() => this.props.root.remove({ obj: this.props.model })}
       />
-    );
+    );*/
 
     const link = (
       <i
@@ -79,7 +79,6 @@ export class DocView extends React.Component<Props> {
     return (
       <div className={classes.tools}>
         {link}
-        {remove}
       </div>
     );
   }

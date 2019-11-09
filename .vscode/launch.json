@@ -37,6 +37,16 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "server dev",
+      "program": "${workspaceRoot}/src/server/doc-server.js",
+      "cwd": "${workspaceRoot}",
+      "env": {
+        "FFMPEG": "c:\\bin\\ffmpeg-4.0.1-win64-shared\\bin\\ffmpeg.exe"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "test-node-entry",
       "program": "${workspaceRoot}/src/entry/test-node-entry.js",
       "outFiles": [],
