@@ -11,7 +11,7 @@ import { HashState } from 'ts-react-ui/hash-state';
 import { TreeItem, updateValues } from 'ts-react-ui/tree/tree-model';
 import { CSSIcon } from 'ts-react-ui/cssicon';
 import { prompt } from 'ts-react-ui/prompt';
-import { findItem } from 'ts-react-ui/tree/item-helpers';
+import { findItem, getPath } from 'ts-react-ui/tree/item-helpers';
 
 class ObjHolder extends ObjectBase {
   private item: TreeItemExt;
@@ -26,7 +26,7 @@ class ObjHolder extends ObjectBase {
   }
 
   getID() {
-    return normalizeObjId(this.item.value);
+    return this.item.value;
   }
 
   getName() {
@@ -72,6 +72,7 @@ export interface ObjTypeMap {
 }
 
 interface AppState {
+  objId: string;
   path: string;
 }
 
@@ -106,22 +107,15 @@ const CreateFolderIcon: React.SFC<{ app: App, path: string[] }> = props => {
   );
 }
 
-const OBJID_PREFIX = 'OBJ_';
-export function normalizeObjId(objId: string) {
-  if (!objId.startsWith(OBJID_PREFIX))
-    return null;
-
-  return objId.substr(OBJID_PREFIX.length);
-}
-
-function convertObjects(folder: Folder, app: App): Array<TreeItemExt> {
+function convertObjects(folder: Folder, app: App, parent: TreeItemExt): Array<TreeItemExt> {
   return (
     folder.objects.map(obj => {
       return {
-        value: OBJID_PREFIX + obj.id,
+        value: obj.id,
         render: obj.name,
         title: obj.name,
         folder: false,
+        parent,
         type: obj.objType,
         icon: app.getObjIcon(obj.objType),
         rightIcons: (
@@ -133,8 +127,9 @@ function convertObjects(folder: Folder, app: App): Array<TreeItemExt> {
               onClick={() => {
                 confirm({ body: `Are you sure to delete "${obj.name}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
                 .then(action => {
-                  if (action != Cancel)
-                    app.removeObj({ id: obj.id, content: action == DeleteAll });
+                  if (action != Cancel) {
+                    app.deleteObject({ id: obj.id, content: action == DeleteAll });
+                  }
                 });
               }}
             />
@@ -200,12 +195,13 @@ function convertFolder(root: Folder, app: App, path?: Array<string>, parent?: Tr
     })
   );
 
-  arr.push(...convertObjects(root, app));
+  arr.push(...convertObjects(root, app, parent));
   return arr;
 }
 
 export class App extends DocRootClient {
   private path = Array< Array<string> >();
+  private folderPath = Array< Array<string> >();
   protected objTree = Array<TreeItemExt>();
   protected objs = Array<ObjHolder>();
   
@@ -243,23 +239,44 @@ export class App extends DocRootClient {
 
   protected onLoad = () => {
     this.fetchTree().
-    then(this.updateObjTree);
+    then(tree => {
+      this.updateObjTree(tree);
+      this.onHashChanged();
+    });
 
-    this.onHashChanged();
     return Promise.resolve();
   }
 
-  static setSelectByPath(path: string) {
-    App.hashState.pushState({ path });
+  static setSelectByObj(objId: string) {
+    App.hashState.pushState({ objId, path: '' });
   }
 
-  setSelectByPath(path: string) {
-    path = path || '';
-    const pathArr = path.split('-');
-    this.path = [ pathArr ];
+  static setSelectByPath(path: string) {
+    App.hashState.pushState({ objId: '', path });
+  }
+
+  protected onHashChanged = () => {
+    this.setSelectByObj(App.hashState.getString('objId'));
+    this.setSelectByPath(App.hashState.getString('path'));
+  };
+
+  private setSelectByPath(path: string | undefined) {
+    if (!path)
+      return;
+
+    this.path = [ path.split('-') ];
+    this.holder.delayedNotify();
+  }
+
+  private setSelectByObj(objId: string | undefined) {
+    const treeItem = !objId ? undefined : findItem<TreeItemExt>(item => !item.folder && item.value == objId, this.objTree);
+    if (treeItem) {
+      this.path = [ [ ...getPath(treeItem).map(item => item.value) ] ];
+      this.folderPath = [ this.path[0].slice() ];
+      this.folderPath[0].pop();
+    }
 
     this.holder.delayedNotify();
-    const objId = normalizeObjId(pathArr[pathArr.length - 1]);
     this.setSelect(undefined);
     if (!objId)
       return;
@@ -286,10 +303,6 @@ export class App extends DocRootClient {
     return this.objLoadPromise;
   }
 
-  protected onHashChanged = () => {
-    this.setSelectByPath(App.hashState.getString('path'));
-  };
-
   setTypeMap(map: ObjTypeMap) {
     this.objTypeMap = map;
     this.updateObjTree();
@@ -302,6 +315,11 @@ export class App extends DocRootClient {
       icon = ({...viewable.getViewDesc()}.icons || {}).item;
     }
     return icon;
+  }
+
+  deleteObject(args: { id: string, content: boolean }) {
+    App.setSelectByPath(this.folderPath[0].join('-'));
+    this.removeObj(args);
   }
 
   private updateObjTree = (tree?: Folder) => {
@@ -336,14 +354,12 @@ export class App extends DocRootClient {
   }
 
   append(obj: ObjectBase): Promise<void> {
-    const pathArr = this.path[0].slice(1);
-    if (normalizeObjId(pathArr[pathArr.length - 1]))
-      pathArr.pop();
+    const pathArr = this.folderPath[0].slice(1);
 
     return (
       this.holder.createObject(obj)
       .then(() => this.appendObj({ id: obj.getID(), path: pathArr }))
-      .then(() => App.setSelectByPath([ 'root', ...pathArr, `${OBJID_PREFIX}${obj.getID()}` ].join('-')))
+      .then(() => App.setSelectByObj(obj.getID()))
     );
   }
 

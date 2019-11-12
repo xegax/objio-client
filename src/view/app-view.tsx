@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { AppCompLayout, AppComponent, AppContent } from 'ts-react-ui/app-comp-layout';
 import { ListView } from 'ts-react-ui/list-view';
-import { App, ObjTypeMap, TreeItemExt, normalizeObjId } from '../model/client/app';
+import { App, ObjTypeMap, TreeItemExt } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
@@ -41,8 +41,14 @@ export class AppView extends React.Component<Props, State> {
     this.props.model.holder.unsubscribe(this.subscriber);
   }
 
-  onSelect = (path: Array<Array<TreeItem>>) => {
-    App.setSelectByPath(path[0].map(p => p.value).join('-'));
+  onSelect = (path: Array<Array<TreeItemExt>>) => {
+    const arr = path[0];
+    const item = arr[arr.length - 1];
+    if (!item.folder) {
+      App.setSelectByObj(item.value);
+    } else {
+      App.setSelectByPath(arr.map(item => item.value).join('-'));
+    }
   }
   
   onDropToList = (files: Array<File>) => {
@@ -99,8 +105,8 @@ export class AppView extends React.Component<Props, State> {
   }
 
   private onDragAndDrop = (args: DragAndDrop) => {
-    const srcFolder = args.drag.map(item => !normalizeObjId(item.value) ? item : null).filter(v => v) as Array<TreeItemExt>;
-    const objIds = args.drag.map(treeItem => normalizeObjId(treeItem.value)).filter(v => v);
+    const srcFolder = args.drag.map((item: TreeItemExt) => item.folder ? item : null).filter(v => v) as Array<TreeItemExt>;
+    const objIds = args.drag.map((item: TreeItemExt) => !item.folder ? item.value : null).filter(v => v);
     const path = getPath(args.drop as TreeItemExt).map(item => item.value).slice(1);  // remove 'root' from path
 
     if (srcFolder.length) {

@@ -149,5 +149,5 @@ export function createDocWizard(objects: Array<ObjectToCreate>): Promise<ObjectB
     />
   );
 
-  return result.promise as Promise<ObjectBase>;
+  return result.promise as any as Promise<ObjectBase>;
 }
