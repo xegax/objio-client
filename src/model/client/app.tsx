@@ -329,6 +329,7 @@ export class App extends DocRootClient {
       children: [],
       deleteable: false,
       folder: true,
+      open: true,
       rightIcons: (
         <>
           <CreateFolderIcon
