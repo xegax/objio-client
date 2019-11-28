@@ -12,6 +12,11 @@ import { TreeItem, updateValues } from 'ts-react-ui/tree/tree-model';
 import { CSSIcon } from 'ts-react-ui/cssicon';
 import { prompt } from 'ts-react-ui/prompt';
 import { findItem, getPath } from 'ts-react-ui/tree/item-helpers';
+import { PopoverIcon } from 'ts-react-ui/popover';
+import { Menu, MenuItem } from '@blueprintjs/core';
+import { createDocWizard } from '../../view/create-doc-wizard';
+import { ObjectToCreate } from 'objio-object/common/interfaces';
+import { uploadDialog } from 'ts-react-ui/upload';
 
 class ObjHolder extends ObjectBase {
   private item: TreeItemExt;
@@ -120,19 +125,30 @@ function convertObjects(folder: Folder, app: App, parent: TreeItemExt): Array<Tr
         icon: app.getObjIcon(obj.objType),
         rightIcons: (
           <>
-            <CSSIcon
-              icon='fa fa-trash'
-              title='Remove'
-              showOnHover
-              onClick={() => {
-                confirm({ body: `Are you sure to delete "${obj.name}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
-                .then(action => {
-                  if (action != Cancel) {
-                    app.deleteObject({ id: obj.id, content: action == DeleteAll });
-                  }
-                });
-              }}
-            />
+            <PopoverIcon icon='fa fa-ellipsis-h'>
+              <Menu>
+                <MenuItem
+                  text='Upload'
+                  onClick={() => {
+                    Promise.all([uploadDialog({ multiple: true }), app.findObject(obj.id)])
+                    .then(([files, dstObj]) => {
+                      app.appendToUpload({ dstObj, files });
+                    });
+                  }}
+                />
+                <MenuItem
+                  text='Remove'
+                  onClick={() => {
+                    confirm({ body: `Are you sure to delete "${obj.name}"? `, actions: [ DeleteAll, DeleteOnlyObject, Cancel ] })
+                    .then(action => {
+                      if (action != Cancel) {
+                        app.deleteObject({ id: obj.id, content: action == DeleteAll });
+                      }
+                    });
+                  }}
+                />
+              </Menu>
+            </PopoverIcon>
           </>
         )
       };
@@ -157,35 +173,55 @@ function convertFolder(root: Folder, app: App, path?: Array<string>, parent?: Tr
         children: [],
         rightIcons: (
           <>
-            <CreateFolderIcon
-              app={app}
-              path={itemPath}
-            />
-            <CSSIcon
-              icon='fa fa-edit'
-              title='Rename'
-              showOnHover
-              onClick={() => {
-                prompt({
-                  title: `Rename folder "${f.name}"`,
-                  placeholder: 'new name',
-                  value: f.name
-                })
-                .then(name => app.renameFolder({ name, path: itemPath }))
-              }}
-            />
-            <CSSIcon
-              icon='fa fa-trash'
-              title='Remove'
-              showOnHover
-              onClick={() => {
-                confirm({ body: 'Are you sure to delete folder?' })
-                .then(a => {
-                  if (a == OK)
-                    app.removeFolder(itemPath);
-                });
-              }}
-            />
+            <PopoverIcon icon='fa fa-ellipsis-h'>
+              <Menu>
+                <MenuItem
+                  text='Create object'
+                  onClick={() => {
+                    app.createObject();
+                  }}
+                />
+                <MenuItem
+                  text='Create folder'
+                  onClick={() => {
+                    prompt({ title: 'Create new folder', placeholder: 'Folder name' })
+                    .then(name => {
+                      app.appendFolder({ name, path: itemPath });
+                    });
+                  }}
+                />
+                <MenuItem
+                  text='Rename folder'
+                  onClick={() => {
+                    prompt({
+                      title: `Rename folder "${f.name}"`,
+                      placeholder: 'New name',
+                      value: f.name
+                    })
+                    .then(name => app.renameFolder({ name, path: itemPath }))
+                  }}
+                />
+                <MenuItem
+                  text='Upload files'
+                  onClick={() => {
+                    uploadDialog({ multiple: true })
+                    .then(files => {
+                      app.appendToUpload({ files });
+                    });
+                  }}
+                />
+                <MenuItem
+                  text='Remove folder'
+                  onClick={() => {
+                    confirm({ body: 'Are you sure to delete folder?' })
+                    .then(a => {
+                      if (a == OK)
+                        app.removeFolder(itemPath);
+                    });
+                  }}
+                />
+              </Menu>
+            </PopoverIcon>
           </>
         )
       };
@@ -200,8 +236,11 @@ function convertFolder(root: Folder, app: App, path?: Array<string>, parent?: Tr
 }
 
 export class App extends DocRootClient {
+  // путь до объекта включающий объект, включая root
   private path = Array< Array<string> >();
+  // путь до каталога, где лежит объект, включая root
   private folderPath = Array< Array<string> >();
+
   protected objTree = Array<TreeItemExt>();
   protected objs = Array<ObjHolder>();
   
@@ -215,6 +254,7 @@ export class App extends DocRootClient {
   protected tree: Folder = { name: 'root', folders: {}, objects: [] };
   private selectObj: ObjectBase;
   private objLoadPromise?: Promise<void>;
+  private objectsToCreate = Array<ObjectToCreate>();
 
   constructor() {
     super();
@@ -227,7 +267,10 @@ export class App extends DocRootClient {
           p.cancel();
 
         p = this.fetchTree()
-        .then(this.updateObjTree)
+        .then(tree => {
+          this.updateObjTree(tree);
+          this.onHashChanged();
+        })
         .finally(() => {
           p = undefined;
         });
@@ -238,8 +281,8 @@ export class App extends DocRootClient {
   }
 
   protected onLoad = () => {
-    this.fetchTree().
-    then(tree => {
+    this.fetchTree()
+    .then(tree => {
       this.updateObjTree(tree);
       this.onHashChanged();
     });
@@ -255,8 +298,16 @@ export class App extends DocRootClient {
     App.hashState.pushState({ objId: '', path });
   }
 
+  setObjectsToCreate(objects: Array<ObjectToCreate>) {
+    this.objectsToCreate = objects;
+  }
+
+  getObjectsToCreate() {
+    return this.objectsToCreate;
+  }
+
   protected onHashChanged = () => {
-    this.setSelectByObj(App.hashState.getString('objId'));
+    this.setSelectByObjId(App.hashState.getString('objId'));
     this.setSelectByPath(App.hashState.getString('path'));
   };
 
@@ -265,10 +316,11 @@ export class App extends DocRootClient {
       return;
 
     this.path = [ path.split('-') ];
+    this.folderPath = this.path.slice();
     this.holder.delayedNotify();
   }
 
-  private setSelectByObj(objId: string | undefined) {
+  private setSelectByObjId(objId: string | undefined) {
     const treeItem = !objId ? undefined : findItem<TreeItemExt>(item => !item.folder && item.value == objId, this.objTree);
     if (treeItem) {
       this.path = [ [ ...getPath(treeItem).map(item => item.value) ] ];
@@ -301,6 +353,10 @@ export class App extends DocRootClient {
 
   isObjLoading() {
     return this.objLoadPromise;
+  }
+
+  findObject(objId: string): Promise<ObjectBase> {
+    return this.holder.getObject(objId);
   }
 
   setTypeMap(map: ObjTypeMap) {
@@ -352,6 +408,13 @@ export class App extends DocRootClient {
     }, this.objTree);
 
     this.holder.delayedNotify();
+  }
+
+  createObject() {
+    createDocWizard(this.objectsToCreate)
+    .then(obj => {
+      this.append(obj);
+    });
   }
 
   append(obj: ObjectBase): Promise<void> {

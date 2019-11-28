@@ -18,7 +18,6 @@ export { App, ObjTypeMap };
 
 interface Props {
   model: App;
-  objects: Array<ObjectToCreate>;
   renderContent(obj: OBJIOItem): JSX.Element;
 }
 
@@ -183,13 +182,7 @@ export class AppView extends React.Component<Props, State> {
   }
 
   onAdd = () => {
-    createDocWizard(this.props.objects)
-    .then(obj => {
-      this.props.model.append( obj );
-    })
-    .catch(() => {
-      console.log('create cancel');
-    });
+    this.props.model.createObject();
     return false;
   }
 

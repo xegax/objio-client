@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { showLogin } from '../view/login';
 import {
-  AuthRequestor,
+  AuthCheckRequestor,
   createRequestor,
   OBJIOItem,
   createFactory,
   createOBJIO,
   OBJIORemoteStore,
-  OBJIO
+  OBJIO,
+  Requestor
 } from 'objio';
 import {
   registerObjects
@@ -26,6 +26,7 @@ import { Project } from 'objio/project/client/project';
 import { App, AppView, ObjTypeMap } from '../view/app-view';
 import { Toaster, Position, Intent } from '@blueprintjs/core';
 import { ObjectBase } from 'objio-object/view/config';
+import { showLogin } from 'ts-react-ui/forms/login';
 
 Promise.config({ cancellation: true });
 
@@ -44,6 +45,22 @@ function parseParams(args: string): { [key: string]: string } {
   return res;
 }
 
+async function login(req: Requestor) {
+  try {
+    await req.getJSON({ url: 'objio/check' });
+  } catch(err) {
+    let error: string;
+    while(true) {
+      const { login, pass: passwd } = await showLogin(error);
+      const res = await req.getJSON({ url: 'objio/login', postData: { login, passwd }});
+      if (!res.error) {
+        req.setCookie({ sessId: res.sessId });
+        break;
+      }
+    }
+  }
+}
+
 async function loadAndRender() {
   const p = window.location.search.split('?')[1] || '';
   const args: { prj?: string, objId?: string } = parseParams(p);
@@ -53,15 +70,23 @@ async function loadAndRender() {
 
   args.prj = args.prj || 'n1';
   const rootReq = createRequestor({ urlBase: '/handler', params: { prj: args.prj } });
-  const req = new AuthRequestor({ req: rootReq, showLogin });
+  await login(rootReq);
+  const req = new AuthCheckRequestor({
+    req: rootReq,
+    onAuthError: () => {
+      location.reload();
+      return new Promise(() => {});
+    }
+  });
   const store = new OBJIORemoteStore({ req });
-  /*let store = await createLocalStore(factory);
-  try {
-    store.load(JSON.parse(localStorage.getItem('objio')));
-  } catch(e) {
-    console.log('localStorage can not be loaded');
-  }*/
-  objio = await createOBJIO({ factory, store, context: { objectsPath: '', filesPath: `/data/projects/${args.prj}/public/` } });
+  objio = await createOBJIO({
+    factory,
+    store,
+    context: {
+      objectsPath: '',
+      filesPath: `/data/projects/${args.prj}/public/`
+    }
+  });
 
   /*objio.addObserver({
     onSave: () => {
@@ -71,7 +96,6 @@ async function loadAndRender() {
   });*/
 
   let mvf = new ViewFactory();
-  // mvf.getItems().findIndex(item => item.classObj)
   Layout.initDocLayout(mvf as any);
 
   let model: App;
@@ -115,13 +139,6 @@ async function loadAndRender() {
       model.holder.notify();
     });
 
-  const objectsToCreate = [
-    ...Objects.getObjectsToCreate(),
-    ...SQLITE3.getObjectsToCreate(),
-    ...MYSQL.getObjectsToCreate(),
-    ...Layout.getObjectsToCreate()
-  ];
-
   Objects.registerViews({
     classObj: App,
     views: [
@@ -129,7 +146,6 @@ async function loadAndRender() {
         view: (props: { model: App }) => {
           return (
             <AppView
-              objects={objectsToCreate}
               model={props.model}
               renderContent={(obj: ObjectBase) => {
                 const objView = mvf.getView({
@@ -186,6 +202,12 @@ async function loadAndRender() {
 
   if (model['setTypeMap'])
     model.setTypeMap(typeMap);
+  model.setObjectsToCreate([
+    ...Objects.getObjectsToCreate(),
+    ...SQLITE3.getObjectsToCreate(),
+    ...MYSQL.getObjectsToCreate(),
+    ...Layout.getObjectsToCreate()
+  ]);
 
   let cont = document.createElement('div');
   document.body.appendChild(cont);
