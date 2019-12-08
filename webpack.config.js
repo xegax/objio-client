@@ -48,11 +48,10 @@ module.exports = [
           }
         }, {
           test: /\.svg$/,
-          include: /node_modules/,
+          include: /node_modules\/font-awesome/,
           loader: 'url-loader'
         }, {
           test: /\.svg$/,
-          exclude: /node_modules/,
           loader: 'svg-inline-loader'
         }
       ]
