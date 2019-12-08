@@ -39,17 +39,13 @@ module.exports = [
           test: /\.scss$/,
           use: [ 'style-loader', 'css-loader', 'sass-loader' ]
         }, {
-          test: /\.(png|jpg|gif|eot|ttf|woff|woff2)$/,
+          test: /(fontawesome-webfont\.svg)|\.(png|jpg|gif|eot|ttf|woff|woff2)$/,
           loader: 'url-loader',
           options: {
             name: '[name].[ext]',
             outputPath: `../${outputDir}`,
             limit: 10000
           }
-        }, {
-          test: /\.svg$/,
-          include: /node_modules\/font-awesome/,
-          loader: 'url-loader'
         }, {
           test: /\.svg$/,
           loader: 'svg-inline-loader'
