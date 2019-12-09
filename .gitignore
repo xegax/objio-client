@@ -8,3 +8,5 @@ data/projects
 env.conf
 nginx/temp/**/*
 nginx/logs/**/*
+server.pid
+server.log

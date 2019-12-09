@@ -1,13 +1,18 @@
 const path = require('path');
 const webpack = require('webpack');
 const externals = [
-  'objio',
-  'objio-object',
-  'objio-sqlite-table',
-  'objio-mysql-database',
-  'ts-react-ui',
   'bluebird',
-  'process'
+  'process',
+  'net',
+  'tls',
+  'fs',
+  'child_process',
+  'aws-sdk',
+  'npm',
+  'node-gyp',
+  'sqlite3',
+  'mysql',
+  'http'
 ];
 
 module.exports = [
