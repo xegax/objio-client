@@ -7,12 +7,12 @@
   "scripts": {
     "prepare": "npm run dist",
     "dist": "npm run externals && npm run entry && npm run server-dist",
+    "dev": "npm run entry && npm run server-dev",
     "entry": "webpack",
     "externals": "webpack --config webpack.externals.js",
     "server": "node server/server",
     "server-dev": "tsc -p tsconfig-srv.json",
     "server-dist": "webpack --config webpack.server.js",
-    "dev": "npm run entry && npm run server-dev",
     "tsc": "tsc",
     "sass": "node_modules/.bin/node-sass styles/styles.scss > build/styles.css",
     "watch": "tsc --watch",
