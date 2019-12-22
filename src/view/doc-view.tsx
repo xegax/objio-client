@@ -3,7 +3,7 @@ import './doc-view.scss';
 import { App } from '../model/client/app';
 import { ObjectBase } from 'objio-object/base/object-base';
 
-const classes = {
+const scss = {
   docView: 'doc-view',
   header: 'doc-view-header',
   content: 'doc-view-content',
@@ -51,22 +51,13 @@ export class DocView extends React.Component<Props> {
       );
 
     return (
-      <div className={classes.name} onDoubleClick={() => this.setState({edit: true})}>
+      <div className={scss.name} onDoubleClick={() => this.setState({edit: true})}>
         {obj.getName()}
       </div>
     );
   }
 
-  renderTools() {
-    /*const remove = (
-      <i
-        style={{marginLeft: 10, marginRight: 10}}
-        title='delete'
-        className='fa fa-trash-o'
-        onClick={() => this.props.root.remove({ obj: this.props.model })}
-      />
-    );*/
-
+  private renderTools() {
     const link = (
       <i
         style={{marginLeft: 10}}
@@ -77,13 +68,13 @@ export class DocView extends React.Component<Props> {
     );
 
     return (
-      <div className={classes.tools}>
+      <div className={scss.tools}>
         {link}
       </div>
     );
   }
 
-  renderProgress() {
+  private renderProgress() {
     const model = this.props.model;
     const base = model;
     if (!base.isStatusInProgess())
@@ -100,13 +91,13 @@ export class DocView extends React.Component<Props> {
 
   render() {
     return (
-      <div className={classes.docView} {...this.props}>
-        <div className={classes.header}>
+      <div className={scss.docView} {...this.props}>
+        <div className={scss.header}>
           {this.renderName()}
           {this.renderTools()}
         </div>
         {this.renderProgress()}
-        <div className={classes.content}>
+        <div className={scss.content}>
           {this.props.children}
         </div>
       </div>

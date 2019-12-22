@@ -161,7 +161,7 @@ export class AppView extends React.Component<Props, State> {
     };
   }
 
-  renderSelectObjectComponents() {
+  private renderSelectObjectComponents() {
     const select = this.props.model.getSelect();
     if (!select)
       return null;
@@ -170,7 +170,13 @@ export class AppView extends React.Component<Props, State> {
     arr.push(...select.getObjTabs().map((tab, i) => {
       const key = 'tab-' + i;
       return (
-        <AppComponent key={key} id={key} faIcon={tab.icon} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+        <AppComponent
+          key={key}
+          id={tab.id || key}
+          faIcon={tab.icon}
+          title={tab.title}
+          style={{ width: '100%', display: 'flex', flexDirection: 'column' }}
+        >
           <PropSheet fitToAbs>
             {tab.render(this.getObjProps())}
           </PropSheet>
@@ -221,9 +227,22 @@ export class AppView extends React.Component<Props, State> {
   render() {
     const select = this.props.model.getSelect();
     return (
-      <AppCompLayout defaultSelect='explorer' className='abs-fit'>
-        <AppComponent id='add' onSelect={this.onAdd} faIcon='fa fa-plus'/>
-        <AppComponent id='explorer' faIcon='fa fa-search' style={{ width: '100%', display: 'flex' }}>
+      <AppCompLayout
+        defaultSelect='explorer'
+        className='abs-fit'
+      >
+        <AppComponent
+          id='add'
+          title='Create object ...'
+          onSelect={this.onAdd}
+          faIcon='fa fa-plus'
+        />
+        <AppComponent
+          id='explorer'
+          title='Explorer'
+          faIcon='fa fa-search'
+          style={{ width: '100%', display: 'flex' }}
+        >
           {this.renderSelectObjectInfo()}
         </AppComponent>
         {this.renderSelectObjectComponents()}
