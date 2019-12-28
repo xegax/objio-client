@@ -6,14 +6,13 @@ import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
 import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
-import { createDocWizard } from './create-doc-wizard';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
-import { ObjectToCreate } from 'objio-object/common/interfaces';
 import './_app.scss';
-import { Tree, TreeItem, DragAndDrop } from 'ts-react-ui/tree/tree';
+import { Tree, DragAndDrop } from 'ts-react-ui/tree/tree';
 import { getPath } from 'ts-react-ui/tree/item-helpers';
 import { DocView } from './doc-view';
 import { Progress } from 'ts-react-ui/progress';
+import { fmtBytes } from 'objio-object/common/common'
 export { App, ObjTypeMap };
 
 interface Props {
@@ -141,14 +140,46 @@ export class AppView extends React.Component<Props, State> {
           </PropsGroup>
         </FilesDropContainer>
         {this.renderUploadQueue()}
-        {select && <PropsGroup label='Object' defaultOpen={false}>
-          <PropItem label='id' value={select.getID()}/>
-          <PropItem label='version' value={select.getVersion()}/>
-          {objBase && <TextPropItem label='name' value={objBase.getName()} onEnter={value => objBase.setName(value)}/>}
-          {file && <PropItem label='size' value={file.getSize()}/>}
-          {file && <PropItem label='original name' value={file.getOriginName()}/>}
-          {file && <PropItem label='ext' value={file.getExt()}/>}
-        </PropsGroup>}
+        {select && (
+          <PropsGroup
+            label='Object'
+            defaultOpen={false}
+          >
+            <PropItem
+              label='ID'
+              value={select.getID()}
+            />
+            <PropItem
+              label='Version'
+              value={select.getVersion()}
+            />
+            {objBase && (
+              <TextPropItem
+                label='Name'
+                value={objBase.getName()}
+                onEnter={value => objBase.setName(value)}
+              />
+            )}
+            {file && (
+              <PropItem
+                label='Size'
+                value={fmtBytes(file.getSize())}
+              />
+            )}
+            {file && (
+              <PropItem
+                label='Orig. name'
+                value={file.getOriginName()}
+              />
+            )}
+            {file && (
+              <PropItem
+                label='Ext'
+                value={file.getExt()}
+              />
+            )}
+          </PropsGroup>
+        )}
         {select && objBase.getObjPropGroups( this.getObjProps() )}
       </PropSheet>
     );
