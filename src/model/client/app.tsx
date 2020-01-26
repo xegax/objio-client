@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DocRootClient, Folder } from '../base/doc-root';
-import { OBJIOItemClass } from 'objio';
+import { OBJIOItemClass, FileSystemSimple } from 'objio';
 import { ObjectBase } from 'objio-object/base/object-base';
 import { createFileObject } from 'objio-object/client';
 
@@ -511,26 +511,32 @@ export class App extends DocRootClient {
       return;
 
     const item = this.uploadQueue[0];
-    let doc: ObjectBase;
+    let fs: FileSystemSimple;
 
     let p: Promise<any>;
     if (!item.dstObj) {
-      doc = createFileObject({
-        name: item.file.name,
-        size: item.file.size,
-        mime: item.file.type
-      });
+      const doc = createFileObject(item.file.name);
       p = this.append(doc);
+      fs = doc.getFS();
     } else {
-      doc = item.dstObj;
+      fs = item.dstObj.getFS();
       p = Promise.resolve();
     }
 
     this.uploading = (
       p.then(() => {
         this.holder.delayedNotify();
-        return doc.sendFile({
-          file: item.file,
+
+        const fd = fs.getFileDesc('content');
+        let file = item.file;
+        const fileSize = file.size;
+        if (fd && fd.name == file.name && fd.fileSize == file.size && fd.uploadSize < file.size) {
+          file = new File( [file.slice(fd.uploadSize)], file.name, { type: file.type });
+        }
+
+        return fs.sendFile({
+          file,
+          fileSize,
           dest: item.dstData,
           onProgress: value => {
             this.currFileProgress = value;

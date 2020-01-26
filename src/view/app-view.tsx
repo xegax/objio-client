@@ -5,14 +5,12 @@ import { App, ObjTypeMap, TreeItemExt } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
-import { FileObjectBase as FileObject } from 'objio-object/base/file-object';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import './_app.scss';
 import { Tree, DragAndDrop } from 'ts-react-ui/tree/tree';
 import { getPath } from 'ts-react-ui/tree/item-helpers';
 import { DocView } from './doc-view';
 import { Progress } from 'ts-react-ui/progress';
-import { fmtBytes } from 'objio-object/common/common'
 export { App, ObjTypeMap };
 
 interface Props {
@@ -121,7 +119,6 @@ export class AppView extends React.Component<Props, State> {
     const select = this.props.model.getSelect();
 
     const objBase: ObjectBase = select;
-    const file: FileObject = select instanceof FileObject ? select : null;
     return (
       <PropSheet fitToAbs>
         <FilesDropContainer onDropFiles={this.onDropToList}>
@@ -158,24 +155,6 @@ export class AppView extends React.Component<Props, State> {
                 label='Name'
                 value={objBase.getName()}
                 onEnter={value => objBase.setName(value)}
-              />
-            )}
-            {file && (
-              <PropItem
-                label='Size'
-                value={fmtBytes(file.getSize())}
-              />
-            )}
-            {file && (
-              <PropItem
-                label='Orig. name'
-                value={file.getOriginName()}
-              />
-            )}
-            {file && (
-              <PropItem
-                label='Ext'
-                value={file.getExt()}
               />
             )}
           </PropsGroup>
@@ -225,7 +204,7 @@ export class AppView extends React.Component<Props, State> {
 
   onDragToDoc = (files: Array<File>): boolean => {
     const select = this.props.model.getSelect();
-    return select && select.sendFile != null;
+    return select && select.getFS() != null;
   }
 
   onDropToDoc = (files: Array<File>) => {
