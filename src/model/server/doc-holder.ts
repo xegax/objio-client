@@ -9,6 +9,7 @@ export class DocHolder extends OBJIOItem {
   protected doc: string;
   protected name: string;
   protected type: string;
+  protected icon: string;
   protected ref: ObjectBase;
 
   constructor(args?: DocHolderArgs) {
@@ -20,6 +21,7 @@ export class DocHolder extends OBJIOItem {
       this.doc = args.doc as any;
       this.name = args.doc.getName();
       this.type = args.doc.getObjType();
+      this.icon = args.doc.getIcon();
     }
 
     this.holder.addEventHandler({
@@ -48,6 +50,10 @@ export class DocHolder extends OBJIOItem {
     return this.name;
   }
 
+  getIcon() {
+    return this.icon;
+  }
+
   getObjType() {
     return this.type;
   }
@@ -57,10 +63,14 @@ export class DocHolder extends OBJIOItem {
   }
 
   private subscriber = () => {
-    const name = this.get().getName();
-    if (this.name == name)
+    const obj = this.get();
+    const icon = obj.getIcon();
+    const name = obj.getName();
+
+    if (this.icon == icon && this.name == name)
       return;
 
+    this.icon = icon;
     this.name = name;
     this.holder.onObjChanged();
     this.holder.save();
@@ -92,6 +102,7 @@ export class DocHolder extends OBJIOItem {
   static SERIALIZE: SERIALIZER = () => ({
     doc:  { type: 'object-deferred' },
     name: { type: 'string' },
-    type: { type: 'string', const: true }
+    type: { type: 'string', const: true },
+    icon: { type: 'string' }
   });
 }

@@ -4,6 +4,7 @@ export interface Item {
   id: string;
   name: string;
   objType: string;
+  icon: string;
 }
 
 export interface Folder {

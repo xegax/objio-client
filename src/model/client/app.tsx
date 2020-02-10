@@ -17,6 +17,7 @@ import { Menu, MenuItem } from '@blueprintjs/core';
 import { createDocWizard } from '../../view/create-doc-wizard';
 import { ObjectToCreate } from 'objio-object/common/interfaces';
 import { uploadDialog } from 'ts-react-ui/upload';
+import { IconMap } from 'ts-react-ui/common/icon-map';
 
 class ObjHolder extends ObjectBase {
   private item: TreeItemExt;
@@ -122,7 +123,7 @@ function convertObjects(folder: Folder, app: App, parent: TreeItemExt): Array<Tr
         folder: false,
         parent,
         type: obj.objType,
-        icon: app.getObjIcon(obj.objType),
+        icon: IconMap.render(obj.icon, 'blank-icon'),
         rightIcons: (
           <>
             <PopoverIcon icon='fa fa-ellipsis-h'>
@@ -364,14 +365,14 @@ export class App extends DocRootClient {
     this.updateObjTree();
   }
 
-  getObjIcon(type: string) {
+  /*getObjIcon(type: string) {
     const viewable = this.objTypeMap[type];
     let icon: JSX.Element;
     if (viewable && viewable.getViewDesc) {
       icon = ({...viewable.getViewDesc()}.icons || {}).item;
     }
     return icon;
-  }
+  }*/
 
   deleteObject(args: { id: string, content: boolean }) {
     App.setSelectByPath(this.folderPath[0].join('-'));

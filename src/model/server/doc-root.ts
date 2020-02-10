@@ -119,7 +119,12 @@ export class DocRoot extends DocRootBase {
     .forEach(obj => {
       const id = obj.getID();
       if (!notRoot.has(id))
-        this.root.objects.push({ id, name: obj.getName(), objType: obj.getObjType() });
+        this.root.objects.push({
+          id,
+          name: obj.getName(),
+          objType: obj.getObjType(),
+          icon: obj.getIcon()
+        });
     });
 
     return Promise.resolve();
@@ -140,7 +145,8 @@ export class DocRoot extends DocRootBase {
         folder.objects.push({
           id: args.id,
           name: holder.getName(),
-          objType: holder.getObjType()
+          objType: holder.getObjType(),
+          icon: holder.getIcon()
         });
         holder.holder.addEventHandler({ onObjChange: () => this.onHolderChanged(holder) });
         this.objects.push(holder);

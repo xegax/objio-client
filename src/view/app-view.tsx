@@ -5,6 +5,7 @@ import { App, ObjTypeMap, TreeItemExt } from '../model/client/app';
 import { OBJIOItem } from 'objio';
 import { PropSheet, PropsGroup, PropItem, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { ObjectBase, ObjProps } from 'objio-object/base/object-base';
+import { fmtBytes } from 'objio-object/common/common';
 import { FilesDropContainer } from 'ts-react-ui/files-drop-container';
 import './_app.scss';
 import { Tree, DragAndDrop } from 'ts-react-ui/tree/tree';
@@ -115,16 +116,63 @@ export class AppView extends React.Component<Props, State> {
     }
   };
 
+  private renderSelObjProps(select?: ObjectBase) {
+    if (!select)
+      return null;
+
+    let files: JSX.Element | null = null;
+    const fsSumm = select.getFSSummary();
+    if (select.getFS()) {
+      files = (
+        <>
+          <PropItem
+            label='Files count'
+            value={fsSumm.count}
+          />
+          <PropItem
+            label='Files size'
+            value={fmtBytes(fsSumm.size)}
+          />
+        </>
+      );
+    }
+
+    const objProps = this.getObjProps();
+    return (
+      <>
+        <PropsGroup
+          label={`Object (${select.getName()})`}
+        >
+          <PropItem
+            label='ID'
+            value={select.getID()}
+          />
+          <PropItem
+            label='Version'
+            value={select.getVersion()}
+          />
+          <TextPropItem
+            label='Name'
+            value={select.getName()}
+            onEnter={value => select.setName(value)}
+          />
+          {files}
+          {select.renderSelObjProps(objProps)}
+        </PropsGroup>
+        {select.getObjPropGroups(objProps)}
+      </>
+    );
+  }
+
   renderSelectObjectInfo() {
     const select = this.props.model.getSelect();
-
-    const objBase: ObjectBase = select;
     return (
       <PropSheet fitToAbs>
         <FilesDropContainer onDropFiles={this.onDropToList}>
           <PropsGroup
             label='Objects'
-            defaultHeight={200}
+            flex
+            grow
             padding={false}
           >
             <Tree
@@ -137,29 +185,7 @@ export class AppView extends React.Component<Props, State> {
           </PropsGroup>
         </FilesDropContainer>
         {this.renderUploadQueue()}
-        {select && (
-          <PropsGroup
-            label='Object'
-            defaultOpen={false}
-          >
-            <PropItem
-              label='ID'
-              value={select.getID()}
-            />
-            <PropItem
-              label='Version'
-              value={select.getVersion()}
-            />
-            {objBase && (
-              <TextPropItem
-                label='Name'
-                value={objBase.getName()}
-                onEnter={value => objBase.setName(value)}
-              />
-            )}
-          </PropsGroup>
-        )}
-        {select && objBase.getObjPropGroups( this.getObjProps() )}
+        {this.renderSelObjProps(select)}
       </PropSheet>
     );
   }
