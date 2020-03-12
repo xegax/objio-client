@@ -31,8 +31,10 @@ export class DocHolder extends OBJIOItem {
         return Promise.resolve();
       },
       onLoad: () => {
-        const fs = this.ref.getFS();
-        fs && fs.holder.addEventHandler({ onObjChange: this.subscriber });
+        if (this.ref) {
+          const fs = this.ref.getFS();
+          fs && fs.holder.addEventHandler({ onObjChange: this.subscriber });
+        }
         return Promise.resolve();
       }
     });

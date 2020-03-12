@@ -205,6 +205,22 @@ export class AppView extends React.Component<Props, State> {
     const arr = select.getAppComponents();
     arr.push(...select.getObjTabs().map((tab, i) => {
       const key = 'tab-' + i;
+
+      if (tab.command) {
+        return (
+          <AppComponent
+            key={key}
+            id={tab.id || key}
+            faIcon={tab.icon}
+            title={tab.title}
+            onSelect={() => {
+              tab.command(this.getObjProps());
+              return false;
+            }}
+          />
+        );
+      }
+
       return (
         <AppComponent
           key={key}

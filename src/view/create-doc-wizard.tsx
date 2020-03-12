@@ -7,7 +7,7 @@ import { PropSheet, PropsGroup, TextPropItem } from 'ts-react-ui/prop-sheet';
 import { Icon } from 'ts-react-ui/icon';
 import * as UnknownTypeIcon from '../images/unknown-type.png';
 import { ObjectToCreate } from 'objio-object/common/interfaces';
-
+import { IconMap } from 'ts-react-ui/common/icon-map';
 import './create-doc-wizard.scss';
 
 interface Item {
@@ -57,7 +57,7 @@ export class CreateDocWizard extends React.Component<Props, State> {
         value: item.name,
         render: () => (
           <div className='horz-panel-1' style={{display: 'flex', alignItems: 'center'}}>
-            {item.icon || <Icon src={UnknownTypeIcon}/>}
+            {IconMap.render(item.icon) || <Icon src={UnknownTypeIcon}/>}
             <span>{item.name}</span>
           </div>
         ),
@@ -89,7 +89,12 @@ export class CreateDocWizard extends React.Component<Props, State> {
 
   render() {
     return (
-      <Dialog isOpen={true} isCloseButtonShown={false} title='create new' style={{width: 600}}>
+      <Dialog
+        isOpen
+        isCloseButtonShown={false}
+        title='Create object'
+        style={{width: 600}}
+      >
         <div className={cs.DIALOG_BODY}>
           <div className={classes.wizard}>
             <div className={classes.objects}>

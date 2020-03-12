@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { DocRootClient, Folder } from '../base/doc-root';
 import { OBJIOItemClass, FileSystemSimple } from 'objio';
-import { ObjectBase } from 'objio-object/base/object-base';
+import { ObjectBase, ObjInfoProv } from 'objio-object/base/object-base';
 import { createFileObject } from 'objio-object/client';
 
-import { OBJIOItemClassViewable, ViewDesc } from 'objio-object/view/config';
+import { OBJIOItemClassViewable } from 'objio-object/view/config';
 import 'ts-react-ui/typings';
 import { confirm, Action, OK } from 'ts-react-ui/prompt';
 import { HashState } from 'ts-react-ui/hash-state';
@@ -18,27 +18,6 @@ import { createDocWizard } from '../../view/create-doc-wizard';
 import { ObjectToCreate } from 'objio-object/common/interfaces';
 import { uploadDialog } from 'ts-react-ui/upload';
 import { IconMap } from 'ts-react-ui/common/icon-map';
-
-class ObjHolder extends ObjectBase {
-  private item: TreeItemExt;
-
-  constructor(item: TreeItemExt) {
-    super();
-    this.item = item;
-  }
-
-  getObjType() {
-    return this.item.type;
-  }
-
-  getID() {
-    return this.item.value;
-  }
-
-  getName() {
-    return this.item.title;
-  }
-}
 
 export interface TreeItemExt extends TreeItem {
   parent?: TreeItemExt;
@@ -243,7 +222,7 @@ export class App extends DocRootClient {
   private folderPath = Array< Array<string> >();
 
   protected objTree = Array<TreeItemExt>();
-  protected objs = Array<ObjHolder>();
+  protected objInfoProv = Array<ObjInfoProv>();
   
   protected uploadQueue = new Array<UploadItem>();
   protected uploading: Promise<any>;
@@ -402,14 +381,22 @@ export class App extends DocRootClient {
     findItem(sortFolders, this.objTree);
     this.objTree = this.objTree.slice();
     
-    this.objs = [];
+    this.objInfoProv = [];
     findItem((item: TreeItemExt) => {
       if (item.type)
-        this.objs.push(new ObjHolder(item));
+        this.objInfoProv.push(this.getObjInfoProv(item));
     }, this.objTree);
 
     this.holder.delayedNotify();
   }
+
+  private getObjInfoProv = (item: TreeItemExt) => {
+    return () => ({
+      name: item.title,
+      id: item.value,
+      type: item.type
+    });
+  };
 
   createObject() {
     createDocWizard(this.objectsToCreate)
@@ -486,12 +473,12 @@ export class App extends DocRootClient {
   }
 
   filterObjects = (filter?: Array<OBJIOItemClass>) => {
-    return this.objs.filter(holder => {
+    return this.objInfoProv.filter(prov => {
       if (!filter || filter.length == 0)
         return true;
 
-      const classObj: OBJIOItemClass = this.objTypeMap[holder.getObjType()];
-      return filter.indexOf( classObj ) != -1;
+      const objClass: OBJIOItemClass = this.objTypeMap[prov().type];
+      return filter.indexOf( objClass ) != -1;
     });
   }
 
