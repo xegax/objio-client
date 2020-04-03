@@ -12,6 +12,7 @@ import { Tree, DragAndDrop } from 'ts-react-ui/tree/tree';
 import { getPath } from 'ts-react-ui/tree/item-helpers';
 import { DocView } from './doc-view';
 import { Progress } from 'ts-react-ui/progress';
+import { User } from 'objio/base/user'
 export { App, ObjTypeMap };
 
 interface Props {
@@ -276,6 +277,36 @@ export class AppView extends React.Component<Props, State> {
     );
   }
 
+  private renderCreateButton() {
+    if (User.get().isGuest())
+      return null;
+
+    return (
+      <AppComponent
+        id='add'
+        title='Create object ...'
+        onSelect={this.onAdd}
+        faIcon='fa fa-plus'
+      />
+    );
+  }
+
+  private renderObjExplorer() {
+    if (User.get().isGuest())
+      return null;
+
+    return (
+      <AppComponent
+        id='explorer'
+        title='Explorer'
+        faIcon='fa fa-search'
+        style={{ width: '100%', display: 'flex' }}
+      >
+        {this.renderSelectObjectInfo()}
+      </AppComponent>
+    );
+  }
+
   render() {
     const select = this.props.model.getSelect();
     return (
@@ -283,20 +314,8 @@ export class AppView extends React.Component<Props, State> {
         defaultSelect='explorer'
         className='abs-fit'
       >
-        <AppComponent
-          id='add'
-          title='Create object ...'
-          onSelect={this.onAdd}
-          faIcon='fa fa-plus'
-        />
-        <AppComponent
-          id='explorer'
-          title='Explorer'
-          faIcon='fa fa-search'
-          style={{ width: '100%', display: 'flex' }}
-        >
-          {this.renderSelectObjectInfo()}
-        </AppComponent>
+        {this.renderCreateButton()}
+        {this.renderObjExplorer()}
         {this.renderSelectObjectComponents()}
         <AppContent>
           {this.renderDoc(select)}
