@@ -161,15 +161,18 @@ async function renderAdmin(objio: OBJIO, vf: ViewFactory, typeMap: ObjTypeMap): 
     ]
   });
 
-  if (model.setTypeMap)
+  if (model.setTypeMap) {
     model.setTypeMap(typeMap);
+  }
 
-  model.setObjectsToCreate([
-    ...Objects.getObjectsToCreate(),
-    ...SQLITE3.getObjectsToCreate(),
-    ...MYSQL.getObjectsToCreate(),
-    ...Layout.getObjectsToCreate()
-  ]);
+  if (model.setObjectsToCreate) {
+    model.setObjectsToCreate([
+      ...Objects.getObjectsToCreate(),
+      ...SQLITE3.getObjectsToCreate(),
+      ...MYSQL.getObjectsToCreate(),
+      ...Layout.getObjectsToCreate()
+    ]);
+  }
 
   showModal(
     vf.getView({
