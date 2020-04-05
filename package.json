@@ -6,10 +6,11 @@
   "repository": "git@github.com:xegax/objio-client.git",
   "scripts": {
     "prepare": "npm run dist",
-    "dist": "npm run externals && npm run entry && npm run server-dist",
+    "dist": "npm run externals && npm run entry-dist && npm run server-dist",
     "dev": "npm run entry && npm run server-dev",
     "entry": "webpack",
-    "externals": "webpack --config webpack.externals.js",
+    "entry-dist": "webpack -p",
+    "externals": "webpack -p --config webpack.externals.js",
     "server": "node server/server",
     "server-dev": "tsc -p tsconfig-srv.json",
     "server-dist": "webpack --config webpack.server.js",
