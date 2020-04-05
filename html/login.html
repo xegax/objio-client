@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-<%=htmlWebpackPlugin.options.headerJS.map(script => `    <script src='${script}?${htmlWebpackPlugin.options.hashStr}'></script>`).join('\n')%>
 </head>
 <body>
-<%=htmlWebpackPlugin.options.bodyJS.map(script => `    <script src='${script}?${htmlWebpackPlugin.options.hashStr}'></script>`)%>
+  <script src='loader.js?<%=htmlWebpackPlugin.options.hashStr%>' scripts='<%=JSON.stringify(htmlWebpackPlugin.options.bodyJS.map(js => `${js}?${htmlWebpackPlugin.options.hashStr}`))%>'>
+  </script>
 </body>
 </html>
