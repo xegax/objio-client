@@ -185,7 +185,7 @@ async function renderAdmin(objio: OBJIO, vf: ViewFactory, typeMap: ObjTypeMap): 
 }
 
 async function loadAndRender() {
-  const { params, hash } = parseParams<{ prj: string }, { objId: string }>();;
+  const { params, hash } = parseParams<{ prj: string }, { objId: string }>();
 
   params.prj = params.prj || 'n1';
   const { req } = await User.openSession({

@@ -14,6 +14,7 @@ import { DocView } from './doc-view';
 import { Progress } from 'ts-react-ui/progress';
 import { User } from 'objio/base/user'
 export { App, ObjTypeMap };
+import { HorizontalResizer } from 'ts-react-ui/resizer';
 
 interface Props {
   model: App;
@@ -173,7 +174,7 @@ export class AppView extends React.Component<Props, State> {
           <PropsGroup
             label='Objects'
             flex
-            grow
+            defaultHeight={this.state.listHeight}
             padding={false}
           >
             <Tree
@@ -185,6 +186,14 @@ export class AppView extends React.Component<Props, State> {
             />
           </PropsGroup>
         </FilesDropContainer>
+        <div style={{ position: 'relative' }}>
+          <HorizontalResizer
+            size={this.state.listHeight}
+            onResizing={size => {
+              this.setState({ listHeight: size });
+            }}
+          />
+        </div>
         {this.renderUploadQueue()}
         {this.renderSelObjProps(select)}
       </PropSheet>
