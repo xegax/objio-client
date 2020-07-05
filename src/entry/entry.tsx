@@ -116,7 +116,12 @@ async function renderAdmin(objio: OBJIO, vf: ViewFactory, typeMap: ObjTypeMap): 
   
   try {
     prj = await objio.loadObject<Project>();
-    model = prj.getObjects().get(0) as App;
+    const objs = prj.getObjects();
+    if (!objs.getLength()) {
+      await prj.appendObject(model = new App());
+    } else {
+      model = prj.getObjects().get(0) as App;
+    }
   } catch (e) {
     document.body.innerHTML = (e['data'] || e) + '';
   }
@@ -181,7 +186,7 @@ async function renderAdmin(objio: OBJIO, vf: ViewFactory, typeMap: ObjTypeMap): 
     })
   );
 
-  return model.holder;
+  return prj.holder;
 }
 
 async function loadAndRender() {

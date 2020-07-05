@@ -27,7 +27,7 @@
   "devDependencies": {
     "@blueprintjs/core": "^2.3.1",
     "@types/bluebird-global": "^3.5.9",
-    "@types/node": "^9.6.22",
+    "@types/node": "^9.6.56",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
     "@types/react-transition-group": "^2.0.11",
@@ -43,7 +43,6 @@
     "style-loader": "^0.21.0",
     "ts-loader": "^4.4.1",
     "tslint": "^3.15.1",
-    "typescript": "^2.9.2",
     "url-loader": "^1.0.1",
     "url-resolve": "^1.0.0",
     "webpack": "^4.12.0",
@@ -65,6 +64,7 @@
     "react-transition-group": "^2.3.1",
     "sqlite3": "^4.1.1",
     "svg-inline-loader": "^0.8.0",
-    "ts-react-ui": "^0.1.42"
+    "ts-react-ui": "^0.1.42",
+    "typescript": "^3.9.5"
   }
 }

@@ -10,7 +10,8 @@ module.exports = [
     entry: {
       'client': ['./src/entry/entry.tsx'],
       'login': ['./src/entry/login.ts'],
-      'loader': ['./src/entry/loader.ts']
+      'loader': ['./src/entry/loader.ts'],
+      'test': ['./src/entry/test.ts']
     },
     output: {
       path: path.resolve(`./${outputDir}`),
@@ -71,6 +72,13 @@ module.exports = [
         inject: false,
         hashStr: Date.now().toString(16),
         bodyJS: [ 'react.js', 'reactdom.js', 'bluebird.js', 'blueprintjs.js', 'login.js' ]
+      }),
+      new htmlWebpackPlugin({
+        template: 'html/test.html',
+        filename: 'test.html',
+        inject: false,
+        hashStr: Date.now().toString(16),
+        bodyJS: [ 'react.js', 'reactdom.js', 'bluebird.js', 'blueprintjs.js', 'test.js' ]
       })
     ],
     devtool: 'source-map'
